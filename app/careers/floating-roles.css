@@ -1,0 +1,30 @@
+.playful-careers { padding-bottom: 100px; }
+.pc-floating-roles {
+  position: fixed;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 10px 10px 10px 24px;
+  border: 1px solid #090909;
+  border-radius: 40px;
+  background: #090909;
+  color: #fffaf3;
+  box-shadow: 3px 5px 0 #ff7a21, 0 10px 25px #09090920;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.pc-floating-arrow { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; background: #ff7a21; color: #090909; }
+.pc-floating-roles:focus-visible { outline: 3px solid #ff7a21; outline-offset: 6px; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .pc-floating-roles:hover { transform: translateY(-3px); box-shadow: 3px 8px 0 #ff7a21, 0 12px 25px #09090920; }
+}
+@media (max-width: 600px) {
+  .pc-floating-roles { right: max(16px, env(safe-area-inset-right)); bottom: calc(16px + env(safe-area-inset-bottom)); gap: 14px; padding: 8px 8px 8px 18px; font-size: 14px; }
+  .pc-floating-arrow { width: 36px; height: 36px; }
+}
+@media (prefers-reduced-motion: reduce) { .pc-floating-roles { transition: none; } }

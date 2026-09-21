@@ -1,0 +1,16 @@
+[
+  { "id": "manmohan", "sort_order": 0, "name": "Manmohan", "photo_url": "https://handysolver.com/assets/images/employees/manmohan-bw.jpg" },
+  { "id": "abhishek", "sort_order": 1, "name": "Abhishek", "photo_url": "https://handysolver.com/assets/images/employees/abhishek-bw.jpg" },
+  { "id": "kanchan", "sort_order": 2, "name": "Kanchan", "photo_url": "https://handysolver.com/assets/images/employees/Kanchan.jpg" },
+  { "id": "rahul", "sort_order": 3, "name": "Rahul", "photo_url": "https://handysolver.com/assets/images/employees/Rahul.jpg" },
+  { "id": "sufiyan", "sort_order": 4, "name": "Sufiyan", "photo_url": "https://handysolver.com/assets/images/employees/Sufiyan.jpg" },
+  { "id": "yashwant", "sort_order": 5, "name": "Yashwant", "photo_url": "https://handysolver.com/assets/images/employees/Yashwant.jpg" },
+  { "id": "meena", "sort_order": 6, "name": "Meena", "photo_url": "https://handysolver.com/assets/images/employees/Meena.jpg" },
+  { "id": "lakshay", "sort_order": 7, "name": "Lakshay", "photo_url": "https://handysolver.com/assets/images/employees/Lakshay.jpg" },
+  { "id": "ashi", "sort_order": 8, "name": "Ashi", "photo_url": "https://handysolver.com/assets/images/employees/ashi-bw.jpg" },
+  { "id": "neerad", "sort_order": 9, "name": "Neerad", "photo_url": "https://handysolver.com/assets/images/employees/neerad-bw.jpg" },
+  { "id": "isa", "sort_order": 10, "name": "Isa", "photo_url": "https://handysolver.com/assets/images/employees/isa-bw.jpg" },
+  { "id": "paranay", "sort_order": 11, "name": "Paranay", "photo_url": "https://handysolver.com/assets/images/employees/paranay-bw.png" },
+  { "id": "sourabh", "sort_order": 12, "name": "Sourabh", "photo_url": "https://handysolver.com/assets/images/employees/sourabh-bw.png" },
+  { "id": "neha", "sort_order": 13, "name": "Neha", "photo_url": "https://handysolver.com/assets/images/employees/neha-bw.jpg" }
+]

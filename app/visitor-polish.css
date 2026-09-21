@@ -1,0 +1,22 @@
+/* Keep interactive stories and service feedback easy to follow. */
+.handy-depth .cs-story[data-state=active] { animation: story-unfold .4s cubic-bezier(.22,1,.36,1); }
+.handy-depth .cs-browse-head button:focus-visible,
+.handy-depth .cs-open-hint:focus-visible { outline: 3px solid #ff9a58; outline-offset: 4px; }
+.handy-depth .cs-open-hint { min-height: 44px; }
+@keyframes story-unfold { from { opacity: .3; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes service-check { from { opacity: 0; scale: .6; } to { opacity: 1; scale: 1; } }
+@media (prefers-reduced-motion: no-preference) {
+  .handy-depth .vs-automate.motion-arrived .vs-auto-row svg { animation: service-check .45s both; animation-delay: 1s; }
+  .handy-depth .vs-automate.motion-arrived .vs-auto-row:nth-child(3) svg { animation-delay: 1.3s; }
+  .handy-depth .vs-automate.motion-arrived .vs-auto-row:nth-child(4) svg { animation-delay: 1.6s; }
+  .handy-depth .vs-connect.motion-arrived .vs-hub-icon { animation: service-check .5s 1.1s both; }
+}
+@media (max-width: 760px) {
+  .handy-depth .vs-card > p { font-size: 16px; }
+  .handy-depth .vs-bottom { font-size: 14px; min-height: 44px; }
+  .handy-depth .cs-story-actions button,
+  .handy-depth .cs-story-actions a { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .handy-depth .cs-story[data-state=active] { animation: none; }
+}

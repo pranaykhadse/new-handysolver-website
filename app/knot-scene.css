@@ -1,0 +1,17 @@
+.hp-knot-alive{--knot-x:0;--knot-y:0;perspective:1000px;padding-bottom:45px}
+.hp-knot-depth{position:relative;transform:rotateX(calc(var(--knot-y)*-2.5deg)) rotateY(calc(var(--knot-x)*3.5deg));transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.hp-knot-alive .hp-knot-picture{animation:hs-knot-drift 8s ease-in-out infinite;animation-play-state:paused;box-shadow:0 15px 35px #5e416510}
+.hp-knot-alive .hp-knot-picture img{animation:hs-cord-breathe 10s ease-in-out infinite;animation-play-state:paused;transform-origin:50% 57%}
+.hp-knot-alive .hp-knot-note{top:-13px;animation:hs-note-sway 6.5s ease-in-out infinite;animation-play-state:paused;transform-origin:40% 20%;box-shadow:4px 7px 0 #2828200d}
+.hp-knot-alive .hp-knot-link{bottom:-14px;z-index:2}
+.hp-knot-alive .hp-knot-link svg{animation:hs-arrow-nudge 3.6s ease-in-out infinite;animation-play-state:paused}
+.hp-knot-alive[data-moving=true] .hp-knot-picture,.hp-knot-alive[data-moving=true] .hp-knot-picture img,.hp-knot-alive[data-moving=true] .hp-knot-note,.hp-knot-alive[data-moving=true] .hp-knot-link svg{animation-play-state:running}
+.hp-knot-motion-toggle{position:absolute;bottom:0;left:2px;display:inline-flex;align-items:center;gap:5px;height:30px!important;min-width:92px;padding:5px 7px!important;font-size:9px!important;font-weight:400;color:#6a625c;background:transparent!important;border-radius:3px}
+.hp-knot-motion-toggle:hover{color:#090909;background:#eae4db!important}.hp-knot-motion-toggle:focus-visible{outline:2px solid #b94700;outline-offset:3px}
+@keyframes hs-knot-drift{0%,100%{transform:translate3d(0,0,0) rotate(3deg)}50%{transform:translate3d(0,-10px,0) rotate(1deg)}}
+@keyframes hs-cord-breathe{0%,100%{transform:scale(1.025) rotate(-.4deg)}50%{transform:scale(1.065) rotate(.7deg)}}
+@keyframes hs-note-sway{0%,100%{transform:translate3d(0,0,0) rotate(-9deg)}50%{transform:translate3d(3px,-7px,0) rotate(-6deg)}}
+@keyframes hs-arrow-nudge{0%,55%,100%{transform:translateY(0)}65%{transform:translateY(4px)}75%{transform:translateY(0)}85%{transform:translateY(3px)}}
+@media(max-width:760px){.hp-knot-alive{padding-bottom:43px}.hp-knot-alive .hp-knot-note{top:-4px}.hp-knot-alive .hp-knot-picture{animation-name:hs-knot-drift-mobile}.hp-knot-motion-toggle{font-size:8px!important}.hp-knot-alive .hp-knot-link{bottom:-10px}}
+@keyframes hs-knot-drift-mobile{0%,100%{transform:translateY(0) rotate(3deg)}50%{transform:translateY(-6px) rotate(1.5deg)}}
+@media(prefers-reduced-motion:reduce){.hp-knot-alive .hp-knot-depth{transform:none!important}.hp-knot-alive *{animation:none!important;transition:none!important}.hp-knot-motion-toggle{display:none}}

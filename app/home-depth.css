@@ -1,0 +1,25 @@
+/* Tactile surfaces, scoped to the homepage. No extra assets or motion library. */
+.handy-depth .vs-card{box-shadow:0 3px 0 #b8aa9845,0 12px 23px -17px #34281860,inset 0 1px 0 #ffffff75;transition:transform .45s cubic-bezier(.2,.75,.2,1),box-shadow .35s}
+.handy-depth .vs-automate{box-shadow:0 3px 0 #443e37,0 12px 23px -17px #34281860,inset 0 1px 0 #ffffff24}
+.handy-depth .vs-tools>span{box-shadow:0 3px 0 #c7bdd175,0 7px 12px -9px #34281880}
+.handy-depth .vs-app{box-shadow:2px 3px 0 #dfb493,5px 7px 0 #d8a685,9px 16px 19px -11px #64452d50}
+.handy-depth .vs-workflow{box-shadow:0 2px 0 #39332c,6px 10px 19px #0003,inset 0 1px 0 #ffffff10}
+.handy-depth .hp-knot-alive .hp-knot-picture{box-shadow:0 3px 0 #c3b5cb,9px 19px 29px -12px #60476b40}
+.handy-depth .hp-knot-alive .hp-knot-note{background:linear-gradient(165deg,#f6e997 0%,#f1df81 78%,#e2cb66 100%);border-radius:1px 1px 12px 1px;box-shadow:1px 2px 2px #53432215,7px 12px 17px -8px #53432255,inset 0 1px 0 #fff7}
+.handy-depth .pj-note,.handy-depth .vs-fit-label{box-shadow:2px 3px 0 #b5905430,5px 9px 14px -7px #382c2950;border-radius:1px 1px 8px 1px}
+.handy-depth .pj-example{box-shadow:0 2px 0 #cfc1b3,7px 11px 22px -12px #42342750}
+.handy-depth .hn-brand .hs-brand-image{box-shadow:1px 2px 0 #5d321c,2px 4px 0 #d96519,5px 8px 12px -5px #34281870}
+.handy-depth .hp-button{box-shadow:0 4px 0 #bf5618,0 9px 15px -9px #34281880;transition:transform .2s,box-shadow .2s,background .2s}
+.handy-depth .hn-contact{box-shadow:0 3px 0 #bd5215,0 7px 12px -8px #34281880}
+.handy-depth .hp-knot-link{box-shadow:0 3px 0 #cbbfac,0 8px 13px -9px #34281870}
+.handy-depth .hp-button:active,.handy-depth .hn-contact:active,.handy-depth .hp-knot-link:active{transform:translateY(3px);box-shadow:0 1px 0 #b78b67}
+@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  .handy-depth .vs-card:hover{transform:perspective(1100px) rotateX(var(--depth-y,0deg)) rotateY(var(--depth-x,0deg)) translateY(-5px);box-shadow:0 4px 0 #b8aa9860,5px 22px 32px -17px #34281865}
+  .handy-depth .vs-automate:hover{box-shadow:0 4px 0 #443e37,5px 22px 32px -17px #34281865}
+  .handy-depth .vs-demo{translate:0 var(--depth-scroll,0px)}
+  .handy-depth .hn-brand:hover .hs-brand-image{transform:perspective(400px) rotateY(-12deg) rotateZ(3deg) translateY(-2px);box-shadow:2px 3px 0 #5d321c,4px 6px 0 #ff7a21,7px 12px 16px -6px #34281860}
+  .handy-depth .hp-button:hover{transform:translateY(-2px);box-shadow:0 6px 0 #a84610,0 13px 19px -10px #34281880}
+  .handy-depth .hp-button:active{transform:translateY(3px);box-shadow:0 1px 0 #a84610}
+}
+@media(hover:none),(pointer:coarse){.handy-depth .vs-card:hover{transform:none}.handy-depth .vs-demo{translate:none}.handy-depth .vs-card:active{box-shadow:0 1px 0 #b8aa9860,0 5px 10px -8px #34281850}}
+@media(prefers-reduced-motion:reduce){.handy-depth .vs-card,.handy-depth .vs-demo,.handy-depth .hn-brand .hs-brand-image,.handy-depth .hp-button,.handy-depth .hn-contact,.handy-depth .hp-knot-link{transition:none!important;translate:none!important}.handy-depth .vs-card:hover,.handy-depth .hp-button:hover,.handy-depth .hp-button:active,.handy-depth .hn-contact:active,.handy-depth .hp-knot-link:active{transform:none!important}}

@@ -1,0 +1,151 @@
+/* Touch-first refinements; desktop remains unchanged. */
+.hn-mobile-contact{display:none}
+@media(max-width:960px){
+ .handy-home.handy-home .hn-header{gap:10px}
+ .handy-home.handy-home .hn-brand{margin-right:auto;min-width:0}
+ .handy-home.handy-home .hn-mobile-contact{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;border-radius:50%;background:#ff7a21;color:#090909}
+ .handy-home.handy-home .hn-menu-trigger{min-height:44px;flex-shrink:0;font-size:13px}
+ .hn-sheet.hn-sheet{height:100dvh;max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;padding-bottom:env(safe-area-inset-bottom)!important}
+ .hn-sheet .hn-sheet-head{padding:25px 68px 20px 22px!important;padding-top:max(25px,env(safe-area-inset-top))!important}
+ .hn-sheet .hn-sheet-head .hs-brand-name{font-size:20px}
+ .hn-sheet .hn-sheet-close{width:44px;height:44px;right:12px;top:20px}
+ .hn-sheet .hn-mobile-nav a{min-height:65px;padding-block:18px}
+ .hn-sheet .hn-sheet-foot{margin:25px 18px 18px;padding:24px}
+ .hn-sheet .hn-sheet-foot a{min-height:44px;font-size:14px}
+}
+@media(max-width:760px){
+ html{scroll-padding-top:96px;-webkit-text-size-adjust:100%}
+ .handy-home.handy-home .hp-wrap{width:calc(100% - 36px);max-width:620px}
+ .handy-home.handy-home main{min-width:0}
+ .handy-home.handy-home main h1,.handy-home.handy-home main h2,.handy-home.handy-home main h3{overflow-wrap:break-word;text-wrap:balance}
+ .handy-home.handy-home .hn-shell{padding-top:max(9px,env(safe-area-inset-top));background:#f6f2e9;backdrop-filter:none;-webkit-backdrop-filter:none}
+ .handy-home.handy-home .hn-brand .hs-brand-name{font-size:21px!important;letter-spacing:-.7px}
+ .handy-home.handy-home button,.handy-home.handy-home a{touch-action:manipulation;-webkit-tap-highlight-color:#ff7a2126}
+ .handy-home.handy-home button:not([role=checkbox]),.handy-home.handy-home [role=tab]{min-height:44px}
+ .handy-home.handy-home .hp-button,.handy-home.handy-home .or-button,.handy-home.handy-home .hp-text-link,.handy-home.handy-home .pc-link{min-height:48px;font-size:13px}
+ .handy-home.handy-home .hp-overline{font-size:11px;line-height:1.6;margin-bottom:16px}
+ .handy-home.handy-home .hp-hero{padding-top:28px;gap:30px}
+ .handy-home.handy-home .hp-hero-copy h1{font-size:clamp(48px,13.5vw,79px);letter-spacing:-.055em}
+ .handy-home.handy-home .hp-lede,.handy-home.handy-home .pc-lede,.handy-home.handy-home .lt-lede{font-size:16px;line-height:1.75;max-width:100%}
+ .handy-home.handy-home .hp-aside{font-size:11px;line-height:1.6}
+ .handy-home.handy-home .hp-knot-scene{width:90%;max-width:420px;padding-bottom:62px}
+ .handy-home.handy-home .hp-knot-link{min-height:48px;font-size:12px;right:-5px}
+ .handy-home.handy-home .hp-knot-motion-toggle{height:44px!important;min-width:110px;font-size:11px!important;bottom:0}
+ .handy-home.handy-home .hp-hero-bottom{font-size:11px;line-height:1.6;flex-wrap:wrap}
+ .handy-home.handy-home .hp-hero-bottom a{min-height:44px}
+ .handy-home.handy-home .hp-intro-strip .hp-wrap,.handy-home.handy-home .pc-strip .hp-wrap{flex-wrap:wrap;justify-content:center;font-size:15px;gap:12px;line-height:1.5}
+ .handy-home.handy-home .hp-picker-tabs button{font-size:13px;padding:14px 16px;white-space:normal}
+ .handy-home.handy-home .hp-picker-story>p,.handy-home.handy-home .pj-story>p,.handy-home.handy-home .cv-copy>p,.handy-home.handy-home .hp-people>div:last-child>p{font-size:15px;line-height:1.8}
+ .handy-home.handy-home .hp-picker-story>a{font-size:12px;line-height:1.65;min-height:44px}
+ .handy-home.handy-home .hp-before-after{grid-template-columns:1fr;gap:16px}
+ .handy-home.handy-home .hp-transform-arrow{justify-self:center;transform:rotate(90deg)}
+ .handy-home.handy-home .hp-before p,.handy-home.handy-home .hp-after p{font-size:12px;padding:13px}
+ .handy-home.handy-home .hp-before>span,.handy-home.handy-home .hp-after>span{font-size:12px;margin-bottom:10px}
+ .handy-home.handy-home .vs-card{padding:24px;border-radius:12px}
+ .handy-home.handy-home .vs-card>p{font-size:15px;line-height:1.75}
+ .handy-home.handy-home .vs-category{font-size:10px;line-height:1.5}
+ .handy-home.handy-home .vs-bottom{font-size:12px;min-height:44px}
+ .handy-home.handy-home .pj-stage-title{font-size:14px;line-height:1.3}
+ .handy-home.handy-home .pj-step-text>small{font-size:9px}
+ .handy-home.handy-home .pj-panel{padding:24px 18px}
+ .handy-home.handy-home .pj-story .pj-next{font-size:13px;min-height:44px}
+ .handy-home.handy-home .pj-message{padding:13px;max-width:94%}
+ .handy-home.handy-home .hp-people-links{flex-wrap:wrap;gap:12px 22px}
+ .handy-home.handy-home .hp-big-contact>span:first-child{font-size:clamp(35px,10vw,48px)}
+ .handy-home.handy-home .hp-contact-arrow{flex-shrink:0;width:56px;height:56px}
+ .handy-home.handy-home .hp-footer-top{grid-template-columns:1fr;gap:16px}
+ .handy-home.handy-home .hp-footer-top>p{font-size:13px;line-height:1.7}
+ .handy-home.handy-home .hp-footer-top>div{flex-wrap:wrap;gap:8px 22px}
+ .handy-home.handy-home .hp-footer-top>div a,.handy-home.handy-home .hp-footer-bottom a{display:inline-flex;align-items:center;min-height:44px;font-size:13px}
+ .handy-home.handy-home .hp-footer-bottom{font-size:11px;line-height:1.6;padding-bottom:max(22px,env(safe-area-inset-bottom))}
+ .handy-home.handy-home .pc-hero{padding-block:30px 45px;gap:40px}
+ .handy-home.handy-home .pc-hero h1{font-size:clamp(45px,12.5vw,72px);letter-spacing:-.05em}
+ .handy-home.handy-home .pc-hero h1 em{white-space:normal}
+ .handy-home.handy-home .pc-actions{gap:14px;align-items:stretch;flex-direction:column}
+ .handy-home.handy-home .pc-actions>a{justify-content:space-between}
+ .handy-home.handy-home .pc-location{font-size:12px;line-height:1.6}
+ .handy-home.handy-home .pc-note{left:0}
+ .handy-home.handy-home .pc-sticker{right:2px;width:75px;height:75px;font-size:12px}
+ .handy-home.handy-home .cv-culture .cv-tabs{display:grid;grid-template-columns:1fr;width:100%;gap:9px}
+ .handy-home.handy-home .cv-culture .cv-tab{font-size:13px;padding:12px 16px;justify-content:flex-start;gap:10px}
+ .handy-home.handy-home .cv-visual{padding:22px 15px;min-height:290px}
+ .handy-home.handy-home .cv-idea-board,.handy-home.handy-home .cv-human-board{padding:15px}
+ .handy-home.handy-home .cv-idea-flow{grid-template-columns:1fr 14px 1fr 14px 1fr;gap:3px}
+ .handy-home.handy-home .cv-idea-flow strong{font-size:19px}
+ .handy-home.handy-home .cv-idea-icon{width:43px;height:43px}
+ .handy-home.handy-home .pc-moments{gap:20px;grid-template-columns:1fr}
+ .handy-home.handy-home .pc-moment-two{margin:10px 6px 0;transform:rotate(2deg)}
+ .handy-home.handy-home .pc-moment-one{margin-inline:6px;transform:rotate(-2deg)}
+ .handy-home.handy-home .pc-moment img{height:auto;aspect-ratio:4/3;object-fit:cover}
+ .handy-home.handy-home .pc-moment figcaption{font-size:15px;padding:16px 9px}
+ .handy-home.handy-home .cv-office-postcard address{font-size:14px;line-height:1.85}
+ .handy-home.handy-home .or-heading h1,.handy-home.handy-home .tw-hero h1,.handy-home.handy-home .lt-intro h1{font-size:clamp(44px,12vw,65px);letter-spacing:-.045em}
+ .handy-home.handy-home .or-heading>div>p:last-child,.handy-home.handy-home .ce-nudge p{font-size:15px;line-height:1.75}
+ .handy-home.handy-home .ce-nudge-bottom button{font-size:12px}
+ .handy-home.handy-home .or-board-top{font-size:13px;line-height:1.6}
+ .handy-home.handy-home .or-job-trigger{padding:20px 12px!important;gap:10px!important}
+ .handy-home.handy-home .or-job-main>strong{font-size:20px;line-height:1.35;overflow-wrap:anywhere}
+ .handy-home.handy-home .or-tags>span{font-size:11px;padding:6px 9px}
+ .handy-home.handy-home .or-description p,.handy-home.handy-home .or-description .or-intro{font-size:15px;line-height:1.8;overflow-wrap:anywhere}
+ .handy-home.handy-home .or-apply{padding:22px 18px}
+ .handy-home.handy-home .or-apply p{font-size:14px}
+ .handy-home.handy-home .or-apply .or-button{width:100%;min-height:50px}
+ .handy-home.handy-home .or-apply small,.handy-home.handy-home .or-feed-note{font-size:11px}
+ .handy-home.handy-home .ce-check{min-height:44px;font-size:13px;margin-block:5px;gap:12px}
+ .handy-home.handy-home .ce-check [data-slot=checkbox]{width:20px;height:20px}
+ .handy-home.handy-home .ce-prep-title{font-size:14px}
+ .handy-home.handy-home .ce-prep>p{font-size:12px!important}
+ .handy-home.handy-home .ce-prep-status{font-size:12px}
+ .handy-home.handy-home .tw-wall-action>span{font-size:12px;line-height:1.6}
+ .handy-home.handy-home .tw-wall-action button{font-size:13px}
+ .handy-home.handy-home .tw-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:5px}
+ .handy-home.handy-home .tw-portrait figcaption{font-size:10px;line-height:1.4;align-items:flex-start}
+ .handy-home.handy-home .tw-you{min-height:220px;padding:15px}
+ .handy-home.handy-home .tw-you small{font-size:12px;line-height:1.5}
+ .handy-home.handy-home .tw-offscreen-copy>p:not(.hp-overline){font-size:15px}
+ .handy-home.handy-home .tw-offscreen-copy>a,.handy-home.handy-home .tw-invite>a{min-height:48px;font-size:14px}
+ .handy-home.handy-home .lt-fields{grid-template-columns:1fr;gap:20px}
+ .handy-home.handy-home .lt-form label{font-size:14px}
+ .handy-home.handy-home .lt-form input,.handy-home.handy-home .lt-form textarea{font-size:16px;line-height:1.6}
+ .handy-home.handy-home .lt-form input{height:50px}
+ .handy-home.handy-home .lt-form textarea{min-height:170px}
+ .handy-home.handy-home .lt-topics legend{font-size:14px}
+ .handy-home.handy-home .lt-topics button{font-size:12px;white-space:normal;text-align:left;line-height:1.4}
+ .handy-home.handy-home .lt-form-actions{flex-direction:column;align-items:stretch}
+ .handy-home.handy-home .lt-form-actions button{font-size:14px;min-height:50px}
+ .handy-home.handy-home .lt-form-actions .lt-send{justify-content:space-between}
+ .handy-home.handy-home .lt-form-note,.handy-home.handy-home .lt-web-form,.handy-home.handy-home .lt-message-meta{font-size:11px;line-height:1.7}
+ .handy-home.handy-home .lt-web-form{min-height:44px;white-space:normal}
+ .handy-home.handy-home .lt-direct{font-size:clamp(13px,3.7vw,17px);gap:9px;min-height:64px}
+ .handy-home.handy-home .lt-direct>span{min-width:0;overflow-wrap:anywhere}
+ .handy-home.handy-home .lt-direct>svg{flex-shrink:0}
+ .handy-home.handy-home .lt-location address,.handy-home.handy-home .lt-career>p:not(.hp-overline){font-size:14px}
+ .handy-home.handy-home .lt-location>a,.handy-home.handy-home .lt-career>a{min-height:48px;font-size:13px}
+ .handy-home.handy-home .tc-section{padding-block:25px}
+ .handy-home.handy-home .tc-slide{min-height:360px;padding-left:30px}
+ .handy-home.handy-home .tc-slide blockquote{font-size:clamp(26px,7vw,35px)}
+ .handy-home.handy-home .tc-attribution strong{font-size:14px}
+ .handy-home.handy-home .tc-attribution p{font-size:12px;line-height:1.5}
+ .handy-home.handy-home .tc-attribution>a{min-height:44px;font-size:12px}
+ .handy-home.handy-home .tc-controls{flex-wrap:wrap;gap:8px}
+ .handy-home.handy-home .tc-dots button{width:44px;height:44px}
+ .handy-home.handy-home .tc-count{font-size:12px;margin-left:auto}
+ .handy-home.handy-home .tc-buttons{width:100%;justify-content:flex-end}
+ .handy-home.handy-home .tc-buttons button{width:44px;height:44px}
+ .handy-home.handy-home .tc-buttons button:first-child{width:auto;margin-right:auto;padding-inline:14px}
+ .handy-home.handy-home .tc-buttons button:first-child span{display:inline;font-size:12px}
+}
+@media(max-width:380px){
+ .handy-home.handy-home .hn-header{gap:8px}
+ .handy-home.handy-home .hn-brand .hs-brand{gap:7px}
+ .handy-home.handy-home .hn-brand .hs-brand-name{font-size:19px!important}
+ .handy-home.handy-home .hn-menu-trigger>span{display:none}
+ .handy-home.handy-home .hn-menu-trigger{padding:10px;width:44px;justify-content:center}
+ .handy-home.handy-home .vs-card{padding:20px}
+ .handy-home.handy-home .tw-you>span{font-size:21px}
+}
+@media(max-height:550px) and (max-width:960px){.hn-sheet .hn-mobile-nav a{padding-block:12px;min-height:52px}.hn-sheet .hn-sheet-head [data-slot=sheet-description]{display:none}}
+@media(hover:none){
+ .handy-home.handy-home .vs-card:hover,.handy-home.handy-home .tw-portrait:hover{transform:none;box-shadow:none}
+ .handy-home.handy-home .hp-button:active,.handy-home.handy-home .hn-mobile-contact:active,.handy-home.handy-home .tw-you:active{scale:.97}
+}

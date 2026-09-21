@@ -1,0 +1,124 @@
+/* Gallery-specific variables and overrides only.
+   Background, grain, hp-wrap, hp-overline, hp-footer, hp-footer-bottom
+   all come from playful-home.css and page-backgrounds.css. */
+
+.gl-page {
+  --muted: #62615d;
+  --orange: #ff7a21;
+  --line: #dcd4c8;
+  min-height: 100vh;
+}
+
+/* ── Hero ───────────────────────────────────────────────── */
+.gl-hero {
+  padding-block: 85px 70px;
+}
+
+.gl-hero h1 {
+  font-size: clamp(56px, 5.8vw, 88px);
+  font-weight: 550;
+  line-height: 1.02;
+  letter-spacing: -4px;
+  margin: 0 0 16px;
+}
+
+.gl-hero h1 em {
+  color: var(--orange);
+  white-space: nowrap;
+}
+
+.gl-lede {
+  font-size: 15px;
+  line-height: 1.85;
+  color: var(--muted);
+  max-width: 480px;
+  margin: 0;
+}
+
+/* ── Grid wrapper ───────────────────────────────────────── */
+.gl-grid-wrap {
+  padding-bottom: 80px;
+}
+
+/* ── Polaroid grid ──────────────────────────────────────── */
+.gl-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.gl-photo {
+  background: #fff;
+  padding: 10px 10px 0;
+  box-shadow: 0 8px 25px #0000000a;
+  transition: transform .4s;
+}
+
+.gl-photo:hover {
+  transform: rotate(0deg) translateY(-8px) !important;
+}
+
+.gl-photo img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  display: block;
+  filter: saturate(.88);
+}
+
+.gl-photo:hover img {
+  filter: saturate(1);
+}
+
+.gl-photo figcaption {
+  padding: 18px 6px 12px;
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #5c584f;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+/* ── Loading skeletons ──────────────────────────────────────── */
+.gl-loading {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+.gl-skeleton {
+  background: linear-gradient(90deg, #e8e0d4 25%, #f0e8dc 50%, #e8e0d4 75%);
+  background-size: 200% 100%;
+  animation: gl-shimmer 1.4s ease-in-out infinite;
+  height: 270px;
+}
+@keyframes gl-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (max-width: 760px) {
+  .gl-hero {
+    padding-block: 52px 40px;
+  }
+
+  .gl-hero h1 {
+    font-size: clamp(46px, 12vw, 72px);
+    letter-spacing: -2.5px;
+  }
+
+  .gl-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .gl-photo img {
+    height: 160px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gl-photo {
+    transition: none !important;
+  }
+}

@@ -1,0 +1,31 @@
+/* The same quiet, tactile colour language as the home page. */
+.handy-home:is(.playful-careers,.open-roles-page,.team-page,.talk-page,.gl-page){
+  --page-grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Cpath fill='%23000' opacity='.035' filter='url(%23grain)' d='M0 0h180v180H0z'/%3E%3C/svg%3E");
+  background-color:#f8f4ed;
+  background-image:var(--page-grain),radial-gradient(ellipse 70% 600px at 95% 180px,#e9def0aa,transparent),radial-gradient(ellipse 65% 500px at 0 60px,#ffe3cda6,transparent);
+}
+.handy-home.playful-careers{background-image:var(--page-grain),radial-gradient(ellipse 70% 640px at 90% 200px,#e4d7efb3,transparent),radial-gradient(ellipse 60% 480px at 0 80px,#ffe3cda6,transparent)}
+.handy-home.open-roles-page{background-image:var(--page-grain),radial-gradient(ellipse 75% 550px at 100% 170px,#ffd9bd99,transparent),radial-gradient(ellipse 65% 570px at 0 420px,#eadff0a6,transparent)}
+.handy-home.talk-page{background-image:var(--page-grain),radial-gradient(ellipse 65% 680px at 0 300px,#ffe1cba6,transparent),radial-gradient(ellipse 75% 760px at 100% 350px,#e4d7efb3,transparent)}
+
+/* Full-width washes sit behind content without changing its layout. */
+.handy-home:is(.playful-careers,.team-page,.open-roles-page) :is(.pc-life,.pc-moments,.tw-wall,.tw-offscreen,.or-bottom){position:relative;isolation:isolate}
+.handy-home:is(.playful-careers,.team-page,.open-roles-page) :is(.pc-life,.pc-moments,.tw-wall,.tw-offscreen,.or-bottom)::before{
+  content:'';position:absolute;z-index:-1;pointer-events:none;inset:0 auto 0 50%;width:100vw;transform:translateX(-50%);
+  background-image:var(--page-grain),linear-gradient(180deg,#f8f4ed00,#eee6f2 20%,#eee6f2 80%,#f8f4ed00);
+}
+.handy-home.playful-careers .pc-moments::before,
+.handy-home.team-page .tw-offscreen::before,
+.handy-home.open-roles-page .or-bottom::before{
+  background-image:var(--page-grain),radial-gradient(ellipse at 12% 55%,#ffd8bc80,transparent 65%),linear-gradient(180deg,#f8f4ed00,#fbe9da 25%,#fbe9da 75%,#f8f4ed00);
+}
+.handy-home.playful-careers .pc-office{background-color:#f4ece1;background-image:var(--page-grain)}
+.handy-home:is(.playful-careers,.open-roles-page,.team-page,.talk-page,.gl-page) .hp-footer{background-image:var(--page-grain)}
+/* Keep editable fields and long role descriptions on their existing clear surfaces. */
+@media(max-width:760px){
+  .handy-home:is(.playful-careers,.open-roles-page,.team-page,.talk-page,.gl-page){background-image:var(--page-grain),radial-gradient(ellipse 110% 650px at 100% 150px,#eadff080,transparent),radial-gradient(ellipse 100% 420px at 0 0,#ffe3cd70,transparent)}
+}
+@media(forced-colors:active){
+  .handy-home:is(.playful-careers,.open-roles-page,.team-page,.talk-page,.gl-page){background-image:none}
+  .handy-home:is(.playful-careers,.team-page,.open-roles-page) :is(.pc-life,.pc-moments,.tw-wall,.tw-offscreen,.or-bottom)::before{display:none}
+}

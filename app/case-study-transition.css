@@ -1,0 +1,4 @@
+.handy-home .hp-intro-strip{position:relative;background:var(--hp-orange);color:#090909;border-color:#09090924;box-shadow:none}
+.handy-home .hp-intro-strip::before{content:none}
+.handy-home .hp-intro-strip svg{color:#090909}
+.handy-home .hp-intro-strip .hp-wrap{position:relative;z-index:1;color:#090909}

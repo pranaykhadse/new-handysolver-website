@@ -1,0 +1,5 @@
+.handy-home.handy-home .hp-hero-copy h1.hp-benefit-title{font-size:clamp(38px,4.3vw,64px);line-height:1.1;letter-spacing:-.045em}
+.handy-home.handy-home .hp-benefit-title em{font-size:1em;line-height:1.15}
+.handy-home.handy-home .hp-benefit-title+.hp-lede{max-width:490px}
+.hp-offer-cues{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 24px;padding:0;list-style:none}.hp-offer-cues li{display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid #cfc5b8;border-radius:999px;background:#fffaf4;font-size:12px;line-height:1.25;color:#312a24;box-shadow:0 2px 0 #e2d8ca}.hp-offer-cues li::before{content:'';width:7px;height:7px;border-radius:50%;background:#ff7a21;flex:0 0 auto}
+@media(max-width:760px){.handy-home.handy-home .hp-hero-copy h1.hp-benefit-title{font-size:clamp(29px,8.5vw,52px);letter-spacing:-.045em}.handy-home.handy-home .hp-benefit-title+.hp-lede{max-width:100%}.hp-offer-cues{gap:7px;margin:18px 0 22px}.hp-offer-cues li{font-size:12px;padding:9px 11px}.handy-home .hp-hero-copy .hp-button{width:100%;justify-content:space-between}}

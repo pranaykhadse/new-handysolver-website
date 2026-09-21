@@ -1,0 +1,6 @@
+[
+  { "id": "vikas-suri", "sort_order": 0, "name": "Vikas Suri", "initials": "VS", "label": "Custom sales CRM client", "quote": "My team immediately accepted the software, started using it, and we are already analysing data.", "avatar_url": null, "video_url": null, "source": "https://in.linkedin.com/company/handysolver", "source_label": "Client stories on LinkedIn" },
+  { "id": "mischa-diender", "sort_order": 1, "name": "Mischa Diender", "initials": "MD", "label": "Client testimonial · excerpt", "quote": "I'm very satisfied!", "avatar_url": null, "video_url": null, "source": "https://handysolver.com/#customers-testimonials2", "source_label": "Read the full testimonial" },
+  { "id": "shawn-snyder", "sort_order": 2, "name": "Shawn Snyder", "initials": "SS", "label": "Client testimonial · excerpt", "quote": "They are flexible and true technical experts.", "avatar_url": null, "video_url": null, "source": "https://handysolver.com/#customers-testimonials2", "source_label": "Read the full testimonial" },
+  { "id": "renjith-nair", "sort_order": 3, "name": "Renjith Nair", "initials": "RN", "label": "Client testimonial · excerpt", "quote": "They have been very polite and courteous, also flexible…", "avatar_url": null, "video_url": null, "source": "https://handysolver.com/#customers-testimonials2", "source_label": "Read the full testimonial" }
+]
