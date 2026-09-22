@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react'
 import {
   Plus, Trash2, PencilLine, LogOut, Save, X, GripVertical, Check, AlertTriangle,
   BellRing, Boxes, ShoppingBag, Building2, HardHat, Factory,
-  HeartPulse, BriefcaseBusiness, Hotel, Users, Image as ImageIcon,
+  HeartPulse, BriefcaseBusiness, Hotel, Users, Image as ImageIcon, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 
@@ -108,7 +108,7 @@ function IconPicker({ value, onChange }: { value: string; onChange: (v: string) 
   );
 }
 
-type Tab = 'case-studies' | 'testimonials' | 'team' | 'jobs' | 'gallery';
+type Tab = 'case-studies' | 'testimonials' | 'team' | 'jobs' | 'applications' | 'gallery';
 type Photo = { id: string; sort_order: number; src: string; caption: string };
 type Row = Record<string, unknown>;
 
@@ -425,7 +425,7 @@ export default function AdminPage() {
   const [loginError, setLoginError] = useState('');
   const [loggingIn, setLoggingIn] = useState(false);
   const [tab, setTab] = useState<Tab>('case-studies');
-  const [rows, setRows] = useState<Record<Tab, Row[]>>({ 'case-studies': [], testimonials: [], team: [], jobs: [] });
+  const [rows, setRows] = useState<Record<Tab, Row[]>>({ 'case-studies': [], testimonials: [], team: [], jobs: [], applications: [] });
   const [loading, setLoading] = useState(false);
   const [draft, setDraft] = useState<Row | null>(null);
   const [saveBusy, setSaveBusy] = useState(false);
@@ -435,6 +435,10 @@ export default function AdminPage() {
   // Gallery-specific state
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [photosLoading, setPhotosLoading] = useState(false);
+  // Job-applications state (read-only mirror of website applications)
+  const [applications, setApplications] = useState<Row[]>([]);
+  const [appsLoading, setAppsLoading] = useState(false);
+  const [expandedApp, setExpandedApp] = useState<string | null>(null);
   const [galDraft, setGalDraft] = useState<Partial<Photo> | null>(null);
   const [galIsNew, setGalIsNew] = useState(false);
   const [galSaveBusy, setGalSaveBusy] = useState(false);
@@ -468,10 +472,11 @@ export default function AdminPage() {
   function switchTab(t: Tab) {
     setTab(t);
     setDraft(null);
+    setExpandedApp(null);
     const url = new URL(window.location.href);
     url.searchParams.set('tab', t);
     window.history.replaceState({}, '', url.toString());
-    if (t === 'gallery') { loadPhotos(); } else { reload(t as Exclude<Tab, 'gallery'>); }
+    if (t === 'gallery') { loadPhotos(); } else if (t === 'applications') { loadApplications(); } else { reload(t as Exclude<Tab, 'gallery' | 'applications'>); }
   }
 
   async function loadPhotos() {
@@ -480,6 +485,15 @@ export default function AdminPage() {
     setPhotosLoading(false);
     if (res.ok && Array.isArray(res.json?.rows)) {
       setPhotos([...res.json.rows].sort((a: Photo, b: Photo) => a.sort_order - b.sort_order));
+    }
+  }
+
+  async function loadApplications() {
+    setAppsLoading(true);
+    const res = await api('/api/admin/applications');
+    setAppsLoading(false);
+    if (res.ok && Array.isArray(res.json?.rows)) {
+      setApplications(res.json.rows);
     }
   }
 
@@ -528,12 +542,13 @@ export default function AdminPage() {
     testimonials: '/api/admin/testimonials',
     team: '/api/admin/team',
     jobs: '/api/admin/jobs',
+    applications: '/api/admin/applications',
   }), []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const storedTab = params.get('tab');
-    if (storedTab && (['case-studies', 'testimonials', 'team', 'jobs', 'gallery'] as Tab[]).includes(storedTab as Tab)) {
+    if (storedTab && (['case-studies', 'testimonials', 'team', 'jobs', 'applications', 'gallery'] as Tab[]).includes(storedTab as Tab)) {
       setTab(storedTab as Tab);
     }
     const magic = params.get('magic');
@@ -579,6 +594,7 @@ export default function AdminPage() {
   useEffect(() => {
     if (!key) return;
     if (tab === 'gallery') loadPhotos();
+    else if (tab === 'applications') loadApplications();
     else reload(tab);
   }, [key]);
 
@@ -913,10 +929,11 @@ export default function AdminPage() {
     testimonials: 'Testimonials',
     team: 'Team members',
     jobs: 'Job posts',
+    applications: 'Job applications',
     gallery: 'Gallery photos',
   };
 
-  const currentRows = tab !== 'gallery' ? rows[tab] : [];
+  const currentRows = tab !== 'gallery' && tab !== 'applications' ? rows[tab] : [];
 
   return (
     <div className="adm-root" data-theme={theme}>
@@ -928,7 +945,7 @@ export default function AdminPage() {
         <div className="adm-header">
           <div>
             <div className="adm-wordmark">Handy<span>Solver</span><i /></div>
-            <p className="adm-header-sub">Manage case studies, testimonials, team members and job posts.</p>
+            <p className="adm-header-sub">Manage case studies, testimonials, team members, job posts and job applications.</p>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button className="adm-theme-toggle" onClick={toggleTheme} title={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'} aria-label={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}>
@@ -945,7 +962,7 @@ export default function AdminPage() {
         </div>
 
         <div className="adm-tabs">
-          {(['case-studies', 'testimonials', 'team', 'jobs', 'gallery'] as Tab[]).map((t) => (
+          {(['case-studies', 'testimonials', 'team', 'jobs', 'applications', 'gallery'] as Tab[]).map((t) => (
             <button
               key={t}
               className="adm-tab"
@@ -961,13 +978,13 @@ export default function AdminPage() {
           <div className="adm-card-head">
             <span className="adm-card-title">
               {TAB_LABELS[tab]}
-              <span className="adm-count-badge">{tab === 'gallery' ? photos.length : currentRows.length}</span>
+              <span className="adm-count-badge">{tab === 'gallery' ? photos.length : tab === 'applications' ? applications.length : currentRows.length}</span>
             </span>
             {tab === 'gallery' ? (
               <button className="adm-add-btn" onClick={() => { setGalIsNew(true); setGalDraft({ src: '', caption: '', sort_order: photos.length + 1 }); setGalPreviewErr(false); }}>
                 <Plus size={13} /> Add photo
               </button>
-            ) : (
+            ) : tab === 'applications' ? null : (
               <button className="adm-add-btn" onClick={() => setDraft({ sort_order: currentRows.length + 1, is_active: true })}>
                 <Plus size={13} /> Add new
               </button>
@@ -989,6 +1006,63 @@ export default function AdminPage() {
                     onEdit={(p) => { setGalIsNew(false); setGalDraft({ ...p }); setGalPreviewErr(false); }}
                     onDelete={id => setGalConfirmId(id)}
                   />
+                </div>
+              )
+            ) : tab === 'applications' ? (
+              appsLoading ? <p className="adm-loading">Loading...</p>
+              : applications.length === 0 ? (
+                <p className="adm-empty">No applications yet. New website applications will appear here.</p>
+              ) : (
+                <div className="adm-list">
+                  {applications.map((a) => {
+                    const id = String(a.id);
+                    const open = expandedApp === id;
+                    const name = `${String(a.fname ?? '').trim()} ${String(a.lname ?? '').trim()}`.trim() || String(a.email ?? '') || 'Application';
+                    const d = new Date(String(a.created_at ?? ''));
+                    const date = isNaN(d.getTime()) ? '' : d.toLocaleDateString();
+                    const submitted = isNaN(d.getTime()) ? '' : d.toLocaleString();
+                    const meta = [String(a.type ?? ''), String(a.email ?? ''), String(a.phone ?? ''), date].filter(Boolean).join(' · ');
+                    const exp = String(a.exp ?? '').trim();
+                    const details = [
+                      ['Applied for', String(a.type ?? '')],
+                      ['Full name', name],
+                      ['Email', String(a.email ?? '')],
+                      ['Phone', String(a.phone ?? '')],
+                      ['Location', String(a.location ?? '')],
+                      ['Experience', exp ? `${exp} months` : ''],
+                      ['Expected salary', String(a.salary ?? '')],
+                      ['Current CTC', String(a.current_ctc ?? '')],
+                      ['Heard via', String(a.hear ?? '')],
+                      ['Date of birth', String(a.dob ?? '')],
+                      ['Gender', String(a.gender ?? '')],
+                      ['CV file', String(a.cv_filename ?? '')],
+                      ['Submitted', submitted],
+                    ].filter((pair): pair is [string, string] => Boolean(pair[1]));
+                    const cvUrl = String(a.cv_url ?? '');
+                    return (
+                      <div key={id} className="adm-row adm-app-row" onClick={() => setExpandedApp(open ? null : id)}>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <p className="adm-row-name">{name}</p>
+                          <p className="adm-row-meta">{meta}</p>
+                          {open && (
+                            <div className="adm-app-details">
+                              {details.map(([label, value]) => (
+                                <div key={label} className="adm-app-detail"><span>{label}</span>{value}</div>
+                              ))}
+                              <div className="adm-app-resume">
+                                {cvUrl ? (
+                                  <a className="adm-resume-btn" href={cvUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>View resume</a>
+                                ) : (
+                                  <span className="adm-resume-missing">Resume file not stored (submitted before file backup was enabled).</span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        <span className="adm-app-expand">{open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               )
             ) : (

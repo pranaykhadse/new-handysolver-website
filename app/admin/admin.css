@@ -1225,6 +1225,18 @@ body:has(.adm-root[data-theme="dark"]) {
   transform: translateY(-2px);
 }
 
+/* ── Job application expandable rows ── */
+.adm-app-row{cursor:pointer}
+.adm-app-expand{margin-left:auto;color:var(--adm-muted);flex-shrink:0;align-self:flex-start;margin-top:2px;display:inline-flex}
+.adm-app-row:hover .adm-app-expand{color:var(--adm-orange)}
+.adm-app-details{margin-top:10px;padding-top:10px;border-top:1px solid var(--adm-line-soft);display:grid;grid-template-columns:1fr 1fr;gap:8px 20px}
+.adm-app-detail{font-size:12px;color:var(--adm-ink);line-height:1.5;min-width:0;overflow-wrap:anywhere}
+.adm-app-detail>span{display:block;font-size:10px;letter-spacing:.06em;color:var(--adm-muted);font-weight:600;margin-bottom:2px}
+.adm-app-resume{grid-column:1/-1;display:flex;gap:10px;align-items:center;margin-top:4px}
+.adm-resume-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:8px;background:var(--adm-orange-dim);border:1px solid var(--adm-orange-border);color:var(--adm-orange);font-size:12px;font-weight:600}
+.adm-resume-btn:hover{background:var(--adm-orange);border-color:var(--adm-orange);color:#fff}
+.adm-resume-missing{font-size:12px;color:var(--adm-muted);font-style:italic}
+
 @media (max-width: 600px) {
   .adm-root { padding: 20px 14px 50px; }
   .adm-login-card { padding: 28px 22px; }

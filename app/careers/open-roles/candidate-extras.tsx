@@ -5,12 +5,19 @@ import { createPortal } from 'react-dom';
 import { ArrowUpRight, RotateCw, Smile, Check, Coffee, X, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { getSupabase } from '@/lib/supabase';
 
 const nudges = [
   ['You’re more than', 'a PDF.', 'Your CV is a starting point. Your ideas, questions and experiences bring it to life.'],
   ['Small project.', 'Big you.', 'Think of something you enjoyed making or improving. What did you bring to it?'],
   ['Take a breath.', 'Be yourself.', 'Read the role, get curious, and give yourself a moment to decide.'],
 ];
+
+// Job applications are saved by the myhandydash backend (its own database),
+// not Supabase — same endpoint + field contract as the live applicant form.
+const APPLICANT_SUBMIT_URL =
+  process.env.NEXT_PUBLIC_APPLICANT_SUBMIT_URL ??
+  'https://handysolver.myhandydash.com/api/web/v1/handy-recruiters/applicant-form-submit';
 
 export function CandidateNudge() {
   const [index, setIndex] = useState(0);
@@ -25,11 +32,12 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
   const [form, setForm] = useState({ firstName:'', lastName:'', email:'', phone:'', experience:'', expectedSalary:'', currentSalary:'', hearAbout:'', location:'', dob:'', gender:'' });
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [status, setStatus] = useState<'idle'|'submitting'|'done'|'error'>('idle');
+  const [serverMsg, setServerMsg] = useState('');
   const overlayRef = useRef<HTMLDivElement>(null);
   const firstRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    firstRef.current?.focus();
+    firstRef.current?.focus({ preventScroll: true });
     const scrollY = window.scrollY;
     // Pin the overlay exactly below the sticky navbar (measured live, not guessed)
     const updateTop = () => {
@@ -61,16 +69,93 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setServerMsg('');
+    // The API reads $_FILES['attachment'] unconditionally and only accepts
+    // pdf/doc/docx (case-sensitive), so guard both client-side.
+    if (!cvFile) {
+      setServerMsg('Please attach your CV (PDF, DOC or DOCX).');
+      setStatus('error');
+      return;
+    }
+    const ext = cvFile.name.split('.').pop()?.toLowerCase() ?? '';
+    if (!['pdf', 'doc', 'docx'].includes(ext)) {
+      setServerMsg('CV must be a PDF, DOC or DOCX file.');
+      setStatus('error');
+      return;
+    }
     setStatus('submitting');
-    // Submit to HandySolver portal via FormData
+    // Multipart POST to myhandydash — field names must match
+    // HandyRecruiterController::actionApplicantFormSubmit ($_POST/$_FILES).
+    // No custom headers: multipart/form-data is CORS-safelisted, so no preflight.
     try {
       const fd = new FormData();
-      Object.entries(form).forEach(([k,v]) => fd.append(k, v));
-      if (cvFile) fd.append('cv', cvFile);
-      fd.append('jobTitle', jobTitle);
-      await new Promise(r => setTimeout(r, 1200)); // simulate
-      setStatus('done');
+      fd.append('type', jobTitle);
+      fd.append('fname', form.firstName);
+      fd.append('lname', form.lastName);
+      fd.append('email', form.email);
+      fd.append('phone', form.phone);
+      fd.append('exp', form.experience);
+      fd.append('salary', form.expectedSalary);
+      fd.append('current_ctc', form.currentSalary);
+      fd.append('hear', form.hearAbout);
+      fd.append('location', form.location);
+      fd.append('dob', form.dob);
+      fd.append('gender', form.gender);
+      fd.append('attachment', cvFile, cvFile.name);
+      const res = await fetch(APPLICANT_SUBMIT_URL, { method: 'POST', body: fd });
+      const data = await res.json().catch(() => null);
+      // NOTE: the API answers HTTP 200 even on validation failure —
+      // success is data.status === 1, not res.ok.
+      if (res.ok && data && Number(data.status) === 1) {
+        setServerMsg(typeof data.message === 'string' ? data.message : '');
+        // Silent mirror to Supabase (own database): back up the CV file to
+        // private storage, then save the row with its path. Best-effort by
+        // design — any failure here must never reach the applicant.
+        try {
+          let cvPath = '';
+          try {
+            const cvName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+            const { error: upError } = await getSupabase().storage
+              .from('application-cvs')
+              .upload(cvName, cvFile, { contentType: cvFile.type || undefined, upsert: false });
+            if (!upError) cvPath = cvName;
+          } catch {
+            // Storage unavailable (bucket/policy missing) — row still saves.
+          }
+          await fetch('/api/applications', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: jobTitle,
+              fname: form.firstName,
+              lname: form.lastName,
+              email: form.email,
+              phone: form.phone,
+              exp: form.experience,
+              salary: form.expectedSalary,
+              current_ctc: form.currentSalary,
+              hear: form.hearAbout,
+              location: form.location,
+              dob: form.dob,
+              gender: form.gender,
+              cv_filename: cvFile.name,
+              cv_path: cvPath,
+            }),
+          }).catch(() => null);
+        } catch {
+          // Silent by design — myhandydash already saved the application.
+        }
+        setStatus('done');
+      } else {
+        setServerMsg(
+          data && typeof data.message === 'string' && data.message
+            ? data.message
+            : 'Something went wrong. Please try again.'
+        );
+        setStatus('error');
+      }
     } catch {
+      setServerMsg('Something went wrong. Please try again.');
       setStatus('error');
     }
   };
@@ -90,7 +175,7 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
           <div className="am-done">
             <span className="am-done-icon"><Check size={28}/></span>
             <h3>Application sent!</h3>
-            <p>We've received your application for <strong>{jobTitle}</strong>. Our team will be in touch soon.</p>
+            <p>{serverMsg || <>We&apos;ve received your application for <strong>{jobTitle}</strong>. Our team will be in touch soon.</>}</p>
             <button className="am-submit" onClick={onClose}>Back to roles</button>
           </div>
         ) : (
@@ -98,7 +183,7 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
             <div className="am-grid">
               <div className="am-field">
                 <label>First Name<span>*</span></label>
-                <input ref={firstRef} required value={form.firstName} onChange={set('firstName')} placeholder="Pranay"/>
+                <input ref={firstRef} required value={form.firstName} onChange={set('firstName')} placeholder="Abhishek"/>
               </div>
               <div className="am-field">
                 <label>Last Name<span>*</span></label>
@@ -155,7 +240,7 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
                 </label>
               </div>
             </div>
-            {status === 'error' && <p className="am-error">Something went wrong. Please try again.</p>}
+            {status === 'error' && <p className="am-error">{serverMsg || 'Something went wrong. Please try again.'}</p>}
             <div className="am-footer">
               <span>Fields marked <span className="am-req">*</span> are required</span>
               <button type="submit" className="am-submit" disabled={status === 'submitting'}>
