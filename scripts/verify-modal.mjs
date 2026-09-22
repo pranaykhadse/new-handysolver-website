@@ -1,7 +1,5 @@
-// Verifies the ApplyModal geometry on /careers/open-roles:
-//  - overlay top edge == navbar bottom edge (viewport-relative, any scroll)
-//  - card exactly centered between navbar bottom and viewport bottom
-//  - background scroll frozen while open
+// Measures ApplyModal geometry: overlay top == navbar bottom,
+// card centered in [navbar-bottom, viewport-bottom], scroll frozen.
 // Usage: node scripts/verify-modal.mjs [url] [outPng]
 import { chromium } from "playwright-core";
 
@@ -15,17 +13,12 @@ page.setDefaultTimeout(20000);
 
 await page.goto(URL, { waitUntil: "networkidle" });
 await page.waitForSelector(".or-job-trigger");
-
-// Simulate "opened with this scroll": scroll mid-page first
 await page.evaluate(() => window.scrollTo(0, 550));
 await page.waitForTimeout(400);
 const scrollBefore = await page.evaluate(() => window.scrollY);
 
-// Expand first role, then open the apply modal
 await page.locator(".or-job-trigger").first().click();
-const applyBtn = page.locator(".or-job-content .or-button", { hasText: "Continue to apply" }).first();
-await applyBtn.waitFor({ state: "visible" });
-await applyBtn.click();
+await page.locator(".or-job-content .or-button", { hasText: "Continue to apply" }).first().click();
 await page.waitForSelector(".am-overlay");
 await page.waitForTimeout(400);
 
@@ -34,29 +27,24 @@ const m = await page.evaluate(() => {
     const el = document.querySelector(sel);
     if (!el) return null;
     const b = el.getBoundingClientRect();
-    return { top: b.top, bottom: b.bottom, left: b.left, right: b.right, height: b.height, width: b.width };
+    return { top: b.top, bottom: b.bottom, height: b.height, width: b.width };
   };
-  const overlay = r(".am-overlay");
-  const card = r(".am-card");
-  const nav = r(".hn-shell");
-  const cs = getComputedStyle(document.documentElement);
   return {
     viewport: window.innerHeight,
     scrollY: window.scrollY,
-    htmlOverflow: cs.overflow,
-    nav, overlay, card,
+    nav: r(".hn-shell"),
+    overlay: r(".am-overlay"),
+    card: r(".am-card"),
   };
 });
 
 const result = { ...m, scrollBefore };
 if (m.overlay && m.nav && m.card) {
-  const regionTop = m.nav.bottom;
-  const regionBottom = m.viewport;
-  const regionCenter = (regionTop + regionBottom) / 2;
+  const regionCenter = (m.nav.bottom + m.viewport) / 2;
   const cardCenter = (m.card.top + m.card.bottom) / 2;
   result.checks = {
-    overlayTopEqNavBottom: +(m.overlay.top - regionTop).toFixed(2),
-    overlayBottomEqViewport: +(m.overlay.bottom - regionBottom).toFixed(2),
+    overlayTopEqNavBottom: +(m.overlay.top - m.nav.bottom).toFixed(2),
+    overlayBottomEqViewport: +(m.overlay.bottom - m.viewport).toFixed(2),
     cardCenterOffset: +(cardCenter - regionCenter).toFixed(2),
     scrollFrozen: m.scrollY === scrollBefore,
   };

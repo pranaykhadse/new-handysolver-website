@@ -2,32 +2,7 @@
 
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-
-// ── Anchor smooth scroll ────────────────────────────────────────────────────
-function easeOutExpo(t: number) {
-  return t >= 1 ? 1 : 1 - Math.pow(2, -10 * t);
-}
-let anchorFrame = 0;
-function smoothScrollTo(targetY: number) {
-  if (anchorFrame) { cancelAnimationFrame(anchorFrame); anchorFrame = 0; }
-  const html = document.documentElement;
-  const startY = html.scrollTop || window.scrollY;
-  const diff = targetY - startY;
-  if (Math.abs(diff) < 1) return;
-  const prev = html.style.scrollBehavior;
-  html.style.scrollBehavior = 'auto';
-  const duration = Math.min(900, Math.max(420, Math.abs(diff) * 0.45));
-  const startedAt = performance.now();
-  function frame() {
-    const t = Math.min((performance.now() - startedAt) / duration, 1);
-    const y = startY + diff * easeOutExpo(t);
-    html.scrollTop = y;
-    window.scrollTo(0, y);
-    if (t < 1) { anchorFrame = requestAnimationFrame(frame); }
-    else { anchorFrame = 0; html.style.scrollBehavior = prev; }
-  }
-  anchorFrame = requestAnimationFrame(frame);
-}
+import { scrollToSection, entryBonus } from './section-scroll';
 
 // ── Parallax layer config ───────────────────────────────────────────────────
 const PARALLAX_LAYERS = [
@@ -114,17 +89,13 @@ export default function ScrollMotion() {
       if (reduced.matches) return;
       const anchor = (e.target as Element).closest('a[href^="#"]') as HTMLAnchorElement | null;
       if (!anchor) return;
-      const id = anchor.getAttribute('href')!.slice(1);
-      const el = id ? document.getElementById(id) : null;
-      if (!el && id) return;
+      const id = (anchor.getAttribute('href') || '').slice(1);
+      if (!id || !document.getElementById(id)) return;
       e.preventDefault();
       e.stopPropagation();
-      const scrollPad = parseInt(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
-      const targetY = Math.max(0, el
-        ? el.getBoundingClientRect().top + window.scrollY - scrollPad
-        : 0);
-      smoothScrollTo(targetY);
-      if (id) history.pushState(null, '', `#${id}`);
+      // Shared calibration (./section-scroll) — same landing as the header nav.
+      scrollToSection(id, entryBonus(id, anchor));
+      history.pushState(null, '', `#${id}`);
     };
     document.addEventListener('click', handleAnchorClick, { capture: true });
 

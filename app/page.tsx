@@ -1,4 +1,5 @@
 import { ArrowUpRight, ArrowRight, ArrowDown, Asterisk, MoveUpRight } from 'lucide-react';
+import type { Metadata } from 'next';
 import { HomeMotion } from './playful-interactions';
 import BrandMark from './brand-mark';
 import ProcessJourney from './process-journey';
@@ -21,6 +22,16 @@ import './mission-refresh.css';
 import './visitor-polish.css';
 
 const contact = '/lets-talk';
+export const metadata: Metadata = {
+  title: 'HandySolver | Ideas into impact',
+  description: 'Hands-on business transformation, custom software, and practical AI. Bring people, processes, and technology together with HandySolver.',
+  alternates: { canonical: '/' },
+  openGraph: {
+    title: 'HandySolver | Ideas into impact',
+    description: 'Hands-on business transformation, custom software, and practical AI. Bring people, processes, and technology together with HandySolver.',
+    url: '/',
+  },
+};
 export default function Home() {
   return <div className="handy-home handy-depth">
     <HomeDepth />

@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { ArrowRight, ArrowUpRight, MessageCircle, MousePointer2, Check, PencilRuler, HeartHandshake, RefreshCw, Pause, Play } from 'lucide-react';
+import { ArrowRight, MessageCircle, MousePointer2, Check, PencilRuler, HeartHandshake, RefreshCw } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import './process-journey.css';
@@ -17,7 +17,6 @@ function Example({stage}:{stage:string}){
 }
 export default function ProcessJourney(){
  const [stage,setStage]=useState('hello');
- const [paused,setPaused]=useState(false);
  const [visible,setVisible]=useState(false);
  const [reduced,setReduced]=useState(true);
  const [hovered,setHovered]=useState(false);
@@ -34,17 +33,17 @@ export default function ProcessJourney(){
    document.addEventListener('visibilitychange',sync);
    return()=>{observer.disconnect();media.removeEventListener('change',update);document.removeEventListener('visibilitychange',sync);};
  },[]);
- const running=visible&&!paused&&!reduced&&!hovered;
+ const running=visible&&!reduced&&!hovered;
  useEffect(()=>{if(!running)return;const timer=window.setInterval(()=>setElapsed(value=>value+100),100);return()=>window.clearInterval(timer);},[running]);
  useEffect(()=>{if(elapsed>=9000){setStage(current=>stages[(stages.findIndex(s=>s.id===current)+1)%3].id);setElapsed(0);}},[elapsed]);
- const choose=(value:string)=>{setStage(value);setElapsed(0);setPaused(true);};
+ const choose=(value:string)=>{setStage(value);setElapsed(0);};
  return <section ref={section} className="pj-section hp-wrap" id="approach" aria-labelledby="pj-title" data-flow={running?'running':'paused'} data-motion={!reduced}>
    <div className="pj-heading"><div><p className="hp-overline">No disappearing acts.</p><h2 id="pj-title">A little back-and-forth.<br/><em>A lot of forward.</em></h2></div><div className="pj-heading-note"><span><MousePointer2 size={15}/> Pick a step. Get a feel for it.</span></div></div>
-   <div className="pj-flow-controls"><span>{reduced?'Explore at your own pace.':paused?'Your pace. Pick a step or press play.':hovered?'Paused while you explore.':'Watch the work flow, one step at a time.'}</span>{!reduced&&<Button variant="outline" className="pj-playback" onClick={()=>setPaused(value=>!value)} aria-label={paused?'Play process walkthrough':'Pause process walkthrough'}>{paused?<Play size={14}/>:<Pause size={14}/>} {paused?'Play flow':'Pause flow'}</Button>}<div className="pj-flow-track" aria-hidden="true"><i style={{transform:`scaleX(${elapsed/9000})`}}/></div></div>
-   <Tabs value={stage} onValueChange={choose} className="pj-journey" onMouseEnter={()=>setHovered(true)} onMouseLeave={()=>setHovered(false)} onFocusCapture={()=>setPaused(true)}>
+   <div className="pj-flow-controls"><span>{reduced?'Explore at your own pace.':hovered?'Paused while you explore.':'Watch the work flow, one step at a time.'}</span><div className="pj-flow-track" aria-hidden="true"><i style={{transform:`scaleX(${elapsed/9000})`}}/></div></div>
+   <Tabs value={stage} onValueChange={choose} className="pj-journey" onMouseEnter={()=>setHovered(true)} onMouseLeave={()=>setHovered(false)}>
     <TabsList className="pj-stages" aria-label="Explore how we work together">{stages.map(({id,number,label,Icon})=><TabsTrigger key={id} value={id} className="pj-stage"><span className="pj-step-marker"><Icon size={23} strokeWidth={1.6}/></span><span className="pj-step-text"><small>STEP {number}</small><span className="pj-stage-title">{label}</span></span></TabsTrigger>)}</TabsList>
     {stages.map((s,i)=><TabsContent className="pj-panel" key={s.id} value={s.id}><div className="pj-story"><span className="pj-chapter">Step {s.number} / 03</span><h3>{s.title}</h3><p>{s.body}</p><Button variant="ghost" className="pj-next" onClick={()=>choose(stages[(i+1)%3].id)}>{i===2?'Back to the first hello':`Next: ${stages[i+1].label}`}<ArrowRight size={17}/></Button></div><div className="pj-scene"><Example stage={s.id}/><span className="pj-note">{s.note}</span></div></TabsContent>)}
    </Tabs>
-   <div className="pj-bottom"><p>In it with you. <em>From the first hello.</em></p><a className="hp-text-link" href="https://handysolver.com/client.html">A closer look at our process <ArrowUpRight size={16}/></a></div>
+   <div className="pj-bottom"><p>In it with you. <em>From the first hello.</em></p></div>
  </section>
 }

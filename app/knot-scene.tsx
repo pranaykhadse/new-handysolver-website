@@ -1,15 +1,13 @@
 'use client';
 import { useEffect, useRef, useState, type PointerEvent } from 'react';
-import { ArrowDown, Pause, Play } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ArrowDown } from 'lucide-react';
 import './knot-scene.css';
 
 export default function KnotScene() {
   const scene = useRef<HTMLDivElement>(null);
-  const [paused, setPaused] = useState(false);
   const [visible, setVisible] = useState(false);
   const [allowed, setAllowed] = useState(false);
-  const moving = visible && allowed && !paused;
+  const moving = visible && allowed;
   useEffect(() => {
     const element = scene.current;
     if (!element) return;
@@ -40,6 +38,5 @@ export default function KnotScene() {
       <span className="hp-knot-note">a little tangled?<br/><em>we get it.</em></span>
       <a className="hp-knot-link" href="#solutions">Let’s work it out <ArrowDown size={19}/></a>
     </div>
-    {allowed && <Button variant="ghost" size="sm" className="hp-knot-motion-toggle" onClick={()=>setPaused(value=>!value)} aria-label={paused?'Resume decorative motion':'Pause decorative motion'}>{paused?<Play size={11}/>:<Pause size={11}/>}<span>{paused?'Play motion':'Pause motion'}</span></Button>}
   </div>;
 }

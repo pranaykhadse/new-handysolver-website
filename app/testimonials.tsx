@@ -97,7 +97,9 @@ export default function Testimonials(){
     const observer=new IntersectionObserver(entries=>setVisible(entries[0]?.isIntersecting??false),{threshold:.15});
     if(region.current)observer.observe(region.current);
     return()=>{observer.disconnect();media.removeEventListener('change',update);document.removeEventListener('visibilitychange',visibility);};
-  },[]);
+    // Re-run when the list populates: on first render the section has no ref
+    // (loading branch), so the observer must attach after testimonials load.
+  },[testimonials.length]);
   useEffect(()=>{
     if(!api)return;
     const select=()=>setSelected(api.selectedScrollSnap());
@@ -107,7 +109,7 @@ export default function Testimonials(){
   },[api]);
   useEffect(()=>{
     if(!api||!playing)return;
-    const timer=window.setTimeout(()=>api.scrollNext(),8000);
+    const timer=window.setTimeout(()=>api.scrollNext(),3000);
     return()=>window.clearTimeout(timer);
   },[api,playing,selected]);
   function go(index:number){if(testimonials.length===0)return;setPaused(true);api?.scrollTo((index+testimonials.length)%testimonials.length,reduced);}
@@ -119,7 +121,7 @@ export default function Testimonials(){
   return <section id="testimonials" className="hp-proof tc-section" ref={region} onMouseEnter={()=>setHovered(true)} onMouseLeave={()=>setHovered(false)} onFocusCapture={e=>{if(!(e.target as HTMLElement).closest('[data-rotation-control]'))setPaused(true);}}>
     <div className="hp-wrap tc-inner"><div className="tc-heading"><p className="hp-overline">The nicest part of our work? Hearing this.</p><span>GOOD WORDS. REAL PEOPLE.</span></div>
       <Carousel opts={{loop:true}} setApi={setApi} aria-label="What our clients say" onKeyDownCapture={e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();go(selected+(e.key==='ArrowLeft'?-1:1));}}}>
-        <CarouselContent aria-live={playing?'off':'polite'}>{testimonials.map((item,index)=><CarouselItem key={item.id} aria-label={`${index+1} of ${testimonials.length}`} aria-hidden={index!==selected}><div className="tc-slide"><span className="tc-quote-mark" aria-hidden="true">&ldquo;</span><blockquote>{item.quote}</blockquote>{item.videoUrl&&<VideoPlayer url={item.videoUrl}/>}<div className="tc-attribution">{item.avatarUrl?<img className="tc-avatar" src={item.avatarUrl} alt={`Photo of ${item.name}`} loading="lazy"/>:<span className="hp-initials">{item.initials}</span>}<div><strong>{item.name}</strong><p>{item.label}</p></div><a href={item.source} tabIndex={index===selected?0:-1} target="_blank" rel="noopener noreferrer">{item.sourceLabel}<ArrowUpRight size={17}/></a></div></div></CarouselItem>)}</CarouselContent>
+        <CarouselContent aria-live={playing?'off':'polite'}>{testimonials.map((item,index)=><CarouselItem key={item.id} aria-label={`${index+1} of ${testimonials.length}`} aria-hidden={index!==selected}><div className="tc-slide"><span className="tc-quote-mark" aria-hidden="true">&ldquo;</span><blockquote>{item.quote}</blockquote>{item.videoUrl&&<VideoPlayer url={item.videoUrl}/>}<div className="tc-attribution">{item.avatarUrl?<img className="tc-avatar" src={item.avatarUrl} alt={`Photo of ${item.name}`} loading="lazy"/>:<span className="hp-initials">{item.initials}</span>}<div><strong>{item.name}</strong><p>{item.label}</p></div>{!/^read the full testimonials?$/i.test((item.sourceLabel||'').trim())&&<a href={item.source} tabIndex={index===selected?0:-1} target="_blank" rel="noopener noreferrer">{item.sourceLabel}<ArrowUpRight size={17}/></a>}</div></div></CarouselItem>)}</CarouselContent>
         <div className="tc-controls"><div className="tc-dots" aria-label="Choose a testimonial">{testimonials.map((item,index)=><Button key={item.id} variant="ghost" aria-label={`Show testimonial from ${item.name}`} aria-pressed={selected===index} onClick={()=>go(index)} disabled={!api}><span/></Button>)}</div><span className="tc-count">{String(selected+1).padStart(2,'0')} / {String(testimonials.length).padStart(2,'0')}</span><div className="tc-buttons"><Button data-rotation-control variant="ghost" onClick={()=>setPaused(p=>!p)} disabled={reduced} aria-label={paused?'Start automatic rotation':'Pause automatic rotation'}>{paused||reduced?<Play size={14}/>:<Pause size={14}/>}<span>{reduced?'Manual mode':paused?'Play':'Pause'}</span></Button><Button variant="outline" size="icon" onClick={()=>go(selected-1)} disabled={!api} aria-label="Previous testimonial"><ArrowLeft size={17}/></Button><Button variant="outline" size="icon" onClick={()=>go(selected+1)} disabled={!api} aria-label="Next testimonial"><ArrowRight size={17}/></Button></div></div>
       </Carousel>
     </div>
