@@ -84,6 +84,8 @@ const server = http.createServer(async (req, res) => {
     // Tell vinext not to compress responses — the proxy reads raw bytes/text
     // and cannot decompress gzip on the fly, which produces garbled output.
     delete headers['accept-encoding'];
+    // node's undici fetch rejects an Expect: 100-continue header outright.
+    delete headers['expect'];
 
     const body = req.method !== 'GET' && req.method !== 'HEAD'
       ? await new Promise((resolve, reject) => {
