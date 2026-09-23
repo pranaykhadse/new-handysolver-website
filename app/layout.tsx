@@ -8,7 +8,6 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: 'HandySolver | Ideas into impact',
   description: DESCRIPTION,
-  icons: { icon: '/hs-logo.png', shortcut: '/hs-logo.png' },
   openGraph: {
     type: 'website',
     siteName: 'HandySolver',
@@ -31,4 +30,4 @@ const ORG_JSON_LD = {
   address: { '@type': 'PostalAddress', addressLocality: 'Gurugram', addressCountry: 'IN' },
 };
 
-export default function RootLayout({children}:Readonly<{children:React.ReactNode}>){return <html lang="en"><body>{children}<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_JSON_LD) }} /></body></html>}
+export default function RootLayout({children}:Readonly<{children:React.ReactNode}>){return <html lang="en"><body><link rel="icon" href="/hs-logo.png" />{children}<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_JSON_LD) }} /></body></html>}
