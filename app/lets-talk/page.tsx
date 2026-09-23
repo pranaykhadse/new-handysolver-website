@@ -8,7 +8,7 @@ import DirectContact from './direct-contact';
 import '../playful-home.css';
 import './talk.css';
 
-export const metadata:Metadata={title:'Let’s talk | HandySolver',description:'Bring your ideas, questions and everyday business headaches. Start a conversation with HandySolver.'};
+export const metadata:Metadata={title:’Let\’s talk | HandySolver’,description:’Bring your ideas, questions and everyday business headaches. Start a conversation with HandySolver.’,alternates:{canonical:’/lets-talk’},openGraph:{title:’Let\’s talk | HandySolver’,description:’Bring your ideas, questions and everyday business headaches. Start a conversation with HandySolver.’,url:’/lets-talk’}};
 export default function LetsTalk(){return <div className="handy-home talk-page"><BreadcrumbsJsonLd items={[{ name: 'Home', path: '/' }, { name: "Let's talk", path: '/lets-talk' }]} /><a className="hp-skip" href="#main">Skip to contact</a><PlayfulHeader/>
   <main id="main" className="hp-wrap">
     <section className="lt-main"><div className="lt-intro"><p className="hp-overline">BIG IDEA? SMALL HEADACHE? SAY HELLO.</p><h1>Bring the<br/><em>messy version.</em></h1><p className="lt-lede">The unfinished idea. The daily workaround.<br/>The “there must be a better way.”<br/>Let’s start there.</p><div className="lt-note"><Asterisk size={29} aria-hidden="true"/><p>You don’t need<br/>all the answers.<br/><em>Just a hello.</em></p></div><DirectContact/></div><MessageBuilder/></section>
