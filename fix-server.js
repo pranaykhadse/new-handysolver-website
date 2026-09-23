@@ -86,6 +86,8 @@ const server = http.createServer(async (req, res) => {
     delete headers['accept-encoding'];
     // node's undici fetch rejects an Expect: 100-continue header outright.
     delete headers['expect'];
+    // Undici also rejects forwarding Upgrade on ordinary proxied HTTP requests.
+    delete headers['upgrade'];
 
     const body = req.method !== 'GET' && req.method !== 'HEAD'
       ? await new Promise((resolve, reject) => {

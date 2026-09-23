@@ -9,6 +9,15 @@
   min-height: 100vh;
 }
 
+.gl-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 34px;
+  font-size: 11px;
+  color: #68635a;
+}
+
 /* ── Hero ───────────────────────────────────────────────── */
 .gl-hero {
   padding-block: 85px 70px;

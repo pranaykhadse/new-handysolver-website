@@ -166,7 +166,7 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
         <div className="am-header">
           <div>
             <p className="am-overline">APPLICATION</p>
-            <h2 id="am-title">Apply for <em>{jobTitle}</em></h2>
+            <h2 id="am-title">Apply for <span className="am-job-title">{jobTitle}</span></h2>
           </div>
           <button className="am-close" onClick={onClose} aria-label="Close"><X size={18}/></button>
         </div>

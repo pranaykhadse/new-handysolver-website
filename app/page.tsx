@@ -1,7 +1,6 @@
 import { ArrowUpRight, ArrowRight, ArrowDown, Asterisk, MoveUpRight } from 'lucide-react';
 import type { Metadata } from 'next';
 import { HomeMotion } from './playful-interactions';
-import BrandMark from './brand-mark';
 import ProcessJourney from './process-journey';
 import PlayfulHeader from './playful-header';
 import KnotScene from './knot-scene';
@@ -77,6 +76,6 @@ export default function Home() {
 
       <section className="hp-contact"><div className="hp-wrap"><p className="hp-overline">Over to you.</p><a className="hp-big-contact" href={contact}><span>What’s your<br/><em>“there must be<br/>a better way”?</em></span><span className="hp-contact-arrow"><MoveUpRight size={70} strokeWidth={1.2}/></span></a><div className="hp-contact-bottom"><p>Let’s find it. Together.</p><a href={contact}>Start a conversation <ArrowUpRight size={18}/></a></div></div></section>
     </main>
-    <footer className="hp-footer hp-wrap"><div className="hp-footer-top"><a className="hp-logo" href="/" aria-label="HandySolver home"><BrandMark /></a><p>Technology to your advantage.<br/>A little humanity, too.</p><div><a href="/careers">Careers</a><a href="https://in.linkedin.com/company/handysolver">LinkedIn</a><a href={contact}>Contact</a></div></div><div className="hp-footer-bottom"><span>© {new Date().getFullYear()} HandySolver</span><span>Gurugram, India. Good ideas travel.</span><a href="#main">Back to the top ↑</a></div></footer>
+    <footer className="hp-footer hp-wrap"><div className="hp-footer-top"><p>Technology to your advantage. A little humanity, too.</p><div><a href="/careers">Careers</a><a href="https://in.linkedin.com/company/handysolver">LinkedIn</a><a href={contact}>Contact</a></div></div><div className="hp-footer-bottom"><span>© {new Date().getFullYear()} HandySolver</span><span>Gurugram, India. Good ideas travel.</span><a href="#main">Back to the top ↑</a></div></footer>
   </div>;
 }

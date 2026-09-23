@@ -57,6 +57,5 @@ export default function MessageBuilder(){
     <div className="lt-form-actions"><Button className="lt-send" type="submit">{channel==='whatsapp'?<><WhatsAppIcon/>Continue on WhatsApp</>:'Open email draft'} <ArrowUpRight size={18}/></Button><Button type="button" variant="ghost" onClick={copy} disabled={!message.trim()}><Copy size={15}/>Copy message</Button></div>
     <p className="lt-form-note">{channel==='whatsapp'?'Opens WhatsApp with your message for +91 99718 15001.':'Opens Gmail in a new tab with a draft to connect@handysolver.com.'} You review and send it there.<br/>This page does not submit or store your details.</p>
     <p className="lt-status" role="status">{status}</p>
-    <a className="lt-web-form" href="https://handysolver.com/reach-us.html" target="_blank" rel="noopener noreferrer">Prefer a web form? Use our existing contact form <ArrowUpRight size={13}/></a>
   </form>;
 }

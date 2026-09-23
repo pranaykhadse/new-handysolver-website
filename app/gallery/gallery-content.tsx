@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import PlayfulHeader from '../playful-header';
 import { HomeMotion } from '../playful-interactions';
 import '../playful-home.css';
@@ -29,6 +30,9 @@ export default function GalleryContent() {
       <PlayfulHeader />
 
       <main id="main">
+        <div className="hp-wrap">
+          <a className="gl-back" href="/careers"><ArrowLeft size={14}/>Back to careers</a>
+        </div>
         <div className="hp-wrap gl-hero">
           <p className="hp-overline">Life at HandySolver</p>
           <h1>Real moments.<br /><em>Unscripted.</em></h1>
@@ -65,6 +69,7 @@ export default function GalleryContent() {
       </main>
 
       <footer className="hp-footer hp-wrap">
+        <div className="hp-footer-top"><p>Real moments. Unscripted, like us.</p><div><a href="/careers">Careers</a><a href="/team">Our people</a><a href="/lets-talk">Contact</a></div></div>
         <div className="hp-footer-bottom">
           <span>© {new Date().getFullYear()} HandySolver</span>
           <span>Gurugram, India. Good ideas travel.</span>

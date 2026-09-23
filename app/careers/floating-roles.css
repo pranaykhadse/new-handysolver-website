@@ -1,4 +1,4 @@
-.playful-careers { padding-bottom: 100px; }
+.playful-careers { padding-bottom: 0; }
 .pc-floating-roles {
   position: fixed;
   right: max(24px, env(safe-area-inset-right));

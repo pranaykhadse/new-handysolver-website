@@ -28,7 +28,7 @@ body:has(.am-overlay) main.hp-wrap{will-change:auto!important;transform:none!imp
 .am-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:22px 24px 16px;border-bottom:1px solid #e8e1d6;flex-shrink:0;background:#fffaf4;z-index:1}
 .am-overline{font-size:9px;letter-spacing:.14em;color:#ff7a21;margin:0 0 6px;font-weight:600}
 .am-header h2{font-size:20px;font-weight:500;letter-spacing:-.5px;margin:0;line-height:1.2;color:#090909}
-.am-header h2 em{font-family:Georgia,serif;color:#ff7a21;font-style:italic}
+.am-header h2 .am-job-title{font-family:Georgia,serif;color:#ff7a21;font-style:normal}
 .am-close{width:34px;height:34px;border-radius:50%;border:1px solid #d8d0c5;background:#fff;display:grid;place-items:center;cursor:pointer;flex-shrink:0;color:#090909;transition:background .18s,border-color .18s}
 .am-close:hover{background:#090909;color:#fff;border-color:#090909}
 .am-form{padding:16px 24px 22px;overflow-y:auto;flex:1;overscroll-behavior:contain}
