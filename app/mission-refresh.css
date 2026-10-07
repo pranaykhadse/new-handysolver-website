@@ -55,7 +55,7 @@
 @media (min-width: 761px) {
   .hr-mission p {
     white-space: nowrap;
-    font-size: min(4.5vw, 64px, calc((100vw - 460px) / 21));
+    font-size: min(66px, calc((100vw - 300px) / 16.5));
   }
 }
 
