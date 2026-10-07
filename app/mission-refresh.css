@@ -52,6 +52,13 @@
   letter-spacing: -0.055em;
 }
 
+@media (min-width: 761px) {
+  .hr-mission p {
+    white-space: nowrap;
+    font-size: min(4.5vw, 64px, calc((100vw - 460px) / 21));
+  }
+}
+
 @media (max-width: 760px) {
   .hr-mission .hp-wrap {
     min-height: 210px;
