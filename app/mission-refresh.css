@@ -26,7 +26,7 @@
 .hr-mission .hp-wrap > span:first-child {
   align-self: start;
   margin-top: 57px;
-  font-size: 11px;
+  font-size: clamp(11px, 0.9vw, 14px);
   letter-spacing: 0.12em;
   white-space: nowrap;
 }
