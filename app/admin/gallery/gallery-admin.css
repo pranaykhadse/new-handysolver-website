@@ -56,24 +56,58 @@
 }
 @keyframes adm-spin { to { transform: rotate(360deg); } }
 
-/* Collage grouped by category */
-.ga-collage-groups { display: flex; flex-direction: column; gap: 34px; }
-.ga-group-title {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin: 0 0 14px;
-  font-size: 15px;
+/* Folder navigation */
+.ga-crumbs { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+.ga-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--adm-ink, #252923);
+  color: var(--adm-muted, #888);
+  cursor: pointer;
 }
-.ga-group-title small { font-size: 11px; font-weight: 400; color: var(--adm-muted, #888); }
-.ga-collage { column-count: 4; column-gap: 12px; }
+button.ga-crumb:hover { color: var(--adm-ink, #252923); border-color: var(--adm-line, #e0dbd3); }
+.ga-crumb[data-current="true"] { color: var(--adm-ink, #252923); cursor: default; }
+.ga-crumb small { font-size: 11px; font-weight: 400; color: var(--adm-muted, #888); }
+.ga-crumb-sep { color: var(--adm-muted, #888); }
+
+.ga-folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 22px 18px; }
+.ga-folder { position: relative; display: block; padding: 0; margin-top: 12px; border: 0; background: none; text-align: left; cursor: pointer; font: inherit; color: inherit; }
+.ga-folder-tab {
+  position: absolute;
+  top: -12px; left: 0;
+  width: 46%; height: 14px;
+  border-radius: 8px 8px 0 0;
+  background: #ff7a21;
+}
+.ga-folder-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  border: 1px solid var(--adm-line, #e0dbd3);
+  border-top: 3px solid #ff7a21;
+  border-radius: 0 12px 12px 12px;
+  background: var(--adm-surface, #f0ede8);
+  transition: transform .2s, box-shadow .2s, border-color .2s;
+}
+.ga-folder:hover .ga-folder-body, .ga-folder:focus-visible .ga-folder-body { transform: translateY(-3px); box-shadow: 0 10px 22px #0003; border-color: #ff7a21; }
+.ga-folder:focus-visible { outline: 2px solid #ff7a21; outline-offset: 4px; border-radius: 8px; }
+.ga-folder-thumbs { display: flex; gap: 5px; height: 62px; margin-bottom: 8px; }
+.ga-folder-thumbs img { flex: 1; min-width: 0; height: 100%; object-fit: cover; border-radius: 5px; }
+.ga-folder-name { font-size: 14px; font-weight: 600; color: var(--adm-ink, #252923); }
+.ga-folder-count { font-size: 11px; color: var(--adm-muted, #888); }
+
+/* Photos inside a folder */
+.ga-photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; }
 .ga-tile {
   position: relative;
-  display: block;
-  margin: 0 0 12px;
-  break-inside: avoid;
+  margin: 0;
   overflow: hidden;
   border-radius: 10px;
   border: 1px solid var(--adm-line, #e0dbd3);
@@ -84,7 +118,7 @@
 .ga-tile:hover { transform: translateY(-2px); box-shadow: 0 8px 20px #0003; }
 .ga-tile[data-dragging="true"] { opacity: .35; }
 .ga-tile[data-drag-over="true"] { outline: 2px dashed #ff7a21; outline-offset: 2px; }
-.ga-tile img { display: block; width: 100%; height: auto; }
+.ga-tile img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; }
 .ga-tile figcaption {
   position: absolute;
   left: 0; right: 0; bottom: 0;
@@ -99,16 +133,8 @@
 }
 .ga-tile figcaption em { opacity: .7; }
 .ga-tile:hover figcaption, .ga-tile:focus-within figcaption { opacity: 1; }
-.ga-tile-actions {
-  position: absolute;
-  top: 8px; right: 8px;
-  display: flex;
-  gap: 6px;
-  opacity: 0;
-  transition: opacity .2s;
-}
+.ga-tile-actions { position: absolute; top: 8px; right: 8px; display: flex; gap: 6px; opacity: 0; transition: opacity .2s; }
 .ga-tile:hover .ga-tile-actions, .ga-tile:focus-within .ga-tile-actions { opacity: 1; }
 .ga-tile-actions .adm-icon-btn { background: #000a; color: #fff; backdrop-filter: blur(4px); }
 @media (hover: none) { .ga-tile figcaption, .ga-tile-actions { opacity: 1; } }
-@media (max-width: 1000px) { .ga-collage { column-count: 3; } }
-@media (max-width: 640px) { .ga-collage { column-count: 2; } }
+@media (prefers-reduced-motion: reduce) { .ga-folder-body, .ga-tile { transition: none; } }

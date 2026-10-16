@@ -5,7 +5,7 @@ import './gallery/gallery-admin.css';
 import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
 import {
   Plus, Trash2, PencilLine, LogOut, Save, X, GripVertical, Check, AlertTriangle,
-  BellRing, Boxes, ShoppingBag, Building2, HardHat, Factory,
+  BellRing, Boxes, ShoppingBag, Building2, HardHat, Factory, FolderOpen, ChevronRight,
   HeartPulse, BriefcaseBusiness, Hotel, Users, Image as ImageIcon, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
@@ -298,57 +298,73 @@ function DraggableList({
   );
 }
 
-/* ── Gallery collage, grouped by category ── */
+/* ── Gallery folders: parent folder -> category folders -> photos ── */
 function DraggablePhotoList({
   photos, onReorder, onEdit, onDelete,
 }: { photos: Photo[]; onReorder: (list: Photo[]) => void; onEdit: (p: Photo) => void; onDelete: (id: string) => void }) {
+  const [openKey, setOpenKey] = useState<string | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
   const groups = groupByCategory(photos);
+  const open = groups.find(g => g.key === openKey) ?? null;
 
   function onDragEnd() {
-    if (dragId && overId && dragId !== overId) {
-      const from = photos.find(p => p.id === dragId);
-      const to = photos.find(p => p.id === overId);
-      if (from && to && categoryOf(from.src) === categoryOf(to.src)) {
-        const key = categoryOf(from.src);
-        const slots = photos.map((p, i) => (categoryOf(p.src) === key ? i : -1)).filter(i => i >= 0);
-        const inGroup = slots.map(i => photos[i]);
-        const [moved] = inGroup.splice(inGroup.findIndex(p => p.id === dragId), 1);
-        inGroup.splice(inGroup.findIndex(p => p.id === overId), 0, moved);
-        const next = [...photos];
-        slots.forEach((slot, n) => { next[slot] = inGroup[n]; });
-        onReorder(next.map((p, i) => ({ ...p, sort_order: i + 1 })));
-      }
+    if (open && dragId && overId && dragId !== overId) {
+      const slots = photos.map((p, i) => (categoryOf(p.src) === open.key ? i : -1)).filter(i => i >= 0);
+      const inGroup = slots.map(i => photos[i]);
+      const [moved] = inGroup.splice(inGroup.findIndex(p => p.id === dragId), 1);
+      inGroup.splice(inGroup.findIndex(p => p.id === overId), 0, moved);
+      const next = [...photos];
+      slots.forEach((slot, n) => { next[slot] = inGroup[n]; });
+      onReorder(next.map((p, i) => ({ ...p, sort_order: i + 1 })));
     }
     setDragId(null); setOverId(null);
   }
 
   return (
-    <div className="ga-collage-groups">
-      {groups.map(group => (
-        <section key={group.key} className="ga-group" aria-label={labelOf(group.key)}>
-          <h3 className="ga-group-title">{labelOf(group.key)}<small>{group.items.length} {group.items.length === 1 ? 'photo' : 'photos'}</small></h3>
-          <div className="ga-collage">
-            {group.items.map(photo => (
-              <figure key={photo.id} className="ga-tile" draggable
-                data-dragging={dragId === photo.id ? 'true' : 'false'}
-                data-drag-over={overId === photo.id && dragId !== photo.id ? 'true' : 'false'}
-                onDragStart={() => setDragId(photo.id)}
-                onDragEnter={() => { if (dragId && categoryOf(photo.src) === categoryOf(photos.find(p => p.id === dragId)?.src ?? '')) setOverId(photo.id); }}
-                onDragOver={e => e.preventDefault()} onDragEnd={onDragEnd}
-              >
-                <img src={photo.src} alt={photo.caption || 'Gallery photo'} loading="lazy" draggable={false} />
-                <figcaption>{photo.caption || <em>No caption</em>}</figcaption>
-                <div className="ga-tile-actions">
-                  <button className="adm-icon-btn" aria-label="Edit" onClick={() => onEdit({ ...photo })}><PencilLine size={14} /></button>
-                  <button className="adm-icon-btn delete" aria-label="Delete" onClick={() => onDelete(photo.id)}><Trash2 size={14} /></button>
-                </div>
-              </figure>
-            ))}
-          </div>
-        </section>
-      ))}
+    <div className="ga-folders">
+      <nav className="ga-crumbs" aria-label="Gallery folders">
+        <button type="button" className="ga-crumb" onClick={() => setOpenKey(null)} data-current={open ? 'false' : 'true'}>
+          <FolderOpen size={15} /> Gallery <small>{photos.length}</small>
+        </button>
+        {open && (<><ChevronRight size={14} className="ga-crumb-sep" /><span className="ga-crumb" data-current="true">{labelOf(open.key)} <small>{open.items.length}</small></span></>)}
+      </nav>
+
+      {!open ? (
+        <div className="ga-folder-grid">
+          {groups.map(group => (
+            <button type="button" key={group.key} className="ga-folder" onClick={() => setOpenKey(group.key)}>
+              <span className="ga-folder-tab" aria-hidden="true" />
+              <span className="ga-folder-body">
+                <span className="ga-folder-thumbs" aria-hidden="true">
+                  {group.items.slice(0, 3).map(p => <img key={p.id} src={p.src} alt="" loading="lazy" />)}
+                </span>
+                <span className="ga-folder-name">{labelOf(group.key)}</span>
+                <span className="ga-folder-count">{group.items.length} {group.items.length === 1 ? 'photo' : 'photos'}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div className="ga-photo-grid">
+          {open.items.map(photo => (
+            <figure key={photo.id} className="ga-tile" draggable
+              data-dragging={dragId === photo.id ? 'true' : 'false'}
+              data-drag-over={overId === photo.id && dragId !== photo.id ? 'true' : 'false'}
+              onDragStart={() => setDragId(photo.id)}
+              onDragEnter={() => { if (dragId) setOverId(photo.id); }}
+              onDragOver={e => e.preventDefault()} onDragEnd={onDragEnd}
+            >
+              <img src={photo.src} alt={photo.caption || 'Gallery photo'} loading="lazy" draggable={false} />
+              <figcaption>{photo.caption || <em>No caption</em>}</figcaption>
+              <div className="ga-tile-actions">
+                <button className="adm-icon-btn" aria-label="Edit" onClick={() => onEdit({ ...photo })}><PencilLine size={14} /></button>
+                <button className="adm-icon-btn delete" aria-label="Delete" onClick={() => onDelete(photo.id)}><Trash2 size={14} /></button>
+              </div>
+            </figure>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
