@@ -684,7 +684,7 @@ export default function AdminPage() {
     finally { setGalSaveBusy(false); }
   }
 
-  function newPhotoId(n: number) { return `g-${Date.now().toString(36)}-${n}-${Math.random().toString(36).slice(2, 6)}`; }
+  function newPhotoId(_n: number) { return crypto.randomUUID(); }
 
   async function galUploadMany(files: FileList | null) {
     if (!files || files.length === 0) return;
