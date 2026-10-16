@@ -1,10 +1,10 @@
 import { getSupabase, isSupabaseConfigured, type DbTeamMember } from "@/lib/supabase";
 import seed from "@/db/seed/team.json";
 
-type TeamPayload = { id: string; name: string; photoUrl: string };
+type TeamPayload = { id: string; name: string; surname: string; photoUrl: string };
 
 function shape(row: DbTeamMember): TeamPayload {
-  return { id: row.id, name: row.name ?? "", photoUrl: row.photo_url ?? "" };
+  return { id: row.id, name: row.name ?? "", surname: row.surname ?? "", photoUrl: row.photo_url ?? "" };
 }
 
 export async function GET() {

@@ -1271,10 +1271,13 @@ export default function AdminPage() {
                 <Field label="Name">
                   <input className="adm-input" value={String(draft.name ?? '')} onChange={(e) => set('name', e.target.value)} />
                 </Field>
-                <Field label="Sort order">
-                  <input type="number" className="adm-input" value={Number(draft.sort_order ?? 1)} onChange={(e) => set('sort_order', e.target.value)} min={1} />
+                <Field label="Surname">
+                  <input className="adm-input" value={String(draft.surname ?? '')} onChange={(e) => set('surname', e.target.value)} />
                 </Field>
               </Field2>
+              <Field label="Sort order">
+                <input type="number" className="adm-input" value={Number(draft.sort_order ?? 1)} onChange={(e) => set('sort_order', e.target.value)} min={1} style={{ maxWidth: 120 }} />
+              </Field>
               <Field label="Photo URL">
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                   <input className="adm-input" style={{ flex: 1 }} value={String(draft.photo_url ?? '')} onChange={(e) => set('photo_url', e.target.value)} placeholder="https://..." />

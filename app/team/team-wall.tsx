@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 
 const PHOTO_BASE = 'https://handysolver.com/assets/images/employees/';
 
-type Member = { id: string; name: string; photoUrl: string };
+type Member = { id: string; name: string; surname: string; photoUrl: string };
 
 function photoSrc(member: Member) {
   if (!member.photoUrl) return '';
@@ -44,6 +44,6 @@ export default function TeamWall(){
   }
   return <section className="tw-wall" aria-labelledby="wall-title">
     <div className="tw-wall-top"><div><p className="hp-overline">THE PEOPLE PART</p><h2 id="wall-title">Different faces.<br/><em>One handy bunch.</em></h2></div><div className="tw-wall-action"><span>No particular order. Just good company.</span><Button variant="outline" onClick={shuffle}><Shuffle size={16}/>Mix things up</Button><span className="sr-only" aria-live="polite">{mix>0?'Photo order shuffled.':''}</span></div></div>
-    <div className="tw-grid" key={mix}>{order.map((member,index)=><figure className="tw-portrait" key={member.id}><div className="tw-photo"><Portrait member={member}/></div><figcaption><span>{member.name||'part of the handy bunch'}</span><span aria-hidden="true">{String(index+1).padStart(2,'0')}</span></figcaption></figure>)}<a className="tw-you" href="/careers/open-roles"><Smile size={40} aria-hidden="true"/><span>And maybe…<br/><em>you?</em></span><small>Find your next thing <ArrowUpRight size={18}/></small></a></div>
+    <div className="tw-grid" key={mix}>{order.map((member,index)=><figure className="tw-portrait" key={member.id}><div className="tw-photo"><Portrait member={member}/></div><figcaption><span>{[member.name, member.surname].filter(Boolean).join(' ')||'part of the handy bunch'}</span><span aria-hidden="true">{String(index+1).padStart(2,'0')}</span></figcaption></figure>)}<a className="tw-you" href="/careers/open-roles"><Smile size={40} aria-hidden="true"/><span>And maybe…<br/><em>you?</em></span><small>Find your next thing <ArrowUpRight size={18}/></small></a></div>
   </section>;
 }

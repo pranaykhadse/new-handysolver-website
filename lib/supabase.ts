@@ -49,6 +49,7 @@ export type DbTeamMember = {
   id: string;
   sort_order: number;
   name: string;
+  surname: string | null;
   photo_url: string;
 };
 
