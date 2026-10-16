@@ -53,7 +53,7 @@ export default function WorkflowAudit() {
   const restart = () => { setAnswers(Array(5).fill(-1)); setScenario(false); setStep(0); };
 
   return <Dialog open={open} onOpenChange={setOpen}>
-    <DialogTrigger asChild><Button className="wa-launch" data-compact={compact} aria-label={compact ? 'Open the workflow check' : undefined}><span className="wa-launch-icon"><Gauge size={22} aria-hidden="true"/></span><span className="wa-launch-copy">How tangled is your work?<small>Take the 2-minute workflow check</small></span><ArrowUpRight className="wa-launch-arrow" size={18}/></Button></DialogTrigger>
+    <DialogTrigger asChild><Button className="wa-launch" data-compact={compact} aria-label={compact ? 'Open the workflow check' : undefined}><span className="wa-launch-icon"><Gauge size={22} aria-hidden="true"/></span><span className="wa-launch-copy">How tangled is your work?<small>Take the 2-minute workflow check</small></span></Button></DialogTrigger>
     <DialogContent className="wa-dialog" onOpenAutoFocus={event => { event.preventDefault(); heading.current?.focus(); }}>
       <div className="wa-scroll" ref={scrollArea}>
         <div className="wa-eyebrow"><Gauge size={18} aria-hidden="true"/> THE HANDY WORKFLOW CHECK</div>

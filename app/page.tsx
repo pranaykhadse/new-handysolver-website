@@ -44,7 +44,7 @@ export default function Home() {
           <HeroHeadline />
           <p className="hp-lede">We help businesses replace disconnected tools, manual processes and repetitive tasks with connected software and practical automation.</p>
           <ul className="hp-offer-cues" aria-label="How we help"><li>Connect your systems</li><li>Simplify your processes</li><li>Automate routine work</li></ul>
-          <a className="hp-button" href={contact}>Show us what’s slowing you down <ArrowUpRight size={19}/></a>
+          <a className="hp-button" href={contact}>Show us what&#8217;s slowing you down</a>
           <span className="hp-aside">No big pitch. Let’s start with your problem.</span>
         </div>
         <KnotScene />
