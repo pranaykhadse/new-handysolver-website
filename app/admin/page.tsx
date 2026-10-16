@@ -725,6 +725,8 @@ export default function AdminPage() {
       const titleField = tab === 'case-studies' ? 'title' : tab === 'jobs' ? 'title' : 'name';
       body.id = slug(String(draft[titleField] ?? ''));
     }
+    // is_active only exists on job_posts — strip it from other tabs to avoid schema errors
+    if (tab !== 'jobs') delete body.is_active;
     const res = await api(route[tab], { method: 'PUT', body: JSON.stringify(body) });
     setSaveBusy(false);
     if (res.ok) {
