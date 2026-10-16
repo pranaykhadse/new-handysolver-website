@@ -75,6 +75,6 @@ export default function Home() {
 
       <section className="hp-contact"><div className="hp-wrap"><p className="hp-overline">Over to you.</p><a className="hp-big-contact" href={contact}><span>What’s your<br/><em>“there must be<br/>a better way”?</em></span><span className="hp-contact-arrow"><MoveUpRight size={70} strokeWidth={1.2}/></span></a><div className="hp-contact-bottom"><p>Let’s find it. Together.</p><a href={contact}>Start a conversation <ArrowUpRight size={18}/></a></div></div></section>
     </main>
-    <footer className="hp-footer hp-wrap"><div className="hp-footer-top"><p>Good work. Real people. Ideas that travel.</p><div><a href="/careers">Careers</a><a href="https://in.linkedin.com/company/handysolver">LinkedIn</a><a href={contact}>Contact</a></div></div><div className="hp-footer-bottom"><span>© {new Date().getFullYear()} HandySolver</span><span>Gurugram, India. Good ideas travel.</span><a href="#main">Back to the top ↑</a></div></footer>
+    <footer className="hp-footer hp-wrap"><div className="hp-footer-top"><div><a href="/careers">Careers</a><a href="https://in.linkedin.com/company/handysolver">LinkedIn</a><a href={contact}>Contact</a></div></div><div className="hp-footer-bottom"><span>© {new Date().getFullYear()} HandySolver</span><span>Gurugram, India. Good ideas travel.</span><a href="#main">Back to the top ↑</a></div></footer>
   </div>;
 }
