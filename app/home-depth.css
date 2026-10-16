@@ -9,7 +9,7 @@
 .handy-depth .pj-note,.handy-depth .vs-fit-label{box-shadow:2px 3px 0 #b5905430,5px 9px 14px -7px #382c2950;border-radius:1px 1px 8px 1px}
 .handy-depth .pj-example{box-shadow:0 2px 0 #cfc1b3,7px 11px 22px -12px #42342750}
 .handy-depth .hn-brand .hs-brand-image{box-shadow:1px 2px 0 #5d321c,2px 4px 0 #d96519,5px 8px 12px -5px #34281870}
-.handy-depth .hp-button{box-shadow:0 3px 14px rgba(28,21,16,.22);transition:transform .2s,box-shadow .2s,border-color .2s}
+.handy-depth .hp-button{box-shadow:4px 5px 0 #ff7a21;transition:transform .2s,box-shadow .2s,border-color .2s}
 .handy-depth .hn-contact{box-shadow:0 3px 0 #090909,0 7px 12px -8px #34281880}
 .handy-depth .hp-knot-link{box-shadow:0 3px 0 #cbbfac,0 8px 13px -9px #34281870}
 .handy-depth .hp-button:active,.handy-depth .hn-contact:active,.handy-depth .hp-knot-link:active{transform:translateY(3px);box-shadow:0 1px 0 #b78b67}
