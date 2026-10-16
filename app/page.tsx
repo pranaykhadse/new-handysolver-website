@@ -11,6 +11,7 @@ import HeroHeadline from './hero-headline';
 import WorkflowAudit from './workflow-audit';
 import CaseStudyShowcase from './case-study-showcase';
 import DayShift from './day-shift';
+import MissionCounter from './mission-counter';
 import './playful-home.css';
 import './hero-copy.css';
 import './home-depth.css';
@@ -69,7 +70,7 @@ export default function Home() {
 
       <ProcessJourney />
 
-      <section className="hr-mission" aria-label="Our ambition"><div className="hp-wrap"><span>OUR AMBITION</span><p>Help <strong>100 companies</strong> reach <em>2× growth.</em></p></div></section>
+      <MissionCounter />
 
       <section className="hr-people hp-wrap hp-reveal" id="about"><div className="hr-team-photo"><img src="https://handysolver.com/assets/images/rock-n-roll/foosball-short.jpg" alt="HandySolver team sharing a relaxed moment in the office"/><span>Real people.<br/><em>Useful work.</em></span></div><div className="hr-people-copy"><p className="hp-overline">Meet the humans behind the handy.</p><h2>Good people.<br/>Sleeves rolled up.</h2><p>Hands-on thinkers who care about the people using what we build.</p><div className="hp-people-links"><a className="hp-text-link" href="/team">Meet the team <ArrowUpRight size={17}/></a><a className="hp-text-link" href="/careers">Come build with us <ArrowUpRight size={17}/></a></div></div></section>
 
