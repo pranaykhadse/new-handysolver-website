@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { isAdminRequest, isCsrfValid } from '@/lib/admin';
+import { detectImageKind, IMAGE_KIND_INFO, NOT_ALLOWED_MESSAGE } from '@/lib/upload-types';
 
 export async function POST(request: NextRequest) {
   if (!(await isAdminRequest(request))) {
@@ -17,15 +18,19 @@ export async function POST(request: NextRequest) {
 
   if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 });
 
-  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
-  const allowed = ['jpg', 'jpeg', 'jfif', 'pjpeg', 'pjp', 'png', 'webp', 'avif', 'gif'];
-  if (!allowed.includes(ext)) {
-    return NextResponse.json({ error: 'File type not allowed. Use JPG, JPEG, JFIF, PNG, WEBP, AVIF, GIF or HEIC.' }, { status: 400 });
+  // Trust the file's real contents, never its name or the type the browser reports.
+  const bytes = await file.arrayBuffer();
+  const kind = detectImageKind(new Uint8Array(bytes.slice(0, 16)));
+  if (!kind) {
+    return NextResponse.json({ error: `This is not a valid image file. ${NOT_ALLOWED_MESSAGE}` }, { status: 400 });
   }
+  if (kind === 'heic') {
+    return NextResponse.json({ error: 'HEIC images must be converted to JPEG before upload.' }, { status: 400 });
+  }
+  const { mime, ext } = IMAGE_KIND_INFO[kind];
 
   const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
   const path = folder ? `${folder}/${name}` : name;
-  const bytes = await file.arrayBuffer();
 
   const supabase = getSupabaseAdmin();
 
@@ -35,11 +40,8 @@ export async function POST(request: NextRequest) {
     await supabase.storage.createBucket(bucket, { public: true });
   }
 
-  const jfifTypes = ['jfif', 'pjpeg', 'pjp'];
-  const contentType = jfifTypes.includes(ext) ? 'image/jpeg' : file.type;
-
   const { error } = await supabase.storage.from(bucket).upload(path, bytes, {
-    contentType,
+    contentType: mime,
     upsert: false,
   });
 

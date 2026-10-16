@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import { categoryOf, groupByCategory, labelOf } from '@/lib/gallery-category';
-import { ALLOWED_IMAGE_LABEL, IMAGE_ACCEPT, isAllowedImage } from '@/lib/upload-types';
+import { ALLOWED_IMAGE_LABEL, IMAGE_ACCEPT, checkImageFile } from '@/lib/upload-types';
 
 let _onAuthFailure: (() => void) | null = null;
 
@@ -472,8 +472,9 @@ function TeamPhotoUpload({ onUrl }: { onUrl: (url: string) => void }) {
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!isAllowedImage(file)) {
-      toast.error(`${file.name}: not allowed. Use ${ALLOWED_IMAGE_LABEL}.`);
+    const problem = await checkImageFile(file);
+    if (problem) {
+      toast.error(problem);
       if (ref.current) ref.current.value = '';
       return;
     }
@@ -688,10 +689,11 @@ export default function AdminPage() {
   async function galUploadMany(files: FileList | null) {
     if (!files || files.length === 0) return;
     const picked = Array.from(files);
-    const list = picked.filter(isAllowedImage);
-    const rejected = picked.filter(f => !isAllowedImage(f));
-    if (rejected.length > 0) {
-      toast.error(`Skipped ${rejected.length} unsupported ${rejected.length === 1 ? 'file' : 'files'} (${rejected.map(f => f.name).slice(0, 3).join(', ')}${rejected.length > 3 ? '...' : ''}). Allowed: ${ALLOWED_IMAGE_LABEL}.`);
+    const checks = await Promise.all(picked.map(checkImageFile));
+    const list = picked.filter((_, i) => !checks[i]);
+    const problems = checks.filter((c): c is string => c !== null);
+    if (problems.length > 0) {
+      toast.error(`Skipped ${problems.length} ${problems.length === 1 ? 'file' : 'files'}. ${problems[0]}${problems.length > 1 ? ` (and ${problems.length - 1} more)` : ''}`);
     }
     if (list.length === 0) { if (galFilesRef.current) galFilesRef.current.value = ''; return; }
     const folder = galFolder ?? 'other';
@@ -715,8 +717,9 @@ export default function AdminPage() {
 
   async function galUploadSingle(file: File | undefined) {
     if (!file) return;
-    if (!isAllowedImage(file)) {
-      toast.error(`${file.name}: not allowed. Use ${ALLOWED_IMAGE_LABEL}.`);
+    const problem = await checkImageFile(file);
+    if (problem) {
+      toast.error(problem);
       if (galSingleRef.current) galSingleRef.current.value = '';
       return;
     }
