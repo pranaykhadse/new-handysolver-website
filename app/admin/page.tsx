@@ -339,6 +339,28 @@ function DraggablePhotoList({
   );
 }
 
+/* ── Team photo preview (click to enlarge) ── */
+function PhotoPreview({ src }: { src: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <img
+        src={src} alt="Preview"
+        onClick={() => setOpen(true)}
+        style={{ marginTop: 10, width: 80, height: 80, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--adm-border)', cursor: 'zoom-in' }}
+      />
+      {open && (
+        <div
+          onClick={() => setOpen(false)}
+          style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-out' }}
+        >
+          <img src={src} alt="Full size" style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain', borderRadius: 10, boxShadow: '0 8px 40px #000a' }} />
+        </div>
+      )}
+    </>
+  );
+}
+
 /* ── Team photo upload ── */
 function TeamPhotoUpload({ onUrl }: { onUrl: (url: string) => void }) {
   const ref = useRef<HTMLInputElement>(null);
@@ -1286,7 +1308,7 @@ export default function AdminPage() {
                   <TeamPhotoUpload onUrl={(url) => set('photo_url', url)} />
                 </div>
                 {draft.photo_url && (
-                  <img src={String(draft.photo_url)} alt="Preview" style={{ marginTop: 10, width: 80, height: 80, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--adm-border)' }} />
+                  <PhotoPreview src={String(draft.photo_url)} />
                 )}
               </Field>
             </>
