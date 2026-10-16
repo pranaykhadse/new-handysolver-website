@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 });
 
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
-  const allowed = ['jpg', 'jpeg', 'png', 'webp', 'avif', 'gif'];
+  const allowed = ['jpg', 'jpeg', 'jfif', 'pjpeg', 'pjp', 'png', 'webp', 'avif', 'gif'];
   if (!allowed.includes(ext)) {
     return NextResponse.json({ error: 'File type not allowed' }, { status: 400 });
   }
@@ -30,8 +30,11 @@ export async function POST(request: NextRequest) {
     await supabase.storage.createBucket(bucket, { public: true });
   }
 
+  const jfifTypes = ['jfif', 'pjpeg', 'pjp'];
+  const contentType = jfifTypes.includes(ext) ? 'image/jpeg' : file.type;
+
   const { error } = await supabase.storage.from(bucket).upload(filename, bytes, {
-    contentType: file.type,
+    contentType,
     upsert: false,
   });
 
