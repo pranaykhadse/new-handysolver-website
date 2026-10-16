@@ -60,15 +60,25 @@
 }
 
 /* Whole-box entrance animation */
-@keyframes hr-box-in {
-  from { opacity: 0; transform: scale(0.96) translateY(28px); }
-  to   { opacity: 1; transform: scale(1)    translateY(0); }
+@keyframes hr-wipe {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
 }
-.hr-mission-anim.motion-arrived {
-  animation: hr-box-in 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+@keyframes hr-text-in {
+  from { opacity: 0; transform: translateX(-60px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
-@media (prefers-reduced-motion: reduce) {
-  .hr-mission-anim { animation: none; }
+.hr-mission.hr-armed { clip-path: inset(0 100% 0 0); }
+.hr-mission.hr-armed .hp-wrap > span,
+.hr-mission.hr-armed p { opacity: 0; }
+.hr-mission.hr-play {
+  animation: hr-wipe 0.9s cubic-bezier(0.77, 0, 0.18, 1) both;
+}
+.hr-mission.hr-play .hp-wrap > span {
+  animation: hr-text-in 0.7s 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.hr-mission.hr-play p {
+  animation: hr-text-in 0.8s 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @media (max-width: 760px) {
