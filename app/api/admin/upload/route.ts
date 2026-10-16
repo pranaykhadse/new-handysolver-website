@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
   const allowed = ['jpg', 'jpeg', 'jfif', 'pjpeg', 'pjp', 'png', 'webp', 'avif', 'gif'];
   if (!allowed.includes(ext)) {
-    return NextResponse.json({ error: 'File type not allowed' }, { status: 400 });
+    return NextResponse.json({ error: 'File type not allowed. Use JPG, JPEG, JFIF, PNG, WEBP, AVIF, GIF or HEIC.' }, { status: 400 });
   }
 
   const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;

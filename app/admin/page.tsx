@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import { categoryOf, groupByCategory, labelOf } from '@/lib/gallery-category';
+import { ALLOWED_IMAGE_LABEL, IMAGE_ACCEPT, isAllowedImage } from '@/lib/upload-types';
 
 let _onAuthFailure: (() => void) | null = null;
 
@@ -322,10 +323,10 @@ async function shrinkImage(input: File): Promise<File> {
   } catch { return file; }
 }
 
-async function uploadGalleryFile(file: File, folder: string): Promise<string> {
+async function uploadGalleryFile(file: File, folder: string, bucket = 'gallery'): Promise<string> {
   const form = new FormData();
   form.append('file', await shrinkImage(file));
-  form.append('bucket', 'gallery');
+  form.append('bucket', bucket);
   form.append('folder', folder);
   const res = await fetch('/api/admin/upload', {
     method: 'POST', body: form, credentials: 'same-origin',
@@ -471,19 +472,17 @@ function TeamPhotoUpload({ onUrl }: { onUrl: (url: string) => void }) {
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!isAllowedImage(file)) {
+      toast.error(`${file.name}: not allowed. Use ${ALLOWED_IMAGE_LABEL}.`);
+      if (ref.current) ref.current.value = '';
+      return;
+    }
     setBusy(true);
     try {
-      const form = new FormData();
-      form.append('file', file);
-      form.append('bucket', 'team-photos');
-      const headers: Record<string, string> = { 'X-CSRF-Token': getCsrfToken() };
-      const res = await fetch('/api/admin/upload', { method: 'POST', body: form, headers, credentials: 'same-origin' });
-      const json = await res.json();
-      if (!res.ok) { toast.error(json.error ?? 'Upload failed'); return; }
-      onUrl(json.url);
+      onUrl(await uploadGalleryFile(file, '', 'team-photos'));
       toast.success('Photo uploaded');
-    } catch {
-      toast.error('Upload failed');
+    } catch (err: unknown) {
+      toast.error((err as Error).message);
     } finally {
       setBusy(false);
       if (ref.current) ref.current.value = '';
@@ -492,7 +491,7 @@ function TeamPhotoUpload({ onUrl }: { onUrl: (url: string) => void }) {
 
   return (
     <>
-      <input ref={ref} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
+      <input ref={ref} type="file" accept={IMAGE_ACCEPT} style={{ display: 'none' }} onChange={handleFile} />
       <button
         type="button"
         className="adm-btn adm-btn-outline"
@@ -688,7 +687,13 @@ export default function AdminPage() {
 
   async function galUploadMany(files: FileList | null) {
     if (!files || files.length === 0) return;
-    const list = Array.from(files);
+    const picked = Array.from(files);
+    const list = picked.filter(isAllowedImage);
+    const rejected = picked.filter(f => !isAllowedImage(f));
+    if (rejected.length > 0) {
+      toast.error(`Skipped ${rejected.length} unsupported ${rejected.length === 1 ? 'file' : 'files'} (${rejected.map(f => f.name).slice(0, 3).join(', ')}${rejected.length > 3 ? '...' : ''}). Allowed: ${ALLOWED_IMAGE_LABEL}.`);
+    }
+    if (list.length === 0) { if (galFilesRef.current) galFilesRef.current.value = ''; return; }
     const folder = galFolder ?? 'other';
     let added = 0;
     let order = photos.reduce((m, p) => Math.max(m, p.sort_order), 0);
@@ -710,6 +715,11 @@ export default function AdminPage() {
 
   async function galUploadSingle(file: File | undefined) {
     if (!file) return;
+    if (!isAllowedImage(file)) {
+      toast.error(`${file.name}: not allowed. Use ${ALLOWED_IMAGE_LABEL}.`);
+      if (galSingleRef.current) galSingleRef.current.value = '';
+      return;
+    }
     setGalUploading('Uploading...');
     try {
       const url = await uploadGalleryFile(file, galFolder ?? 'other');
@@ -1191,7 +1201,7 @@ export default function AdminPage() {
             </span>
             {tab === 'gallery' ? (
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <input ref={galFilesRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => galUploadMany(e.target.files)} />
+                <input ref={galFilesRef} type="file" accept={IMAGE_ACCEPT} multiple style={{ display: 'none' }} onChange={e => galUploadMany(e.target.files)} />
                 <button className="adm-add-btn" disabled={galUploading !== null} onClick={() => galFilesRef.current?.click()}>
                   <Upload size={13} /> {galUploading ?? 'Upload photos'}
                 </button>
@@ -1215,6 +1225,7 @@ export default function AdminPage() {
                 </div>
               ) : (
                 <div className="adm-list">
+                  <p className="ga-upload-hint" style={{ marginTop: 0 }}>Upload several photos at once. Allowed image types: {ALLOWED_IMAGE_LABEL}. Other file types can&apos;t be selected.</p>
                   <DraggablePhotoList
                     photos={photos}
                     onReorder={galSaveOrder}
@@ -1339,11 +1350,12 @@ export default function AdminPage() {
               <input className="adm-input" style={{ flex: 1 }} type="url" value={galDraft.src ?? ''} autoFocus
                 onChange={e => { setGalDraft(d => ({ ...d, src: e.target.value })); setGalPreviewErr(false); }}
                 placeholder="https://handysolver.com/assets/images/..." />
-              <input ref={galSingleRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => galUploadSingle(e.target.files?.[0])} />
+              <input ref={galSingleRef} type="file" accept={IMAGE_ACCEPT} style={{ display: 'none' }} onChange={e => galUploadSingle(e.target.files?.[0])} />
               <button type="button" className="adm-btn adm-btn-outline" style={{ whiteSpace: 'nowrap' }} disabled={galUploading !== null} onClick={() => galSingleRef.current?.click()}>
                 {galUploading ?? 'Upload photo'}
               </button>
             </div>
+            <p className="ga-upload-hint">Allowed image types: {ALLOWED_IMAGE_LABEL}. Other file types can&apos;t be selected.</p>
             {galDraft.src && !galPreviewErr && (
               <img className="ga-modal-preview" src={galDraft.src} alt="preview" onError={() => setGalPreviewErr(true)} />
             )}
@@ -1464,6 +1476,7 @@ export default function AdminPage() {
                   <input className="adm-input" style={{ flex: 1 }} value={String(draft.photo_url ?? '')} onChange={(e) => set('photo_url', e.target.value)} placeholder="https://..." />
                   <TeamPhotoUpload onUrl={(url) => set('photo_url', url)} />
                 </div>
+                <p className="ga-upload-hint">Allowed image types: {ALLOWED_IMAGE_LABEL}. Other file types can&apos;t be selected.</p>
                 {draft.photo_url && (
                   <PhotoPreview src={String(draft.photo_url)} />
                 )}

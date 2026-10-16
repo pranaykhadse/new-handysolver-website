@@ -170,3 +170,15 @@ button.ga-crumb:hover { color: var(--adm-ink, #252923); border-color: var(--adm-
 .ga-lb-close { top: 18px; right: 18px; }
 .ga-lb-prev { left: 18px; top: 50%; transform: translateY(-50%); }
 .ga-lb-next { right: 18px; top: 50%; transform: translateY(-50%); }
+
+/* Upload instructions */
+.ga-upload-hint {
+  margin: 8px 0 14px;
+  padding: 8px 12px;
+  border-left: 3px solid #ff7a21;
+  border-radius: 4px;
+  background: var(--adm-surface, #f0ede8);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--adm-muted, #888);
+}
