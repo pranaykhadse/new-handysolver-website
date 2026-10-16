@@ -36,10 +36,7 @@ export default function WorkflowAudit() {
   const heading = useRef<HTMLHeadingElement>(null);
   const scrollArea = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const update = () => setCompact(window.scrollY > 720);
-    update();
-    window.addEventListener('scroll', update, { passive: true });
-    return () => window.removeEventListener('scroll', update);
+    void setCompact;
   }, []);
   useEffect(() => {
     if (!open) return;
