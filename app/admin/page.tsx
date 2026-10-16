@@ -5,7 +5,7 @@ import './gallery/gallery-admin.css';
 import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
 import {
   Plus, Trash2, PencilLine, LogOut, Save, X, GripVertical, Check, AlertTriangle,
-  BellRing, Boxes, ShoppingBag, Building2, HardHat, Factory, FolderOpen, ChevronRight,
+  BellRing, Boxes, ShoppingBag, Building2, HardHat, Factory, FolderOpen, ChevronRight, ChevronLeft, Maximize2, Upload,
   HeartPulse, BriefcaseBusiness, Hotel, Users, Image as ImageIcon, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
@@ -298,11 +298,70 @@ function DraggableList({
   );
 }
 
+/* ── Gallery upload helpers ── */
+async function shrinkImage(file: File): Promise<File> {
+  const canResize = /^image\/(jpeg|png|webp)$/.test(file.type);
+  if (!canResize || file.size < 2.5 * 1024 * 1024) return file;
+  try {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, 2400 / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, 'image/jpeg', 0.85));
+    if (!blob) return file;
+    return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
+  } catch { return file; }
+}
+
+async function uploadGalleryFile(file: File, folder: string): Promise<string> {
+  const form = new FormData();
+  form.append('file', await shrinkImage(file));
+  form.append('bucket', 'gallery');
+  form.append('folder', folder);
+  const res = await fetch('/api/admin/upload', {
+    method: 'POST', body: form, credentials: 'same-origin',
+    headers: { 'X-CSRF-Token': getCsrfToken() },
+  });
+  let json: any = null;
+  try { json = await res.json(); } catch {}
+  if (!res.ok || !json?.url) throw new Error(json?.error ?? 'Upload failed');
+  return json.url as string;
+}
+
+/* ── Photo lightbox (click to maximize, arrows to browse) ── */
+function PhotoLightbox({ items, index, onClose, onNav }: { items: Photo[]; index: number; onClose: () => void; onNav: (i: number) => void }) {
+  const photo = items[index];
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+      else if (e.key === 'ArrowLeft') onNav((index - 1 + items.length) % items.length);
+      else if (e.key === 'ArrowRight') onNav((index + 1) % items.length);
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [index, items.length, onClose, onNav]);
+  if (!photo) return null;
+  return (
+    <div className="ga-lightbox" role="dialog" aria-modal="true" aria-label="Photo preview" onClick={onClose}>
+      <button type="button" className="ga-lb-btn ga-lb-close" aria-label="Close" onClick={onClose}><X size={20} /></button>
+      {items.length > 1 && <button type="button" className="ga-lb-btn ga-lb-prev" aria-label="Previous photo" onClick={e => { e.stopPropagation(); onNav((index - 1 + items.length) % items.length); }}><ChevronLeft size={26} /></button>}
+      <figure className="ga-lb-figure" onClick={e => e.stopPropagation()}>
+        <img src={photo.src} alt={photo.caption || 'Gallery photo'} />
+        <figcaption>{photo.caption || 'No caption'} <small>{index + 1} / {items.length}</small></figcaption>
+      </figure>
+      {items.length > 1 && <button type="button" className="ga-lb-btn ga-lb-next" aria-label="Next photo" onClick={e => { e.stopPropagation(); onNav((index + 1) % items.length); }}><ChevronRight size={26} /></button>}
+    </div>
+  );
+}
+
 /* ── Gallery folders: parent folder -> category folders -> photos ── */
 function DraggablePhotoList({
-  photos, onReorder, onEdit, onDelete,
-}: { photos: Photo[]; onReorder: (list: Photo[]) => void; onEdit: (p: Photo) => void; onDelete: (id: string) => void }) {
-  const [openKey, setOpenKey] = useState<string | null>(null);
+  photos, onReorder, onEdit, onDelete, openKey, onOpenKey,
+}: { photos: Photo[]; onReorder: (list: Photo[]) => void; onEdit: (p: Photo) => void; onDelete: (id: string) => void; openKey: string | null; onOpenKey: (k: string | null) => void }) {
+  const setOpenKey = onOpenKey;
+  const [lightIdx, setLightIdx] = useState<number | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
   const groups = groupByCategory(photos);
@@ -347,7 +406,7 @@ function DraggablePhotoList({
         </div>
       ) : (
         <div className="ga-photo-grid">
-          {open.items.map(photo => (
+          {open.items.map((photo, i) => (
             <figure key={photo.id} className="ga-tile" draggable
               data-dragging={dragId === photo.id ? 'true' : 'false'}
               data-drag-over={overId === photo.id && dragId !== photo.id ? 'true' : 'false'}
@@ -355,15 +414,19 @@ function DraggablePhotoList({
               onDragEnter={() => { if (dragId) setOverId(photo.id); }}
               onDragOver={e => e.preventDefault()} onDragEnd={onDragEnd}
             >
-              <img src={photo.src} alt={photo.caption || 'Gallery photo'} loading="lazy" draggable={false} />
+              <img src={photo.src} alt={photo.caption || 'Gallery photo'} loading="lazy" draggable={false} onClick={() => setLightIdx(i)} style={{ cursor: 'zoom-in' }} />
               <figcaption>{photo.caption || <em>No caption</em>}</figcaption>
               <div className="ga-tile-actions">
+                <button className="adm-icon-btn" aria-label="Maximize" onClick={() => setLightIdx(i)}><Maximize2 size={14} /></button>
                 <button className="adm-icon-btn" aria-label="Edit" onClick={() => onEdit({ ...photo })}><PencilLine size={14} /></button>
                 <button className="adm-icon-btn delete" aria-label="Delete" onClick={() => onDelete(photo.id)}><Trash2 size={14} /></button>
               </div>
             </figure>
           ))}
         </div>
+      )}
+      {open && lightIdx !== null && (
+        <PhotoLightbox items={open.items} index={Math.min(lightIdx, open.items.length - 1)} onClose={() => setLightIdx(null)} onNav={setLightIdx} />
       )}
     </div>
   );
@@ -539,6 +602,10 @@ export default function AdminPage() {
   const [galSaveBusy, setGalSaveBusy] = useState(false);
   const [galConfirmId, setGalConfirmId] = useState<string | null>(null);
   const [galPreviewErr, setGalPreviewErr] = useState(false);
+  const [galFolder, setGalFolder] = useState<string | null>(null);
+  const [galUploading, setGalUploading] = useState<string | null>(null);
+  const galFilesRef = useRef<HTMLInputElement>(null);
+  const galSingleRef = useRef<HTMLInputElement>(null);
   const [showForgot, setShowForgot] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(true);
   const [forgotEmail, setForgotEmail] = useState('');
@@ -598,7 +665,7 @@ export default function AdminPage() {
     setGalSaveBusy(true);
     try {
       const res = galIsNew
-        ? await api('/api/admin/gallery', { method: 'POST', body: JSON.stringify(galDraft) })
+        ? await api('/api/admin/gallery', { method: 'POST', body: JSON.stringify({ ...galDraft, id: galDraft.id ?? newPhotoId(0) }) })
         : await api('/api/admin/gallery', { method: 'PUT', body: JSON.stringify(galDraft) });
       if (!res.ok) throw new Error(res.json?.error ?? 'Save failed');
       toast.success(galIsNew ? 'Photo added' : 'Photo updated');
@@ -606,6 +673,42 @@ export default function AdminPage() {
       loadPhotos();
     } catch (err: unknown) { toast.error((err as Error).message); }
     finally { setGalSaveBusy(false); }
+  }
+
+  function newPhotoId(n: number) { return `g-${Date.now().toString(36)}-${n}-${Math.random().toString(36).slice(2, 6)}`; }
+
+  async function galUploadMany(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    const list = Array.from(files);
+    const folder = galFolder ?? 'other';
+    let added = 0;
+    let order = photos.reduce((m, p) => Math.max(m, p.sort_order), 0);
+    for (let i = 0; i < list.length; i++) {
+      setGalUploading(`Uploading ${i + 1} of ${list.length}...`);
+      try {
+        const src = await uploadGalleryFile(list[i], folder);
+        const caption = list[i].name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim();
+        const res = await api('/api/admin/gallery', { method: 'POST', body: JSON.stringify({ id: newPhotoId(i), src, caption, sort_order: ++order }) });
+        if (!res.ok) throw new Error(res.json?.error ?? 'Save failed');
+        added++;
+      } catch (err: unknown) { toast.error(`${list[i].name}: ${(err as Error).message}`); }
+    }
+    setGalUploading(null);
+    if (galFilesRef.current) galFilesRef.current.value = '';
+    if (added > 0) toast.success(added === 1 ? 'Photo uploaded' : `${added} photos uploaded`);
+    loadPhotos();
+  }
+
+  async function galUploadSingle(file: File | undefined) {
+    if (!file) return;
+    setGalUploading('Uploading...');
+    try {
+      const url = await uploadGalleryFile(file, galFolder ?? 'other');
+      setGalDraft(d => ({ ...d, src: url }));
+      setGalPreviewErr(false);
+      toast.success('Photo uploaded');
+    } catch (err: unknown) { toast.error((err as Error).message); }
+    finally { setGalUploading(null); if (galSingleRef.current) galSingleRef.current.value = ''; }
   }
 
   async function galDelete(id: string) {
@@ -1078,9 +1181,15 @@ export default function AdminPage() {
               <span className="adm-count-badge">{tab === 'gallery' ? photos.length : tab === 'applications' ? applications.length : currentRows.length}</span>
             </span>
             {tab === 'gallery' ? (
-              <button className="adm-add-btn" onClick={() => { setGalIsNew(true); setGalDraft({ src: '', caption: '', sort_order: photos.length + 1 }); setGalPreviewErr(false); }}>
-                <Plus size={13} /> Add photo
-              </button>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input ref={galFilesRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => galUploadMany(e.target.files)} />
+                <button className="adm-add-btn" disabled={galUploading !== null} onClick={() => galFilesRef.current?.click()}>
+                  <Upload size={13} /> {galUploading ?? 'Upload photos'}
+                </button>
+                <button className="adm-add-btn" onClick={() => { setGalIsNew(true); setGalDraft({ src: '', caption: '', sort_order: photos.length + 1 }); setGalPreviewErr(false); }}>
+                  <Plus size={13} /> Add by URL
+                </button>
+              </div>
             ) : tab === 'applications' ? null : (
               <button className="adm-add-btn" onClick={() => setDraft({ sort_order: currentRows.length + 1, is_active: true })}>
                 <Plus size={13} /> Add new
@@ -1093,7 +1202,7 @@ export default function AdminPage() {
               : photos.length === 0 ? (
                 <div className="adm-empty">
                   <ImageIcon size={36} strokeWidth={1.2} style={{ opacity: .3 }} />
-                  <p>No photos yet. Click "Add photo" to get started.</p>
+                  <p>No photos yet. Click "Upload photos" to get started.</p>
                 </div>
               ) : (
                 <div className="adm-list">
@@ -1102,6 +1211,8 @@ export default function AdminPage() {
                     onReorder={galSaveOrder}
                     onEdit={(p) => { setGalIsNew(false); setGalDraft({ ...p }); setGalPreviewErr(false); }}
                     onDelete={id => setGalConfirmId(id)}
+                    openKey={galFolder}
+                    onOpenKey={setGalFolder}
                   />
                 </div>
               )
@@ -1215,9 +1326,15 @@ export default function AdminPage() {
         <Modal title={galIsNew ? 'Add photo' : 'Edit photo'} onClose={() => setGalDraft(null)} onSave={galSave} saveBusy={galSaveBusy}>
           <div className="adm-field">
             <label className="adm-label">Image URL <span style={{ color: '#ff4d4d', fontSize: 11 }}>*</span></label>
-            <input className="adm-input" type="url" value={galDraft.src ?? ''} autoFocus
-              onChange={e => { setGalDraft(d => ({ ...d, src: e.target.value })); setGalPreviewErr(false); }}
-              placeholder="https://handysolver.com/assets/images/..." />
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input className="adm-input" style={{ flex: 1 }} type="url" value={galDraft.src ?? ''} autoFocus
+                onChange={e => { setGalDraft(d => ({ ...d, src: e.target.value })); setGalPreviewErr(false); }}
+                placeholder="https://handysolver.com/assets/images/..." />
+              <input ref={galSingleRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => galUploadSingle(e.target.files?.[0])} />
+              <button type="button" className="adm-btn adm-btn-outline" style={{ whiteSpace: 'nowrap' }} disabled={galUploading !== null} onClick={() => galSingleRef.current?.click()}>
+                {galUploading ?? 'Upload photo'}
+              </button>
+            </div>
             {galDraft.src && !galPreviewErr && (
               <img className="ga-modal-preview" src={galDraft.src} alt="preview" onError={() => setGalPreviewErr(true)} />
             )}

@@ -9,7 +9,7 @@ const LABELS: Record<string, string> = {
 };
 
 export function categoryOf(src: string): string {
-  const m = src.match(/\/images\/([^/]+)\/[^/]+$/);
+  const m = src.match(/\/(?:images|object\/public\/gallery)\/([^/]+)\/[^/]+$/);
   return m ? m[1].toLowerCase() : 'other';
 }
 

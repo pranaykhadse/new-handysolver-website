@@ -138,3 +138,35 @@ button.ga-crumb:hover { color: var(--adm-ink, #252923); border-color: var(--adm-
 .ga-tile-actions .adm-icon-btn { background: #000a; color: #fff; backdrop-filter: blur(4px); }
 @media (hover: none) { .ga-tile figcaption, .ga-tile-actions { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .ga-folder-body, .ga-tile { transition: none; } }
+
+/* Lightbox */
+.ga-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, .88);
+  cursor: zoom-out;
+}
+.ga-lb-figure { margin: 0; max-width: 88vw; cursor: default; text-align: center; }
+.ga-lb-figure img { display: block; max-width: 88vw; max-height: 82vh; object-fit: contain; border-radius: 10px; box-shadow: 0 8px 40px #000a; }
+.ga-lb-figure figcaption { margin-top: 12px; font-size: 13px; color: #e8e2d8; }
+.ga-lb-figure figcaption small { margin-left: 10px; color: #9b9387; }
+.ga-lb-btn {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 44px; height: 44px;
+  border: 1px solid #ffffff40;
+  border-radius: 50%;
+  background: #00000080;
+  color: #fff;
+  cursor: pointer;
+  transition: background .2s, border-color .2s;
+}
+.ga-lb-btn:hover { background: #ff7a21; border-color: #ff7a21; color: #090909; }
+.ga-lb-close { top: 18px; right: 18px; }
+.ga-lb-prev { left: 18px; top: 50%; transform: translateY(-50%); }
+.ga-lb-next { right: 18px; top: 50%; transform: translateY(-50%); }
