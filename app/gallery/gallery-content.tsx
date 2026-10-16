@@ -2,23 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import { groupByCategory, labelOf } from '@/lib/gallery-category';
 import PlayfulHeader from '../playful-header';
 import { HomeMotion } from '../playful-interactions';
 import '../playful-home.css';
 import './gallery.css';
 
 type Photo = { id: string; sort_order: number; src: string; caption: string };
-
-const LABELS: Record<string, string> = { birthday: 'Birthdays', diwali: 'Diwali', sports: 'Sports', farewell: 'Farewells', starbucks: 'Celebrating success', 'rock-n-roll': 'Rock n roll', other: 'More moments' };
-
-function categoryOf(src: string) {
-  const m = src.match(/\/images\/([^/]+)\/[^/]+$/);
-  return m ? m[1].toLowerCase() : 'other';
-}
-
-function labelOf(key: string) {
-  return LABELS[key] ?? key.replace(/[-_]+/g, ' ').replace(/^./, c => c.toUpperCase());
-}
 
 const ROTATIONS = [-4, 3, -2, 5, -3, 2, -5, 4, -1, 3, -4, 2, 5, -3, 1, -2, 4, -5, 3, -1];
 
@@ -35,13 +25,7 @@ export default function GalleryContent() {
       .finally(() => setLoading(false));
   }, []);
 
-  const groups: { key: string; photos: Photo[] }[] = [];
-  photos.forEach(photo => {
-    const key = categoryOf(photo.src);
-    const group = groups.find(g => g.key === key);
-    if (group) group.photos.push(photo); else groups.push({ key, photos: [photo] });
-  });
-  groups.sort((a, b) => Number(a.key === 'other') - Number(b.key === 'other'));
+  const groups = groupByCategory(photos).map(g => ({ key: g.key, photos: g.items }));
   const visible = active === 'all' ? groups : groups.filter(g => g.key === active);
 
   return (

@@ -9,6 +9,7 @@ import {
   HeartPulse, BriefcaseBusiness, Hotel, Users, Image as ImageIcon, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
+import { categoryOf, groupByCategory, labelOf } from '@/lib/gallery-category';
 
 let _onAuthFailure: (() => void) | null = null;
 
@@ -297,47 +298,58 @@ function DraggableList({
   );
 }
 
-/* ── Gallery drag-and-drop list ── */
+/* ── Gallery collage, grouped by category ── */
 function DraggablePhotoList({
   photos, onReorder, onEdit, onDelete,
 }: { photos: Photo[]; onReorder: (list: Photo[]) => void; onEdit: (p: Photo) => void; onDelete: (id: string) => void }) {
-  const [draggingIdx, setDraggingIdx] = useState<number | null>(null);
-  const [overIdx, setOverIdx] = useState<number | null>(null);
-  const dragRef = useRef<number | null>(null);
-  function onDragStart(i: number) { dragRef.current = i; setDraggingIdx(i); }
-  function onDragEnter(i: number) { setOverIdx(i); }
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
+  const groups = groupByCategory(photos);
+
   function onDragEnd() {
-    if (dragRef.current !== null && overIdx !== null && dragRef.current !== overIdx) {
-      const updated = [...photos];
-      const [moved] = updated.splice(dragRef.current, 1);
-      updated.splice(overIdx, 0, moved);
-      onReorder(updated.map((p, i) => ({ ...p, sort_order: i + 1 })));
+    if (dragId && overId && dragId !== overId) {
+      const from = photos.find(p => p.id === dragId);
+      const to = photos.find(p => p.id === overId);
+      if (from && to && categoryOf(from.src) === categoryOf(to.src)) {
+        const key = categoryOf(from.src);
+        const slots = photos.map((p, i) => (categoryOf(p.src) === key ? i : -1)).filter(i => i >= 0);
+        const inGroup = slots.map(i => photos[i]);
+        const [moved] = inGroup.splice(inGroup.findIndex(p => p.id === dragId), 1);
+        inGroup.splice(inGroup.findIndex(p => p.id === overId), 0, moved);
+        const next = [...photos];
+        slots.forEach((slot, n) => { next[slot] = inGroup[n]; });
+        onReorder(next.map((p, i) => ({ ...p, sort_order: i + 1 })));
+      }
     }
-    dragRef.current = null; setDraggingIdx(null); setOverIdx(null);
+    setDragId(null); setOverId(null);
   }
+
   return (
-    <>
-      {photos.map((photo, i) => (
-        <div key={photo.id} className="adm-row" draggable
-          data-dragging={draggingIdx === i ? 'true' : 'false'}
-          data-drag-over={overIdx === i && draggingIdx !== i ? 'true' : 'false'}
-          onDragStart={() => onDragStart(i)} onDragEnter={() => onDragEnter(i)}
-          onDragOver={e => e.preventDefault()} onDragEnd={onDragEnd}
-        >
-          <span className="adm-drag-handle" title="Drag to reorder"><GripVertical size={14} /></span>
-          <span className="adm-order-badge">{i + 1}</span>
-          <div className="ga-row-thumb"><img src={photo.src} alt={photo.caption || 'Gallery photo'} /></div>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <p className="adm-row-name">{photo.caption || <em style={{ opacity: .5 }}>No caption</em>}</p>
-            <p className="adm-row-meta" style={{ wordBreak: 'break-all' }}>{photo.src}</p>
+    <div className="ga-collage-groups">
+      {groups.map(group => (
+        <section key={group.key} className="ga-group" aria-label={labelOf(group.key)}>
+          <h3 className="ga-group-title">{labelOf(group.key)}<small>{group.items.length} {group.items.length === 1 ? 'photo' : 'photos'}</small></h3>
+          <div className="ga-collage">
+            {group.items.map(photo => (
+              <figure key={photo.id} className="ga-tile" draggable
+                data-dragging={dragId === photo.id ? 'true' : 'false'}
+                data-drag-over={overId === photo.id && dragId !== photo.id ? 'true' : 'false'}
+                onDragStart={() => setDragId(photo.id)}
+                onDragEnter={() => { if (dragId && categoryOf(photo.src) === categoryOf(photos.find(p => p.id === dragId)?.src ?? '')) setOverId(photo.id); }}
+                onDragOver={e => e.preventDefault()} onDragEnd={onDragEnd}
+              >
+                <img src={photo.src} alt={photo.caption || 'Gallery photo'} loading="lazy" draggable={false} />
+                <figcaption>{photo.caption || <em>No caption</em>}</figcaption>
+                <div className="ga-tile-actions">
+                  <button className="adm-icon-btn" aria-label="Edit" onClick={() => onEdit({ ...photo })}><PencilLine size={14} /></button>
+                  <button className="adm-icon-btn delete" aria-label="Delete" onClick={() => onDelete(photo.id)}><Trash2 size={14} /></button>
+                </div>
+              </figure>
+            ))}
           </div>
-          <div className="adm-row-actions">
-            <button className="adm-icon-btn" aria-label="Edit" onClick={() => onEdit({ ...photo })}><PencilLine size={14} /></button>
-            <button className="adm-icon-btn delete" aria-label="Delete" onClick={() => onDelete(photo.id)}><Trash2 size={14} /></button>
-          </div>
-        </div>
+        </section>
       ))}
-    </>
+    </div>
   );
 }
 
