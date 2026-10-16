@@ -12,7 +12,7 @@ type Photo = { id: string; sort_order: number; src: string; caption: string };
 const LABELS: Record<string, string> = { birthday: 'Birthdays', diwali: 'Diwali', sports: 'Sports', farewell: 'Farewells', starbucks: 'Celebrating success', 'rock-n-roll': 'Rock n roll', other: 'More moments' };
 
 function categoryOf(src: string) {
-  const m = src.match(//images/([^/]+)/[^/]+$/);
+  const m = src.match(/\/images\/([^/]+)\/[^/]+$/);
   return m ? m[1].toLowerCase() : 'other';
 }
 
