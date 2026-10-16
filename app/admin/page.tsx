@@ -210,6 +210,7 @@ function DraggableList({
   onDelete,
   onToggleActive,
   showIcon,
+  metaField,
 }: {
   rows: Row[];
   onReorder: (reordered: Row[]) => void;
@@ -217,6 +218,7 @@ function DraggableList({
   onDelete: (id: string) => void;
   onToggleActive?: (id: string, active: boolean) => void;
   showIcon?: boolean;
+  metaField?: string;
 }) {
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const [overIndex, setOverIndex] = useState<number | null>(null);
@@ -266,7 +268,7 @@ function DraggableList({
           <div style={{ minWidth: 0, flex: 1 }}>
             <p className="adm-row-name">{String(row.title ?? row.name ?? row.id)}</p>
             <p className="adm-row-meta">
-              {String(row.id)}
+              {metaField ? (row[metaField] ? String(row[metaField]) : '') : String(row.id)}
               {row.job_type ? ' · ' + String(row.job_type) : ''}
             </p>
           </div>
@@ -1145,6 +1147,7 @@ export default function AdminPage() {
                   onDelete={remove}
                   onToggleActive={tab === 'jobs' ? toggleActive : undefined}
                   showIcon={tab === 'jobs'}
+                  metaField={tab === 'team' ? 'surname' : undefined}
                 />
               </>
             )}
