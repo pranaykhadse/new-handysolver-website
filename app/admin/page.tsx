@@ -339,6 +339,49 @@ function DraggablePhotoList({
   );
 }
 
+/* ── Team photo upload ── */
+function TeamPhotoUpload({ onUrl }: { onUrl: (url: string) => void }) {
+  const ref = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBusy(true);
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      form.append('bucket', 'team-photos');
+      const headers: Record<string, string> = { 'X-CSRF-Token': getCsrfToken() };
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: form, headers, credentials: 'same-origin' });
+      const json = await res.json();
+      if (!res.ok) { toast.error(json.error ?? 'Upload failed'); return; }
+      onUrl(json.url);
+      toast.success('Photo uploaded');
+    } catch {
+      toast.error('Upload failed');
+    } finally {
+      setBusy(false);
+      if (ref.current) ref.current.value = '';
+    }
+  }
+
+  return (
+    <>
+      <input ref={ref} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
+      <button
+        type="button"
+        className="adm-btn adm-btn-outline"
+        style={{ whiteSpace: 'nowrap', minWidth: 110 }}
+        disabled={busy}
+        onClick={() => ref.current?.click()}
+      >
+        {busy ? 'Uploading…' : '⬆ Upload photo'}
+      </button>
+    </>
+  );
+}
+
 /* ── Modal form ── */
 function Modal({
   title,
@@ -1233,7 +1276,13 @@ export default function AdminPage() {
                 </Field>
               </Field2>
               <Field label="Photo URL">
-                <input className="adm-input" value={String(draft.photo_url ?? '')} onChange={(e) => set('photo_url', e.target.value)} placeholder="https://..." />
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <input className="adm-input" style={{ flex: 1 }} value={String(draft.photo_url ?? '')} onChange={(e) => set('photo_url', e.target.value)} placeholder="https://..." />
+                  <TeamPhotoUpload onUrl={(url) => set('photo_url', url)} />
+                </div>
+                {draft.photo_url && (
+                  <img src={String(draft.photo_url)} alt="Preview" style={{ marginTop: 10, width: 80, height: 80, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--adm-border)' }} />
+                )}
               </Field>
             </>
           )}
