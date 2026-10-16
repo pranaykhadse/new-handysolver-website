@@ -59,23 +59,20 @@
   }
 }
 
-/* Scroll-triggered slide-in animation */
-.hr-mission-wrap {
-  opacity: 0;
-  transform: translateY(22px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+/* Whole-box entrance animation */
+@keyframes hr-box-in {
+  from { opacity: 0; transform: scale(0.96) translateY(28px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
 }
-.hr-mission-wrap.hr-mission-in {
-  opacity: 1;
-  transform: translateY(0);
+.hr-mission-anim {
+  animation: hr-box-in 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-play-state: paused;
 }
-.hr-count {
-  display: inline-block;
-  min-width: 2.2ch;
-  font-variant-numeric: tabular-nums;
+.hr-mission-anim.motion-arrived {
+  animation-play-state: running;
 }
 @media (prefers-reduced-motion: reduce) {
-  .hr-mission-wrap { opacity: 1; transform: none; transition: none; }
+  .hr-mission-anim { animation: none; }
 }
 
 @media (max-width: 760px) {
