@@ -9,11 +9,23 @@ import './gallery.css';
 
 type Photo = { id: string; sort_order: number; src: string; caption: string };
 
+const LABELS: Record<string, string> = { birthday: 'Birthdays', diwali: 'Diwali', sports: 'Sports', farewell: 'Farewells', starbucks: 'Celebrating success', 'rock-n-roll': 'Rock n roll', other: 'More moments' };
+
+function categoryOf(src: string) {
+  const m = src.match(//images/([^/]+)/[^/]+$/);
+  return m ? m[1].toLowerCase() : 'other';
+}
+
+function labelOf(key: string) {
+  return LABELS[key] ?? key.replace(/[-_]+/g, ' ').replace(/^./, c => c.toUpperCase());
+}
+
 const ROTATIONS = [-4, 3, -2, 5, -3, 2, -5, 4, -1, 3, -4, 2, 5, -3, 1, -2, 4, -5, 3, -1];
 
 export default function GalleryContent() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [active, setActive] = useState('all');
 
   useEffect(() => {
     fetch('/api/gallery')
@@ -22,6 +34,15 @@ export default function GalleryContent() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  const groups: { key: string; photos: Photo[] }[] = [];
+  photos.forEach(photo => {
+    const key = categoryOf(photo.src);
+    const group = groups.find(g => g.key === key);
+    if (group) group.photos.push(photo); else groups.push({ key, photos: [photo] });
+  });
+  groups.sort((a, b) => Number(a.key === 'other') - Number(b.key === 'other'));
+  const visible = active === 'all' ? groups : groups.filter(g => g.key === active);
 
   return (
     <div className="handy-home gl-page">
@@ -47,23 +68,27 @@ export default function GalleryContent() {
               ))}
             </div>
           ) : (
-            <div className="gl-grid">
-              {photos.map((photo, idx) => (
-                <figure
-                  key={photo.id}
-                  className="gl-photo"
-                  style={{ transform: `rotate(${ROTATIONS[idx % ROTATIONS.length]}deg)` }}
-                >
-                  <img
-                    src={photo.src}
-                    alt={photo.caption}
-                    loading={idx < 6 ? 'eager' : 'lazy'}
-                    decoding="async"
-                  />
-                  <figcaption>{photo.caption}</figcaption>
-                </figure>
+            <>
+              <div className="gl-filters" role="group" aria-label="Filter photos by category">
+                <button type="button" className="gl-chip" aria-pressed={active === 'all'} onClick={() => setActive('all')}>All <small>{photos.length}</small></button>
+                {groups.map(g => (
+                  <button type="button" key={g.key} className="gl-chip" aria-pressed={active === g.key} onClick={() => setActive(g.key)}>{labelOf(g.key)} <small>{g.photos.length}</small></button>
+                ))}
+              </div>
+              {visible.map(group => (
+                <section key={group.key} className="gl-group" aria-label={labelOf(group.key)}>
+                  <h2 className="gl-group-title">{labelOf(group.key)}<small>{group.photos.length} {group.photos.length === 1 ? 'photo' : 'photos'}</small></h2>
+                  <div className="gl-grid">
+                    {group.photos.map((photo, idx) => (
+                      <figure key={photo.id} className="gl-photo" style={{ transform: `rotate(${ROTATIONS[idx % ROTATIONS.length]}deg)` }}>
+                        <img src={photo.src} alt={photo.caption} loading={idx < 4 ? 'eager' : 'lazy'} decoding="async" />
+                        <figcaption>{photo.caption}</figcaption>
+                      </figure>
+                    ))}
+                  </div>
+                </section>
               ))}
-            </div>
+            </>
           )}
         </div>
       </main>
