@@ -54,7 +54,7 @@ export default function CaseStudyShowcase(){
   }
   return <section className="cs-section" aria-labelledby="cs-title">
     <div className="hp-wrap">
-      <div className="cs-heading hp-reveal"><div><h2 id="cs-title">Real problems.<br/><em>Useful outcomes.</em></h2></div><p>{studies.length} quick examples of everyday business friction made simpler. Pick one that feels familiar.</p></div>
+      <div className="cs-heading hp-reveal"><div><h2 id="cs-title">Real problems.<br/><em>Useful outcomes.</em></h2></div></div>
       <Tabs className="cs-tabs" value={current??studies[0].id} onValueChange={choose}>
         <div className="cs-browse-head"><span>Browse all {studies.length}</span><div><small>Scroll to explore</small><button type="button" onClick={()=>list.current?.scrollBy({left:-330,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})} aria-label="Previous case studies"><ArrowLeft/></button><button type="button" onClick={()=>list.current?.scrollBy({left:330,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})} aria-label="More case studies"><ArrowRight/></button></div></div>
         <div className="cs-list-shell"><TabsList ref={list} className="cs-list" aria-label="Choose a case study">{studies.map(({id,number,label,metric,title,icon})=>{const Icon=ICONS[icon]??Boxes;return <TabsTrigger className="cs-card" value={id} key={id} onClick={()=>choose(id)}>
