@@ -299,7 +299,14 @@ function DraggableList({
 }
 
 /* ── Gallery upload helpers ── */
-async function shrinkImage(file: File): Promise<File> {
+async function shrinkImage(input: File): Promise<File> {
+  let file = input;
+  if (/^image\/hei[cf]$/.test(file.type) || /\.hei[cf]$/i.test(file.name)) {
+    const { default: heic2any } = await import('heic2any');
+    const out = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 });
+    const blob = Array.isArray(out) ? out[0] : out;
+    file = new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
+  }
   const canResize = /^image\/(jpeg|png|webp)$/.test(file.type);
   if (!canResize || file.size < 2.5 * 1024 * 1024) return file;
   try {
@@ -326,7 +333,9 @@ async function uploadGalleryFile(file: File, folder: string): Promise<string> {
   });
   let json: any = null;
   try { json = await res.json(); } catch {}
-  if (!res.ok || !json?.url) throw new Error(json?.error ?? 'Upload failed');
+  if (!res.ok || !json?.url) {
+    throw new Error(json?.error ?? (res.status === 413 ? 'File is too large' : `Upload failed (${res.status})`));
+  }
   return json.url as string;
 }
 
