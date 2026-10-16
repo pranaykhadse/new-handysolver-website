@@ -1,4 +1,4 @@
-.cs-browse-head{display:flex;justify-content:space-between;align-items:center;margin:0 2px 12px;color:#fffaf3}
+.cs-browse-head{display:flex;justify-content:flex-end;align-items:center;margin:0 2px 12px;color:#fffaf3}
 .cs-browse-head span{font-size:14px;text-transform:uppercase;letter-spacing:.07em}
 .cs-browse-head small{font-size:12px;color:#938b82}
 .cs-section .cs-list{justify-content:flex-start;align-items:stretch}
