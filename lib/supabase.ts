@@ -58,6 +58,7 @@ export type DbGalleryPhoto = {
   sort_order: number;
   src: string;
   caption: string;
+  category?: string | null;
 };
 
 export type DbJobPost = {

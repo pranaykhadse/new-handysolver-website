@@ -7,8 +7,13 @@ export async function GET() {
       .select("*")
       .order("sort_order", { ascending: true });
     if (error) throw error;
-    return Response.json({ photos: data ?? [] });
+    let folders: { slug: string; label: string }[] = [];
+    try {
+      const res = await getSupabase().from("gallery_folders").select("slug,label");
+      if (!res.error && res.data) folders = res.data;
+    } catch { /* folders table not created yet */ }
+    return Response.json({ photos: data ?? [], folders });
   } catch (error) {
-    return Response.json({ photos: [] });
+    return Response.json({ photos: [], folders: [] });
   }
 }

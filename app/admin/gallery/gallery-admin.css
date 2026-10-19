@@ -182,3 +182,115 @@ button.ga-crumb:hover { color: var(--adm-ink, #252923); border-color: var(--adm-
   line-height: 1.5;
   color: var(--adm-muted, #888);
 }
+
+/* Folder management: new folder card, selection, move dialog */
+.ga-folder-wrap { position: relative; }
+.ga-folder-del { position: absolute; top: 18px; right: 8px; z-index: 2; }
+.ga-folder-empty {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--adm-line, #e0dbd3);
+  border-radius: 5px;
+  font-size: 11px;
+  color: var(--adm-muted, #888);
+}
+.ga-folder-new .ga-folder-body {
+  align-items: center;
+  justify-content: center;
+  min-height: 132px;
+  border-style: dashed;
+  border-top-style: dashed;
+  border-top-color: var(--adm-line, #e0dbd3);
+  color: var(--adm-muted, #888);
+  background: transparent;
+}
+.ga-folder-new:hover .ga-folder-body { color: #ff7a21; border-color: #ff7a21; }
+.ga-folder-new { margin-top: 12px; }
+
+.ga-selbar {
+  position: sticky;
+  top: 8px;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border: 1px solid #ff7a21;
+  border-radius: 10px;
+  background: var(--adm-surface, #f0ede8);
+  font-size: 13px;
+}
+.ga-selbar strong { margin-right: auto; }
+.ga-selbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid var(--adm-line, #e0dbd3);
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.ga-selbtn:hover { border-color: #ff7a21; }
+.ga-selbtn-primary { background: #ff7a21; border-color: #ff7a21; color: #090909; font-weight: 600; }
+
+.ga-tile-check {
+  position: absolute;
+  top: 8px; left: 8px;
+  display: grid;
+  place-items: center;
+  width: 26px; height: 26px;
+  border-radius: 7px;
+  background: #000a;
+  opacity: 0;
+  transition: opacity .2s;
+  cursor: pointer;
+}
+.ga-tile-check input { width: 15px; height: 15px; accent-color: #ff7a21; cursor: pointer; }
+.ga-tile:hover .ga-tile-check, .ga-tile:focus-within .ga-tile-check, .ga-tile[data-selected="true"] .ga-tile-check { opacity: 1; }
+.ga-tile[data-selected="true"] { outline: 2px solid #ff7a21; outline-offset: 1px; }
+@media (hover: none) { .ga-tile-check { opacity: 1; } }
+
+.ga-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, .6);
+}
+.ga-dialog {
+  width: min(440px, 100%);
+  max-height: 88vh;
+  overflow: auto;
+  padding: 22px;
+  border: 1px solid var(--adm-line, #e0dbd3);
+  border-radius: 14px;
+  background: var(--adm-card, var(--adm-surface, #fff));
+  color: var(--adm-ink, inherit);
+  box-shadow: 0 20px 60px #0006;
+}
+.ga-dialog h3 { margin: 0 0 14px; font-size: 16px; }
+.ga-dialog-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+.ga-dialog-opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--adm-line, #e0dbd3);
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.ga-dialog-opt:hover { border-color: #ff7a21; }
+.ga-dialog-opt input { accent-color: #ff7a21; }
+.ga-dialog-opt span { display: inline-flex; align-items: center; gap: 7px; flex: 1; }
+.ga-dialog-opt small { color: var(--adm-muted, #888); }
+.ga-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.ga-dialog-list + .ga-dialog-actions { margin-top: 0; }

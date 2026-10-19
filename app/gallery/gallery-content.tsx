@@ -2,30 +2,31 @@
 
 import { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { groupByCategory, labelOf } from '@/lib/gallery-category';
+import { groupByCategory, labelOf, type FolderMeta } from '@/lib/gallery-category';
 import PlayfulHeader from '../playful-header';
 import { HomeMotion } from '../playful-interactions';
 import '../playful-home.css';
 import './gallery.css';
 
-type Photo = { id: string; sort_order: number; src: string; caption: string };
+type Photo = { id: string; sort_order: number; src: string; caption: string; category?: string | null };
 
 const ROTATIONS = [-4, 3, -2, 5, -3, 2, -5, 4, -1, 3, -4, 2, 5, -3, 1, -2, 4, -5, 3, -1];
 
 export default function GalleryContent() {
   const [photos, setPhotos] = useState<Photo[]>([]);
+  const [folders, setFolders] = useState<FolderMeta[]>([]);
   const [loading, setLoading] = useState(true);
   const [active, setActive] = useState('all');
 
   useEffect(() => {
     fetch('/api/gallery')
       .then(r => r.json())
-      .then(d => setPhotos(d.photos ?? []))
+      .then(d => { setPhotos(d.photos ?? []); setFolders(d.folders ?? []); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
-  const groups = groupByCategory(photos).map(g => ({ key: g.key, photos: g.items }));
+  const groups = groupByCategory(photos, folders).map(g => ({ key: g.key, photos: g.items }));
   const visible = active === 'all' ? groups : groups.filter(g => g.key === active);
 
   return (
@@ -56,12 +57,12 @@ export default function GalleryContent() {
               <div className="gl-filters" role="group" aria-label="Filter photos by category">
                 <button type="button" className="gl-chip" aria-pressed={active === 'all'} onClick={() => setActive('all')}>All <small>{photos.length}</small></button>
                 {groups.map(g => (
-                  <button type="button" key={g.key} className="gl-chip" aria-pressed={active === g.key} onClick={() => setActive(g.key)}>{labelOf(g.key)} <small>{g.photos.length}</small></button>
+                  <button type="button" key={g.key} className="gl-chip" aria-pressed={active === g.key} onClick={() => setActive(g.key)}>{labelOf(g.key, folders)} <small>{g.photos.length}</small></button>
                 ))}
               </div>
               {visible.map(group => (
-                <section key={group.key} className="gl-group" aria-label={labelOf(group.key)}>
-                  <h2 className="gl-group-title">{labelOf(group.key)}<small>{group.photos.length} {group.photos.length === 1 ? 'photo' : 'photos'}</small></h2>
+                <section key={group.key} className="gl-group" aria-label={labelOf(group.key, folders)}>
+                  <h2 className="gl-group-title">{labelOf(group.key, folders)}<small>{group.photos.length} {group.photos.length === 1 ? 'photo' : 'photos'}</small></h2>
                   <div className="gl-grid">
                     {group.photos.map((photo, idx) => (
                       <figure key={photo.id} className="gl-photo" style={{ transform: `rotate(${ROTATIONS[idx % ROTATIONS.length]}deg)` }}>
