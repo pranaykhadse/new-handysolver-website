@@ -392,3 +392,37 @@ button.ga-crumb:hover { color: var(--adm-ink, #252923); border-color: var(--adm-
 .ga-folder-thumbs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; height: 62px; }
 .ga-folder-thumbs img { width: 100%; height: 100%; min-width: 0; object-fit: cover; border-radius: 5px; }
 .ga-folder-thumbs .ga-folder-empty { grid-column: 1 / -1; }
+
+/* Folder order/rename tools and hidden photos */
+.ga-folder-wrap[draggable="true"] { cursor: grab; }
+.ga-folder-wrap[data-dragging="true"] { opacity: .35; }
+.ga-folder-wrap[data-drag-over="true"] .ga-folder-body { border-color: #ff7a21; box-shadow: 0 0 0 2px #ff7a2155; }
+.ga-folder-tools {
+  position: absolute;
+  top: 18px; right: 8px;
+  z-index: 2;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity .2s;
+}
+.ga-folder-wrap:hover .ga-folder-tools, .ga-folder-wrap:focus-within .ga-folder-tools { opacity: 1; }
+.ga-folder-tools .adm-icon-btn { background: #000a; color: #fff; backdrop-filter: blur(4px); }
+.ga-folder-tools .adm-icon-btn:disabled { opacity: .35; cursor: default; }
+@media (hover: none) { .ga-folder-tools { opacity: 1; } }
+.ga-crumbs .adm-icon-btn { margin-left: -2px; }
+.ga-tile[data-inactive="true"] img { opacity: .4; filter: grayscale(1); }
+.ga-tile-badge {
+  position: absolute;
+  bottom: 8px; left: 8px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #090909d9;
+  color: #ffad71;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.ga-tile:hover .ga-tile-badge { opacity: 0; }

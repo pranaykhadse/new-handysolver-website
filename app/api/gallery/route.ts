@@ -7,12 +7,15 @@ export async function GET() {
       .select("*")
       .order("sort_order", { ascending: true });
     if (error) throw error;
-    let folders: { slug: string; label: string }[] = [];
+    // Hidden photos never reach the public site. Rows without the flag (older databases) count as visible.
+    const photos = (data ?? []).filter((p: { is_active?: boolean }) => p.is_active !== false);
+
+    let folders: { slug: string; label: string; sort_order?: number }[] = [];
     try {
-      const res = await getSupabase().from("gallery_folders").select("slug,label");
-      if (!res.error && res.data) folders = res.data;
+      const res = await getSupabase().from("gallery_folders").select("*");
+      if (!res.error && res.data) folders = res.data.map((f: { slug: string; label: string; sort_order?: number }) => ({ slug: f.slug, label: f.label, sort_order: f.sort_order }));
     } catch { /* folders table not created yet */ }
-    return Response.json({ photos: data ?? [], folders });
+    return Response.json({ photos, folders });
   } catch (error) {
     return Response.json({ photos: [], folders: [] });
   }

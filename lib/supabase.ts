@@ -59,6 +59,7 @@ export type DbGalleryPhoto = {
   src: string;
   caption: string;
   category?: string | null;
+  is_active?: boolean;
 };
 
 export type DbJobPost = {

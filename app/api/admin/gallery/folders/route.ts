@@ -4,9 +4,10 @@ import { isAdminRequest, isCsrfValid, unauthorized, forbidden, badRequest, serve
 export async function GET(request: Request) {
   if (!(await isAdminRequest(request))) return unauthorized();
   try {
-    const { data, error } = await getSupabase().from("gallery_folders").select("*").order("created_at", { ascending: true });
+    const { data, error } = await getSupabase().from("gallery_folders").select("*");
     if (error) throw error;
-    return Response.json({ rows: data ?? [] });
+    const rows = [...(data ?? [])].sort((a, b) => (a.sort_order || 1e6) - (b.sort_order || 1e6) || String(a.created_at).localeCompare(String(b.created_at)));
+    return Response.json({ rows });
   } catch (error) {
     return serverError(error);
   }
@@ -19,9 +20,34 @@ export async function POST(request: Request) {
     const body = await request.json();
     const slug = String(body?.slug ?? "").trim();
     const label = String(body?.label ?? "").trim();
-    if (!/^[a-z0-9-]{1,40}$/.test(slug)) return badRequest("Invalid folder name");
+    if (!/^[a-z0-9_-]{1,40}$/.test(slug)) return badRequest("Invalid folder name");
     if (!label || label.length > 60) return badRequest("Folder name is required (max 60 characters)");
     const { error } = await getSupabase().from("gallery_folders").insert({ slug, label });
+    if (error) throw error;
+    return Response.json({ ok: true });
+  } catch (error) {
+    return serverError(error);
+  }
+}
+
+export async function PUT(request: Request) {
+  if (!(await isAdminRequest(request))) return unauthorized();
+  if (!(await isCsrfValid(request))) return forbidden();
+  try {
+    const body = await request.json();
+    const list = Array.isArray(body?.folders) ? body.folders : [];
+    if (list.length === 0 || list.length > 200) return badRequest("folders must be a non-empty list");
+    const rows = [];
+    for (const f of list) {
+      const slug = String(f?.slug ?? "").trim();
+      const label = String(f?.label ?? "").trim();
+      const sort_order = Number(f?.sort_order);
+      if (!/^[a-z0-9_-]{1,40}$/.test(slug)) return badRequest("Invalid folder name");
+      if (!label || label.length > 60) return badRequest("Folder name is required (max 60 characters)");
+      if (!Number.isInteger(sort_order) || sort_order < 1) return badRequest("Invalid folder position");
+      rows.push({ slug, label, sort_order });
+    }
+    const { error } = await getSupabase().from("gallery_folders").upsert(rows, { onConflict: "slug" });
     if (error) throw error;
     return Response.json({ ok: true });
   } catch (error) {

@@ -5,7 +5,7 @@ import './gallery/gallery-admin.css';
 import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
 import {
   Plus, Trash2, PencilLine, LogOut, Save, X, GripVertical, Check, AlertTriangle,
-  BellRing, Boxes, ShoppingBag, Building2, HardHat, Factory, FolderOpen, FolderInput, FolderPlus, Download, ChevronRight, ChevronLeft, Maximize2, Upload,
+  BellRing, Boxes, ShoppingBag, Building2, HardHat, Factory, FolderOpen, FolderInput, FolderPlus, Download, Eye, EyeOff, ChevronRight, ChevronLeft, Maximize2, Upload,
   HeartPulse, BriefcaseBusiness, Hotel, Users, Image as ImageIcon, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
@@ -111,7 +111,7 @@ function IconPicker({ value, onChange }: { value: string; onChange: (v: string) 
 }
 
 type Tab = 'case-studies' | 'testimonials' | 'team' | 'jobs' | 'applications' | 'gallery';
-type Photo = { id: string; sort_order: number; src: string; caption: string; category?: string | null };
+type Photo = { id: string; sort_order: number; src: string; caption: string; category?: string | null; is_active?: boolean };
 type Row = Record<string, unknown>;
 
 function slug(value: string): string {
@@ -368,12 +368,14 @@ function PhotoLightbox({ items, index, onClose, onNav }: { items: Photo[]; index
 
 /* ── One-time database setup notice for gallery folders ── */
 const GALLERY_SETUP_SQL = `alter table public.gallery_photos add column if not exists category text;
+alter table public.gallery_photos add column if not exists is_active boolean not null default true;
 
 create table if not exists public.gallery_folders (
   slug text primary key,
   label text not null,
   created_at timestamptz not null default now()
 );
+alter table public.gallery_folders add column if not exists sort_order integer not null default 0;
 alter table public.gallery_folders enable row level security;
 
 drop policy if exists "Public read access" on public.gallery_folders;
@@ -395,7 +397,7 @@ function GallerySetupNotice({ onRecheck }: { onRecheck: () => void }) {
     <div className="ga-setup" role="status">
       <div className="ga-setup-head">
         <AlertTriangle size={16} />
-        <strong>One-time setup needed for moving photos and creating folders</strong>
+        <strong>One-time database update needed for folders, folder order and hiding photos</strong>
       </div>
       <ol>
         <li>Open your Supabase project, then <b>SQL Editor</b> in the left menu, then <b>New query</b>.</li>
@@ -407,15 +409,18 @@ function GallerySetupNotice({ onRecheck }: { onRecheck: () => void }) {
         <button type="button" className="adm-btn adm-btn-outline" onClick={copy}>{copied ? 'Copied' : 'Copy SQL'}</button>
         <button type="button" className="adm-btn adm-btn-primary" onClick={onRecheck}>I ran it, check again</button>
       </div>
-      <p className="ga-setup-note">Importing from your computer, uploading and reordering work without this step.</p>
+      <p className="ga-setup-note">It is safe to run more than once. Importing from your computer, reordering photos and the lightbox work without this step.</p>
     </div>
   );
 }
 
 /* ── Gallery folders: parent folder -> category folders -> photos ── */
 function DraggablePhotoList({
-  photos, folders, onReorder, onEdit, onDelete, openKey, onOpenKey, onMove, onCreateFolder, onDeleteFolder, onImportFiles, onImportLinks, importing,
+  photos, folders, onReorder, onEdit, onDelete, openKey, onOpenKey, onMove, onCreateFolder, onDeleteFolder, onImportFiles, onImportLinks, importing, onReorderFolders, onRenameFolder, onSetActive,
 }: {
+  onReorderFolders: (keys: string[]) => Promise<void>;
+  onRenameFolder: (slug: string, label: string) => Promise<boolean>;
+  onSetActive: (ids: string[], active: boolean) => Promise<void>;
   photos: Photo[]; folders: FolderMeta[];
   onReorder: (list: Photo[]) => void; onEdit: (p: Photo) => void; onDelete: (id: string) => void;
   openKey: string | null; onOpenKey: (k: string | null) => void;
@@ -447,6 +452,39 @@ function DraggablePhotoList({
   const groups = groupByCategory(photos, folders, true);
   const open = groups.find(g => g.key === openKey) ?? null;
   const NEW = '__new__';
+  const [folderDragKey, setFolderDragKey] = useState<string | null>(null);
+  const [folderOverKey, setFolderOverKey] = useState<string | null>(null);
+  const [renameKey, setRenameKey] = useState<string | null>(null);
+  const [renameName, setRenameName] = useState('');
+
+  function moveFolder(key: string, delta: number) {
+    const keys = groups.map(g => g.key);
+    const from = keys.indexOf(key);
+    const to = from + delta;
+    if (from < 0 || to < 0 || to >= keys.length) return;
+    keys.splice(to, 0, keys.splice(from, 1)[0]);
+    onReorderFolders(keys);
+  }
+
+  function onFolderDragEnd() {
+    if (folderDragKey && folderOverKey && folderDragKey !== folderOverKey) {
+      const keys = groups.map(g => g.key);
+      const from = keys.indexOf(folderDragKey);
+      const to = keys.indexOf(folderOverKey);
+      if (from >= 0 && to >= 0) { keys.splice(to, 0, keys.splice(from, 1)[0]); onReorderFolders(keys); }
+    }
+    setFolderDragKey(null); setFolderOverKey(null);
+  }
+
+  function openRename(key: string) { setRenameKey(key); setRenameName(labelOf(key, folders)); }
+
+  async function confirmRename() {
+    if (!renameKey) return;
+    setDialogBusy(true);
+    const ok = await onRenameFolder(renameKey, renameName);
+    setDialogBusy(false);
+    if (ok) setRenameKey(null);
+  }
 
   useEffect(() => { setSelected([]); setImportOpen(false); }, [openKey]);
 
@@ -536,7 +574,8 @@ function DraggablePhotoList({
         <button type="button" className="ga-crumb" onClick={() => setOpenKey(null)} data-current={open ? 'false' : 'true'}>
           <FolderOpen size={15} /> Gallery <small>{photos.length}</small>
         </button>
-        {open && (<><ChevronRight size={14} className="ga-crumb-sep" /><span className="ga-crumb" data-current="true">{labelOf(open.key, folders)} <small>{open.items.length}</small></span></>)}
+        {open && (<><ChevronRight size={14} className="ga-crumb-sep" /><span className="ga-crumb" data-current="true">{labelOf(open.key, folders)} <small>{open.items.length}</small></span>
+          <button type="button" className="adm-icon-btn" aria-label="Rename this folder" title="Rename folder" onClick={() => openRename(open.key)}><PencilLine size={14} /></button></>)}
         {open && (
           <button type="button" className="ga-import-btn" onClick={openImport} disabled={importing !== null}>
             <Download size={14} /> {importing ?? 'Import photos'}
@@ -549,28 +588,43 @@ function DraggablePhotoList({
           <strong>{selected.length} selected</strong>
           <button type="button" className="ga-selbtn" onClick={() => setSelected(open.items.map(p => p.id))}>Select all</button>
           <button type="button" className="ga-selbtn ga-selbtn-primary" onClick={() => openMove(selected)}><FolderInput size={14} /> Move to folder</button>
+          <button type="button" className="ga-selbtn" onClick={() => { onSetActive(selected, false); setSelected([]); }}><EyeOff size={14} /> Hide on website</button>
+          <button type="button" className="ga-selbtn" onClick={() => { onSetActive(selected, true); setSelected([]); }}><Eye size={14} /> Show on website</button>
           <button type="button" className="ga-selbtn" onClick={() => setSelected([])}>Clear</button>
         </div>
       )}
 
       {!open ? (
         <div className="ga-folder-grid">
-          {groups.map(group => {
+          {groups.map((group, gi) => {
             const custom = group.items.length === 0 && folders.some(f => f.slug === group.key);
+            const hidden = group.items.filter(p => p.is_active === false).length;
+            const name = labelOf(group.key, folders);
             return (
-              <div key={group.key} className="ga-folder-wrap">
+              <div key={group.key} className="ga-folder-wrap" draggable
+                data-dragging={folderDragKey === group.key ? 'true' : 'false'}
+                data-drag-over={folderOverKey === group.key && folderDragKey !== group.key ? 'true' : 'false'}
+                onDragStart={() => setFolderDragKey(group.key)}
+                onDragEnter={() => { if (folderDragKey) setFolderOverKey(group.key); }}
+                onDragOver={e => e.preventDefault()} onDragEnd={onFolderDragEnd}
+              >
                 <button type="button" className="ga-folder" onClick={() => setOpenKey(group.key)}>
                   <span className="ga-folder-tab" aria-hidden="true" />
                   <span className="ga-folder-body">
                     <span className="ga-folder-thumbs" aria-hidden="true">
-                      {group.items.slice(0, 3).map(p => <img key={p.id} src={p.src} alt="" loading="lazy" />)}
+                      {group.items.slice(0, 3).map(p => <img key={p.id} src={p.src} alt="" loading="lazy" draggable={false} />)}
                       {group.items.length === 0 && <span className="ga-folder-empty">Empty folder</span>}
                     </span>
-                    <span className="ga-folder-name">{labelOf(group.key, folders)}</span>
-                    <span className="ga-folder-count">{group.items.length} {group.items.length === 1 ? 'photo' : 'photos'}</span>
+                    <span className="ga-folder-name">{name}</span>
+                    <span className="ga-folder-count">{group.items.length} {group.items.length === 1 ? 'photo' : 'photos'}{hidden > 0 ? ` · ${hidden} hidden` : ''}</span>
                   </span>
                 </button>
-                {custom && <button type="button" className="adm-icon-btn delete ga-folder-del" aria-label={`Delete folder ${labelOf(group.key, folders)}`} onClick={() => onDeleteFolder(group.key)}><Trash2 size={14} /></button>}
+                <div className="ga-folder-tools">
+                  <button type="button" className="adm-icon-btn" aria-label={`Move ${name} earlier`} title="Move earlier" disabled={gi === 0} onClick={() => moveFolder(group.key, -1)}><ChevronLeft size={14} /></button>
+                  <button type="button" className="adm-icon-btn" aria-label={`Move ${name} later`} title="Move later" disabled={gi === groups.length - 1} onClick={() => moveFolder(group.key, 1)}><ChevronRight size={14} /></button>
+                  <button type="button" className="adm-icon-btn" aria-label={`Rename folder ${name}`} title="Rename folder" onClick={() => openRename(group.key)}><PencilLine size={14} /></button>
+                  {custom && <button type="button" className="adm-icon-btn delete" aria-label={`Delete folder ${name}`} title="Delete empty folder" onClick={() => onDeleteFolder(group.key)}><Trash2 size={14} /></button>}
+                </div>
               </div>
             );
           })}
@@ -581,7 +635,7 @@ function DraggablePhotoList({
           </div>
         </div>
       ) : open.items.length === 0 ? (
-        <p className="adm-empty">This folder is empty. Use Upload photos while it is open, or move photos into it from another folder.</p>
+        <p className="adm-empty">This folder is empty. Click Import photos to add some.</p>
       ) : (
         <div className="ga-photo-grid">
           {open.items.map((photo, i) => (
@@ -589,6 +643,7 @@ function DraggablePhotoList({
               data-dragging={dragId === photo.id ? 'true' : 'false'}
               data-drag-over={overId === photo.id && dragId !== photo.id ? 'true' : 'false'}
               data-selected={selected.includes(photo.id) ? 'true' : 'false'}
+              data-inactive={photo.is_active === false ? 'true' : 'false'}
               onDragStart={() => setDragId(photo.id)}
               onDragEnter={() => { if (dragId) setOverId(photo.id); }}
               onDragOver={e => e.preventDefault()} onDragEnd={onDragEnd}
@@ -597,8 +652,10 @@ function DraggablePhotoList({
               <label className="ga-tile-check" title="Select photo">
                 <input type="checkbox" checked={selected.includes(photo.id)} onChange={() => toggle(photo.id)} aria-label={`Select ${photo.caption || 'photo'}`} />
               </label>
+              {photo.is_active === false && <span className="ga-tile-badge">Hidden</span>}
               <figcaption>{photo.caption || <em>No caption</em>}</figcaption>
               <div className="ga-tile-actions">
+                <button className="adm-icon-btn" aria-label={photo.is_active === false ? 'Show on website' : 'Hide from website'} title={photo.is_active === false ? 'Inactive: click to show on website' : 'Active: click to hide from website'} onClick={() => onSetActive([photo.id], photo.is_active === false)}>{photo.is_active === false ? <EyeOff size={14} /> : <Eye size={14} />}</button>
                 <button className="adm-icon-btn" aria-label="Move to another folder" title="Move to another folder" onClick={() => openMove([photo.id])}><FolderInput size={14} /></button>
                 <button className="adm-icon-btn" aria-label="Maximize" onClick={() => setLightIdx(i)}><Maximize2 size={14} /></button>
                 <button className="adm-icon-btn" aria-label="Edit" onClick={() => onEdit({ ...photo })}><PencilLine size={14} /></button>
@@ -712,6 +769,20 @@ function DraggablePhotoList({
                   {importBusy ? 'Importing...' : `Import ${importSel.length || ''} ${importSel.length === 1 ? 'photo' : 'photos'}`}
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {renameKey && (
+        <div className="ga-dialog-backdrop" onClick={() => !dialogBusy && setRenameKey(null)}>
+          <div className="ga-dialog" role="dialog" aria-modal="true" aria-label="Rename folder" onClick={e => e.stopPropagation()}>
+            <h3>Rename folder</h3>
+            <input className="adm-input" autoFocus value={renameName} maxLength={60} onChange={e => setRenameName(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && renameName.trim()) confirmRename(); }} />
+            <p className="ga-upload-hint">This is the name shown on the website and in the admin.</p>
+            <div className="ga-dialog-actions">
+              <button type="button" className="adm-btn adm-btn-outline" disabled={dialogBusy} onClick={() => setRenameKey(null)}>Cancel</button>
+              <button type="button" className="adm-btn adm-btn-primary" disabled={dialogBusy || !renameName.trim()} onClick={confirmRename}>{dialogBusy ? 'Saving...' : 'Save name'}</button>
             </div>
           </div>
         </div>
@@ -953,7 +1024,12 @@ export default function AdminPage() {
     const fres = await api('/api/admin/gallery/folders');
     if (fres.ok && Array.isArray(fres.json?.rows)) setFolders(fres.json.rows);
     const rows = Array.isArray(res.json?.rows) ? res.json.rows : [];
-    setGalNeedsSetup(!fres.ok || (rows.length > 0 && !('category' in rows[0])));
+    const frows = Array.isArray(fres.json?.rows) ? fres.json.rows : [];
+    setGalNeedsSetup(
+      !fres.ok
+      || (rows.length > 0 && (!('category' in rows[0]) || !('is_active' in rows[0])))
+      || (frows.length > 0 && !('sort_order' in frows[0]))
+    );
   }
 
   async function loadApplications() {
@@ -1031,6 +1107,50 @@ export default function AdminPage() {
     }
     if (added > 0) toast.success(added === 1 ? 'Photo added' : `${added} photos added`);
     loadPhotos();
+  }
+
+  async function galPersistFolders(keys: string[], rename?: { slug: string; label: string }): Promise<boolean> {
+    const metas = keys.map((k, i) => ({ slug: k, label: rename && rename.slug === k ? rename.label : labelOf(k, folders), sort_order: i + 1 }));
+    const previous = folders;
+    setFolders(metas);
+    const res = await api('/api/admin/gallery/folders', { method: 'PUT', body: JSON.stringify({ folders: metas }) });
+    if (res.ok) return true;
+    setFolders(previous);
+    const msg = String(res.json?.error ?? '');
+    if (/sort_order|schema cache|gallery_folders|does not exist/i.test(msg)) {
+      setGalNeedsSetup(true);
+      toast.error('This needs a one-time database update. See the notice on this page.');
+    } else toast.error(msg || 'Could not save the folders');
+    return false;
+  }
+
+  async function galReorderFolders(keys: string[]) {
+    if (await galPersistFolders(keys)) toast.success('Folder order saved');
+  }
+
+  async function galRenameFolder(slug: string, label: string): Promise<boolean> {
+    const name = label.trim();
+    if (!name) { toast.error('Enter a folder name'); return false; }
+    const keys = groupByCategory(photos, folders, true).map(g => g.key);
+    if (!(await galPersistFolders(keys, { slug, label: name }))) return false;
+    toast.success(`Renamed to "${name}"`);
+    return true;
+  }
+
+  async function galSetActive(ids: string[], active: boolean) {
+    const changing = photos.filter(p => ids.includes(p.id)).map(p => ({ ...p, is_active: active }));
+    setPhotos(ps => ps.map(p => (ids.includes(p.id) ? { ...p, is_active: active } : p)));
+    const results = await Promise.all(changing.map(p => api('/api/admin/gallery', { method: 'PUT', body: JSON.stringify(p) })));
+    const failed = results.find(r => !r.ok);
+    if (failed) {
+      const msg = String(failed.json?.error ?? '');
+      if (/is_active|schema cache/i.test(msg)) { setGalNeedsSetup(true); toast.error('Hiding photos needs a one-time database update. See the notice on this page.'); }
+      else toast.error(msg || 'Could not update the photos');
+      loadPhotos();
+    } else {
+      const n = changing.length;
+      toast.success(active ? `${n} ${n === 1 ? 'photo is' : 'photos are'} now shown on the website` : `${n} ${n === 1 ? 'photo is' : 'photos are'} now hidden from the website`);
+    }
   }
 
   async function galMove(ids: string[], target: string) {
@@ -1583,6 +1703,9 @@ export default function AdminPage() {
                     folders={folders}
                     onImportFiles={galUploadMany}
                     onImportLinks={galImportLinks}
+                    onReorderFolders={galReorderFolders}
+                    onRenameFolder={galRenameFolder}
+                    onSetActive={galSetActive}
                     importing={galUploading}
                     onMove={galMove}
                     onCreateFolder={galCreateFolder}
