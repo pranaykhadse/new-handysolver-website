@@ -385,3 +385,10 @@ button.ga-crumb:hover { color: var(--adm-ink, #252923); border-color: var(--adm-
 }
 .ga-setup-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .ga-setup-note { margin: 10px 0 0; font-size: 12px; color: var(--adm-muted, #888); }
+
+/* Equal-width folder cards and thumbnails */
+.ga-folder { width: 100%; }
+.ga-folder-body { width: 100%; box-sizing: border-box; }
+.ga-folder-thumbs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; height: 62px; }
+.ga-folder-thumbs img { width: 100%; height: 100%; min-width: 0; object-fit: cover; border-radius: 5px; }
+.ga-folder-thumbs .ga-folder-empty { grid-column: 1 / -1; }
