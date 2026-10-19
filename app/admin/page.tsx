@@ -414,7 +414,7 @@ function GallerySetupNotice({ onRecheck }: { onRecheck: () => void }) {
 
 /* ── Gallery folders: parent folder -> category folders -> photos ── */
 function DraggablePhotoList({
-  photos, folders, onReorder, onEdit, onDelete, openKey, onOpenKey, onMove, onCreateFolder, onDeleteFolder, onImportFiles, importing,
+  photos, folders, onReorder, onEdit, onDelete, openKey, onOpenKey, onMove, onCreateFolder, onDeleteFolder, onImportFiles, onImportLinks, importing,
 }: {
   photos: Photo[]; folders: FolderMeta[];
   onReorder: (list: Photo[]) => void; onEdit: (p: Photo) => void; onDelete: (id: string) => void;
@@ -423,11 +423,13 @@ function DraggablePhotoList({
   onCreateFolder: (label: string) => Promise<string | null>;
   onDeleteFolder: (slug: string) => void;
   onImportFiles: (files: ArrayLike<File>) => Promise<void>;
+  onImportLinks: (urls: string[]) => Promise<void>;
   importing: string | null;
 }) {
   const setOpenKey = onOpenKey;
   const [importOpen, setImportOpen] = useState(false);
-  const [importTab, setImportTab] = useState<'computer' | 'folders'>('computer');
+  const [importTab, setImportTab] = useState<'computer' | 'folders' | 'link'>('computer');
+  const [importLinks, setImportLinks] = useState('');
   const [importFrom, setImportFrom] = useState<string>('');
   const [importSel, setImportSel] = useState<string[]>([]);
   const [importBusy, setImportBusy] = useState(false);
@@ -464,6 +466,16 @@ function DraggablePhotoList({
     await onImportFiles(files);
     setImportBusy(false);
     if (importFileRef.current) importFileRef.current.value = '';
+    setImportOpen(false);
+  }
+
+  async function importFromLinks() {
+    const urls = importLinks.split('\n').map(u => u.trim()).filter(Boolean);
+    if (urls.length === 0) return;
+    setImportBusy(true);
+    await onImportLinks(urls);
+    setImportBusy(false);
+    setImportLinks('');
     setImportOpen(false);
   }
 
@@ -634,6 +646,7 @@ function DraggablePhotoList({
             <div className="ga-tabs" role="tablist">
               <button type="button" role="tab" aria-selected={importTab === 'computer'} className="ga-tab" onClick={() => setImportTab('computer')}>From your computer</button>
               <button type="button" role="tab" aria-selected={importTab === 'folders'} className="ga-tab" onClick={() => setImportTab('folders')}>From other folders</button>
+              <button type="button" role="tab" aria-selected={importTab === 'link'} className="ga-tab" onClick={() => setImportTab('link')}>From a link</button>
             </div>
 
             {importTab === 'computer' ? (
@@ -652,6 +665,14 @@ function DraggablePhotoList({
                   <span>You can select many photos at once.</span>
                 </div>
                 <p className="ga-upload-hint">Allowed image types: {ALLOWED_IMAGE_LABEL}. Other file types are rejected.</p>
+              </>
+            ) : importTab === 'link' ? (
+              <>
+                <label className="ga-import-from" style={{ display: 'block' }}>
+                  <span style={{ display: 'block', marginBottom: 8 }}>Paste one image link per line</span>
+                  <textarea className="adm-input" rows={6} value={importLinks} onChange={e => setImportLinks(e.target.value)} placeholder={'https://example.com/photo-1.jpg\nhttps://example.com/photo-2.jpg'} style={{ width: '100%', resize: 'vertical' }} />
+                </label>
+                <p className="ga-upload-hint">The photos stay hosted at those links; they are not copied to your storage. Only http and https links are accepted.</p>
               </>
             ) : importSources.length === 0 ? (
               <p className="adm-empty">There are no photos in other folders to import.</p>
@@ -681,6 +702,11 @@ function DraggablePhotoList({
 
             <div className="ga-dialog-actions">
               <button type="button" className="adm-btn adm-btn-outline" disabled={importBusy} onClick={() => setImportOpen(false)}>{importTab === 'computer' ? 'Close' : 'Cancel'}</button>
+              {importTab === 'link' && (
+                <button type="button" className="adm-btn adm-btn-primary" disabled={importBusy || !importLinks.trim()} onClick={importFromLinks}>
+                  {importBusy ? 'Adding...' : 'Add photos'}
+                </button>
+              )}
               {importTab === 'folders' && importSources.length > 0 && (
                 <button type="button" className="adm-btn adm-btn-primary" disabled={importBusy || importSel.length === 0} onClick={importFromFolder}>
                   {importBusy ? 'Importing...' : `Import ${importSel.length || ''} ${importSel.length === 1 ? 'photo' : 'photos'}`}
@@ -983,6 +1009,27 @@ export default function AdminPage() {
     setGalUploading(null);
     if (galFilesRef.current) galFilesRef.current.value = '';
     if (added > 0) toast.success(added === 1 ? 'Photo uploaded' : `${added} photos uploaded`);
+    loadPhotos();
+  }
+
+  async function galImportLinks(urls: string[]) {
+    const valid: string[] = [];
+    const bad: string[] = [];
+    urls.forEach(u => {
+      try { const p = new URL(u); (p.protocol === 'http:' || p.protocol === 'https:' ? valid : bad).push(u); } catch { bad.push(u); }
+    });
+    if (bad.length > 0) toast.error(`Skipped ${bad.length} invalid ${bad.length === 1 ? 'link' : 'links'}: ${bad[0]}${bad.length > 1 ? ` (and ${bad.length - 1} more)` : ''}`);
+    let order = photos.reduce((m, p) => Math.max(m, p.sort_order), 0);
+    let added = 0;
+    for (let i = 0; i < valid.length; i++) {
+      const rawName = valid[i].split('?')[0].split('/').pop() ?? '';
+      let decoded = rawName;
+      try { decoded = decodeURIComponent(rawName); } catch { /* keep the raw name */ }
+      const name = decoded.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim();
+      const res = await api('/api/admin/gallery', { method: 'POST', body: JSON.stringify({ id: newPhotoId(i), src: valid[i], caption: name, sort_order: ++order, ...(galFolder ? { category: galFolder } : {}) }) });
+      if (res.ok) added++; else toast.error(`${valid[i]}: ${res.json?.error ?? 'Save failed'}`);
+    }
+    if (added > 0) toast.success(added === 1 ? 'Photo added' : `${added} photos added`);
     loadPhotos();
   }
 
@@ -1513,17 +1560,7 @@ export default function AdminPage() {
               {TAB_LABELS[tab]}
               <span className="adm-count-badge">{tab === 'gallery' ? photos.length : tab === 'applications' ? applications.length : currentRows.length}</span>
             </span>
-            {tab === 'gallery' ? (
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <input ref={galFilesRef} type="file" accept={IMAGE_ACCEPT} multiple style={{ display: 'none' }} onChange={e => galUploadMany(e.target.files)} />
-                <button className="adm-add-btn" disabled={galUploading !== null} onClick={() => galFilesRef.current?.click()}>
-                  <Upload size={13} /> {galUploading ?? 'Upload photos'}
-                </button>
-                <button className="adm-add-btn" onClick={() => { setGalIsNew(true); setGalDraft({ src: '', caption: '', sort_order: photos.length + 1 }); setGalPreviewErr(false); }}>
-                  <Plus size={13} /> Add by URL
-                </button>
-              </div>
-            ) : tab === 'applications' ? null : (
+            {tab === 'gallery' || tab === 'applications' ? null : (
               <button className="adm-add-btn" onClick={() => setDraft({ sort_order: currentRows.length + 1, is_active: true })}>
                 <Plus size={13} /> Add new
               </button>
@@ -1532,19 +1569,20 @@ export default function AdminPage() {
           <div className="adm-card-body">
             {tab === 'gallery' ? (
               photosLoading ? <p className="adm-loading">Loading...</p>
-              : photos.length === 0 ? (
-                <div className="adm-empty">
-                  <ImageIcon size={36} strokeWidth={1.2} style={{ opacity: .3 }} />
-                  <p>No photos yet. Click "Upload photos" to get started.</p>
-                </div>
-              ) : (
+              : (
                 <div className="adm-list">
-                  <p className="ga-upload-hint" style={{ marginTop: 0 }}>Upload several photos at once. Allowed image types: {ALLOWED_IMAGE_LABEL}. Other file types can&apos;t be selected.</p>
+                  {photos.length === 0 && (
+                    <div className="adm-empty">
+                      <ImageIcon size={36} strokeWidth={1.2} style={{ opacity: .3 }} />
+                      <p>No photos yet. Create a folder, open it, then click Import photos.</p>
+                    </div>
+                  )}
                   {galNeedsSetup && <GallerySetupNotice onRecheck={loadPhotos} />}
                   <DraggablePhotoList
                     photos={photos}
                     folders={folders}
                     onImportFiles={galUploadMany}
+                    onImportLinks={galImportLinks}
                     importing={galUploading}
                     onMove={galMove}
                     onCreateFolder={galCreateFolder}
