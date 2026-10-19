@@ -5,7 +5,7 @@ import './gallery/gallery-admin.css';
 import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
 import {
   Plus, Trash2, PencilLine, LogOut, Save, X, GripVertical, Check, AlertTriangle,
-  BellRing, Boxes, ShoppingBag, Building2, HardHat, Factory, FolderOpen, FolderInput, FolderPlus, ChevronRight, ChevronLeft, Maximize2, Upload,
+  BellRing, Boxes, ShoppingBag, Building2, HardHat, Factory, FolderOpen, FolderInput, FolderPlus, Download, ChevronRight, ChevronLeft, Maximize2, Upload,
   HeartPulse, BriefcaseBusiness, Hotel, Users, Image as ImageIcon, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
@@ -366,9 +366,55 @@ function PhotoLightbox({ items, index, onClose, onNav }: { items: Photo[]; index
   );
 }
 
+/* ── One-time database setup notice for gallery folders ── */
+const GALLERY_SETUP_SQL = `alter table public.gallery_photos add column if not exists category text;
+
+create table if not exists public.gallery_folders (
+  slug text primary key,
+  label text not null,
+  created_at timestamptz not null default now()
+);
+alter table public.gallery_folders enable row level security;
+
+drop policy if exists "Public read access" on public.gallery_folders;
+create policy "Public read access" on public.gallery_folders for select to anon using (true);
+drop policy if exists "Public insert access" on public.gallery_folders;
+create policy "Public insert access" on public.gallery_folders for insert to anon with check (true);
+drop policy if exists "Public update access" on public.gallery_folders;
+create policy "Public update access" on public.gallery_folders for update to anon using (true) with check (true);
+drop policy if exists "Public delete access" on public.gallery_folders;
+create policy "Public delete access" on public.gallery_folders for delete to anon using (true);`;
+
+function GallerySetupNotice({ onRecheck }: { onRecheck: () => void }) {
+  const [copied, setCopied] = useState(false);
+  async function copy() {
+    try { await navigator.clipboard.writeText(GALLERY_SETUP_SQL); setCopied(true); setTimeout(() => setCopied(false), 2500); }
+    catch { toast.error('Could not copy. Select the text and copy it manually.'); }
+  }
+  return (
+    <div className="ga-setup" role="status">
+      <div className="ga-setup-head">
+        <AlertTriangle size={16} />
+        <strong>One-time setup needed for moving photos and creating folders</strong>
+      </div>
+      <ol>
+        <li>Open your Supabase project, then <b>SQL Editor</b> in the left menu, then <b>New query</b>.</li>
+        <li>Paste the SQL below and click <b>Run</b>. It only adds things, so nothing existing is changed or deleted.</li>
+        <li>Come back here and click <b>I ran it, check again</b>.</li>
+      </ol>
+      <pre className="ga-setup-sql">{GALLERY_SETUP_SQL}</pre>
+      <div className="ga-setup-actions">
+        <button type="button" className="adm-btn adm-btn-outline" onClick={copy}>{copied ? 'Copied' : 'Copy SQL'}</button>
+        <button type="button" className="adm-btn adm-btn-primary" onClick={onRecheck}>I ran it, check again</button>
+      </div>
+      <p className="ga-setup-note">Importing from your computer, uploading and reordering work without this step.</p>
+    </div>
+  );
+}
+
 /* ── Gallery folders: parent folder -> category folders -> photos ── */
 function DraggablePhotoList({
-  photos, folders, onReorder, onEdit, onDelete, openKey, onOpenKey, onMove, onCreateFolder, onDeleteFolder,
+  photos, folders, onReorder, onEdit, onDelete, openKey, onOpenKey, onMove, onCreateFolder, onDeleteFolder, onImportFiles, importing,
 }: {
   photos: Photo[]; folders: FolderMeta[];
   onReorder: (list: Photo[]) => void; onEdit: (p: Photo) => void; onDelete: (id: string) => void;
@@ -376,8 +422,17 @@ function DraggablePhotoList({
   onMove: (ids: string[], target: string) => Promise<void>;
   onCreateFolder: (label: string) => Promise<string | null>;
   onDeleteFolder: (slug: string) => void;
+  onImportFiles: (files: ArrayLike<File>) => Promise<void>;
+  importing: string | null;
 }) {
   const setOpenKey = onOpenKey;
+  const [importOpen, setImportOpen] = useState(false);
+  const [importTab, setImportTab] = useState<'computer' | 'folders'>('computer');
+  const [importFrom, setImportFrom] = useState<string>('');
+  const [importSel, setImportSel] = useState<string[]>([]);
+  const [importBusy, setImportBusy] = useState(false);
+  const [dropping, setDropping] = useState(false);
+  const importFileRef = useRef<HTMLInputElement>(null);
   const [lightIdx, setLightIdx] = useState<number | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
@@ -391,7 +446,34 @@ function DraggablePhotoList({
   const open = groups.find(g => g.key === openKey) ?? null;
   const NEW = '__new__';
 
-  useEffect(() => { setSelected([]); }, [openKey]);
+  useEffect(() => { setSelected([]); setImportOpen(false); }, [openKey]);
+
+  const importSources = groups.filter(g => g.key !== open?.key && g.items.length > 0);
+  const importSource = importSources.find(g => g.key === importFrom) ?? importSources[0] ?? null;
+
+  function openImport() {
+    setImportTab('computer');
+    setImportFrom(importSources[0]?.key ?? '');
+    setImportSel([]);
+    setImportOpen(true);
+  }
+
+  async function importFromComputer(files: ArrayLike<File> | null) {
+    if (!files || files.length === 0) return;
+    setImportBusy(true);
+    await onImportFiles(files);
+    setImportBusy(false);
+    if (importFileRef.current) importFileRef.current.value = '';
+    setImportOpen(false);
+  }
+
+  async function importFromFolder() {
+    if (!open || importSel.length === 0) return;
+    setImportBusy(true);
+    await onMove(importSel, open.key);
+    setImportBusy(false);
+    setImportOpen(false);
+  }
 
   function toggle(id: string) { setSelected(s => (s.includes(id) ? s.filter(x => x !== id) : [...s, id])); }
 
@@ -443,6 +525,11 @@ function DraggablePhotoList({
           <FolderOpen size={15} /> Gallery <small>{photos.length}</small>
         </button>
         {open && (<><ChevronRight size={14} className="ga-crumb-sep" /><span className="ga-crumb" data-current="true">{labelOf(open.key, folders)} <small>{open.items.length}</small></span></>)}
+        {open && (
+          <button type="button" className="ga-import-btn" onClick={openImport} disabled={importing !== null}>
+            <Download size={14} /> {importing ?? 'Import photos'}
+          </button>
+        )}
       </nav>
 
       {open && selected.length > 0 && (
@@ -535,6 +622,70 @@ function DraggablePhotoList({
             <div className="ga-dialog-actions">
               <button type="button" className="adm-btn adm-btn-outline" disabled={dialogBusy} onClick={() => setMoveIds(null)}>Cancel</button>
               <button type="button" className="adm-btn adm-btn-primary" disabled={dialogBusy || (moveTarget === NEW && !newName.trim())} onClick={confirmMove}>{dialogBusy ? 'Moving...' : 'Move'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {importOpen && open && (
+        <div className="ga-dialog-backdrop" onClick={() => !importBusy && setImportOpen(false)}>
+          <div className="ga-dialog ga-dialog-wide" role="dialog" aria-modal="true" aria-label="Import photos" onClick={e => e.stopPropagation()}>
+            <h3>Import photos into &ldquo;{labelOf(open.key, folders)}&rdquo;</h3>
+            <div className="ga-tabs" role="tablist">
+              <button type="button" role="tab" aria-selected={importTab === 'computer'} className="ga-tab" onClick={() => setImportTab('computer')}>From your computer</button>
+              <button type="button" role="tab" aria-selected={importTab === 'folders'} className="ga-tab" onClick={() => setImportTab('folders')}>From other folders</button>
+            </div>
+
+            {importTab === 'computer' ? (
+              <>
+                <input ref={importFileRef} type="file" accept={IMAGE_ACCEPT} multiple style={{ display: 'none' }} onChange={e => importFromComputer(e.target.files)} />
+                <div
+                  className="ga-dropzone" data-active={dropping ? 'true' : 'false'} role="button" tabIndex={0}
+                  onClick={() => !importBusy && importFileRef.current?.click()}
+                  onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !importBusy) { e.preventDefault(); importFileRef.current?.click(); } }}
+                  onDragOver={e => { e.preventDefault(); setDropping(true); }}
+                  onDragLeave={() => setDropping(false)}
+                  onDrop={e => { e.preventDefault(); setDropping(false); if (!importBusy) importFromComputer(e.dataTransfer.files); }}
+                >
+                  <Upload size={26} />
+                  <strong>{importing ?? 'Drop photos here, or click to choose'}</strong>
+                  <span>You can select many photos at once.</span>
+                </div>
+                <p className="ga-upload-hint">Allowed image types: {ALLOWED_IMAGE_LABEL}. Other file types are rejected.</p>
+              </>
+            ) : importSources.length === 0 ? (
+              <p className="adm-empty">There are no photos in other folders to import.</p>
+            ) : (
+              <>
+                <label className="ga-import-from">
+                  <span>Import from</span>
+                  <select className="adm-input" value={importSource?.key ?? ''} onChange={e => { setImportFrom(e.target.value); setImportSel([]); }}>
+                    {importSources.map(g => <option key={g.key} value={g.key}>{labelOf(g.key, folders)} ({g.items.length})</option>)}
+                  </select>
+                </label>
+                <div className="ga-import-bar">
+                  <button type="button" className="ga-selbtn" onClick={() => setImportSel(importSource ? importSource.items.map(p => p.id) : [])}>Select all</button>
+                  <button type="button" className="ga-selbtn" onClick={() => setImportSel([])}>Clear</button>
+                  <small>{importSel.length} selected</small>
+                </div>
+                <div className="ga-import-grid">
+                  {importSource?.items.map(p => (
+                    <label key={p.id} className="ga-import-item" data-selected={importSel.includes(p.id) ? 'true' : 'false'}>
+                      <img src={p.src} alt={p.caption || 'Gallery photo'} loading="lazy" />
+                      <input type="checkbox" checked={importSel.includes(p.id)} onChange={() => setImportSel(s => (s.includes(p.id) ? s.filter(x => x !== p.id) : [...s, p.id]))} aria-label={`Select ${p.caption || 'photo'}`} />
+                    </label>
+                  ))}
+                </div>
+              </>
+            )}
+
+            <div className="ga-dialog-actions">
+              <button type="button" className="adm-btn adm-btn-outline" disabled={importBusy} onClick={() => setImportOpen(false)}>{importTab === 'computer' ? 'Close' : 'Cancel'}</button>
+              {importTab === 'folders' && importSources.length > 0 && (
+                <button type="button" className="adm-btn adm-btn-primary" disabled={importBusy || importSel.length === 0} onClick={importFromFolder}>
+                  {importBusy ? 'Importing...' : `Import ${importSel.length || ''} ${importSel.length === 1 ? 'photo' : 'photos'}`}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -727,6 +878,7 @@ export default function AdminPage() {
   const [galPreviewErr, setGalPreviewErr] = useState(false);
   const [galFolder, setGalFolder] = useState<string | null>(null);
   const [folders, setFolders] = useState<FolderMeta[]>([]);
+  const [galNeedsSetup, setGalNeedsSetup] = useState(false);
   const [galUploading, setGalUploading] = useState<string | null>(null);
   const galFilesRef = useRef<HTMLInputElement>(null);
   const galSingleRef = useRef<HTMLInputElement>(null);
@@ -774,6 +926,8 @@ export default function AdminPage() {
     }
     const fres = await api('/api/admin/gallery/folders');
     if (fres.ok && Array.isArray(fres.json?.rows)) setFolders(fres.json.rows);
+    const rows = Array.isArray(res.json?.rows) ? res.json.rows : [];
+    setGalNeedsSetup(!fres.ok || (rows.length > 0 && !('category' in rows[0])));
   }
 
   async function loadApplications() {
@@ -803,7 +957,7 @@ export default function AdminPage() {
 
   function newPhotoId(_n: number) { return crypto.randomUUID(); }
 
-  async function galUploadMany(files: FileList | null) {
+  async function galUploadMany(files: ArrayLike<File> | null) {
     if (!files || files.length === 0) return;
     const picked = Array.from(files);
     const checks = await Promise.all(picked.map(checkImageFile));
@@ -821,7 +975,7 @@ export default function AdminPage() {
       try {
         const src = await uploadGalleryFile(list[i], folder);
         const caption = list[i].name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim();
-        const res = await api('/api/admin/gallery', { method: 'POST', body: JSON.stringify({ id: newPhotoId(i), src, caption, sort_order: ++order, ...(galFolder ? { category: galFolder } : {}) }) });
+        const res = await api('/api/admin/gallery', { method: 'POST', body: JSON.stringify({ id: newPhotoId(i), src, caption, sort_order: ++order }) });
         if (!res.ok) throw new Error(res.json?.error ?? 'Save failed');
         added++;
       } catch (err: unknown) { toast.error(`${list[i].name}: ${(err as Error).message}`); }
@@ -839,7 +993,9 @@ export default function AdminPage() {
     const results = await Promise.all(moving.map(p => api('/api/admin/gallery', { method: 'PUT', body: JSON.stringify(p) })));
     const failed = results.find(r => !r.ok);
     if (failed) {
-      toast.error(failed.json?.error ?? 'Could not move the photos');
+      const msg = String(failed.json?.error ?? '');
+      if (/category|schema cache/i.test(msg)) { setGalNeedsSetup(true); toast.error('Moving photos needs a one-time database update. See the notice on this page.'); }
+      else toast.error(msg || 'Could not move the photos');
       loadPhotos();
     } else {
       toast.success(`Moved ${moving.length} ${moving.length === 1 ? 'photo' : 'photos'} to ${label}`);
@@ -853,7 +1009,12 @@ export default function AdminPage() {
     const existing = groupByCategory(photos, folders, true).some(g => g.key === slug) || folders.some(f => f.slug === slug);
     if (existing) { toast.message('That folder already exists, using it'); return slug; }
     const res = await api('/api/admin/gallery/folders', { method: 'POST', body: JSON.stringify({ slug, label: name }) });
-    if (!res.ok) { toast.error(res.json?.error ?? 'Could not create the folder'); return null; }
+    if (!res.ok) {
+      const msg = String(res.json?.error ?? '');
+      if (/gallery_folders|schema cache|does not exist/i.test(msg)) { setGalNeedsSetup(true); toast.error('Creating folders needs a one-time database update. See the notice on this page.'); }
+      else toast.error(msg || 'Could not create the folder');
+      return null;
+    }
     setFolders(fs => [...fs, { slug, label: name }]);
     toast.success(`Folder "${name}" created`);
     return slug;
@@ -1379,9 +1540,12 @@ export default function AdminPage() {
               ) : (
                 <div className="adm-list">
                   <p className="ga-upload-hint" style={{ marginTop: 0 }}>Upload several photos at once. Allowed image types: {ALLOWED_IMAGE_LABEL}. Other file types can&apos;t be selected.</p>
+                  {galNeedsSetup && <GallerySetupNotice onRecheck={loadPhotos} />}
                   <DraggablePhotoList
                     photos={photos}
                     folders={folders}
+                    onImportFiles={galUploadMany}
+                    importing={galUploading}
                     onMove={galMove}
                     onCreateFolder={galCreateFolder}
                     onDeleteFolder={galDeleteFolder}
