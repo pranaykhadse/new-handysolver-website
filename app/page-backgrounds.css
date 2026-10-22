@@ -14,10 +14,14 @@
   content:'';position:absolute;z-index:-1;pointer-events:none;inset:0 auto 0 50%;width:100vw;transform:translateX(-50%);
   background-image:var(--page-grain),linear-gradient(180deg,#f8f4ed00,#eee6f2 20%,#eee6f2 80%,#f8f4ed00);
 }
+/* A soft peach glow that fades out smoothly on every side, so the band never shows an edge. */
 .handy-home.playful-careers .pc-moments::before,
 .handy-home.team-page .tw-offscreen::before,
 .handy-home.open-roles-page .or-bottom::before{
-  background-image:var(--page-grain),radial-gradient(ellipse at 12% 55%,#ffd8bc80,transparent 65%),linear-gradient(180deg,#f8f4ed00,#fbe9da 25%,#fbe9da 75%,#f8f4ed00);
+  inset:-60px auto -60px 50%;
+  background-image:
+    radial-gradient(ellipse 55% 60% at 16% 50%,#ffd2b266,#ffd2b200 72%),
+    linear-gradient(180deg,#fbe9da00 0%,#fbe9da38 16%,#fbe9da80 34%,#fbe9daa6 50%,#fbe9da80 66%,#fbe9da38 84%,#fbe9da00 100%);
 }
 .handy-home.playful-careers .pc-office{background-color:#f4ece1;background-image:var(--page-grain)}
 .handy-home:is(.playful-careers,.open-roles-page,.team-page,.talk-page,.gl-page) .hp-footer{background-image:var(--page-grain)}

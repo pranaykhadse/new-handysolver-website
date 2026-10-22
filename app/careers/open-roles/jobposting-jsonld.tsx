@@ -42,7 +42,7 @@ export default function JobPostingJsonLd({ jobs }: { jobs: PublicJob[] }) {
         '@type': 'JobPosting',
         title: job.title,
         description,
-        hiringOrganization: { '@type': 'Organization', name: 'HandySolver', sameAs: SITE_URL },
+        hiringOrganization: { '@type': 'Organization', name: 'Handysolver', sameAs: SITE_URL },
         jobLocation: {
           '@type': 'Place',
           address: {

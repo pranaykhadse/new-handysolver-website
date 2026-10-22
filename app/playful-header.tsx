@@ -98,7 +98,7 @@ export default function PlayfulHeader() {
   // (Same-page anchor landing lives in ./section-scroll so the capture-phase
   // ScrollMotion handler and this fallback share one calibration.)
   return <header className={`hn-shell${scrolled ? ' hn-scrolled' : ''}`}><ScrollMotion/>{pathname !== '/' && <HomeDepth key={pathname} rootSelector=".handy-home:not(.handy-depth)" cardSelector=".pc-polaroid, .pc-moment, .tw-portrait, .tw-snapshots figure, .lt-note, .tw-hello, .ce-nudge"/>}<div className="hn-header hp-wrap">
-    <a className="hn-brand" href="/" aria-label="HandySolver home"><BrandMark /></a>
+    <a className="hn-brand" href="/" aria-label="Handysolver home"><BrandMark /></a>
     <nav className="hn-nav" aria-label="Main navigation">
       {links.map(link => <a href={link.href} key={link.href} aria-current={current(link.href)} onClick={(e) => {
         if (!link.href.startsWith('/#') || pathname !== '/') return;

@@ -40,7 +40,7 @@ export default function GalleryContent() {
           <a className="gl-back" href="/careers"><ArrowLeft size={14}/>Back to careers</a>
         </div>
         <div className="hp-wrap gl-hero">
-          <p className="hp-overline">Life at HandySolver</p>
+          <p className="hp-overline">Life at Handysolver</p>
           <h1>Real moments.<br /><em>Unscripted.</em></h1>
           <p className="gl-lede">The birthdays, the celebrations, the games of cricket and the slices of cake. The bits between the work that make it worth showing up.</p>
         </div>
@@ -81,7 +81,7 @@ export default function GalleryContent() {
       <footer className="hp-footer hp-wrap">
         <div className="hp-footer-top"><p>Real moments. Unscripted, like us.</p><div><a href="/careers">Careers</a><a href="/team">Our people</a><a href="/lets-talk">Contact</a></div></div>
         <div className="hp-footer-bottom">
-          <span>© {new Date().getFullYear()} HandySolver</span>
+          <span>© {new Date().getFullYear()} Handysolver</span>
           <span>Gurugram, India. Good ideas travel.</span>
           <a href="#main">Back to the top ↑</a>
         </div>

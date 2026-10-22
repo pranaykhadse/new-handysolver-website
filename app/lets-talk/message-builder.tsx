@@ -35,7 +35,7 @@ export default function MessageBuilder(){
   const [trap,setTrap]=useState('');
   const [sending,setSending]=useState(false);
   const [status,setStatus]=useState('');
-  const body=()=>`Hi HandySolver,\n\nI’d like to talk about: ${topic}.\n\n${message.trim()}\n\n${name.trim()}${company.trim()?`\n${company.trim()}`:''}`;
+  const body=()=>`Hi Handysolver,\n\nI’d like to talk about: ${topic}.\n\n${message.trim()}\n\n${name.trim()}${company.trim()?`\n${company.trim()}`:''}`;
   async function submit(event:FormEvent<HTMLFormElement>){
     event.preventDefault();
     if(channel==='whatsapp'){
