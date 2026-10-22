@@ -17,7 +17,7 @@ function photoSrc(member: Member) {
 function Portrait({member}:{member:Member}) {
   const [failed,setFailed] = useState(false);
   const src = photoSrc(member);
-  return failed||!src?<div className="tw-photo-fallback"><Smile size={40}/><span>One of our humans.</span></div>:<img src={src} alt={member.name||'HandySolver team member'} loading="lazy" onError={()=>setFailed(true)}/>;
+  return failed||!src?<div className="tw-photo-fallback"><Smile size={40}/><span>One of our humans.</span></div>:<img src={src} alt={member.name||'HandySolver team member'} width={400} height={432} loading="lazy" onError={()=>setFailed(true)}/>;
 }
 
 export default function TeamWall(){

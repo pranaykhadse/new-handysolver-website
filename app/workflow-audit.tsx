@@ -33,10 +33,18 @@ export default function WorkflowAudit() {
   const [answers, setAnswers] = useState<number[]>(Array(5).fill(-1));
   const [scenario, setScenario] = useState(false);
   const [compact, setCompact] = useState(false);
+  const [atFooter, setAtFooter] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const scrollArea = useRef<HTMLDivElement>(null);
   useEffect(() => {
     void setCompact;
+  }, []);
+  useEffect(() => {
+    const footer = document.querySelector('footer');
+    if (!footer) return;
+    const observer = new IntersectionObserver(([entry]) => setAtFooter(entry.isIntersecting), { threshold: 0 });
+    observer.observe(footer);
+    return () => observer.disconnect();
   }, []);
   useEffect(() => {
     if (!open) return;
@@ -53,7 +61,7 @@ export default function WorkflowAudit() {
   const restart = () => { setAnswers(Array(5).fill(-1)); setScenario(false); setStep(0); };
 
   return <Dialog open={open} onOpenChange={setOpen}>
-    <DialogTrigger asChild><Button className="wa-launch" data-compact={compact} aria-label={compact ? 'Open the workflow check' : undefined}><span className="wa-launch-icon"><Gauge size={22} aria-hidden="true"/></span><span className="wa-launch-copy">How tangled is your work?<small>Take the 2-minute workflow check</small></span></Button></DialogTrigger>
+    <DialogTrigger asChild><Button className="wa-launch" data-compact={compact} data-docked={atFooter ? 'true' : 'false'} tabIndex={atFooter ? -1 : undefined} aria-hidden={atFooter ? true : undefined} aria-label={compact ? 'Open the workflow check' : undefined}><span className="wa-launch-icon"><Gauge size={22} aria-hidden="true"/></span><span className="wa-launch-copy">How tangled is your work?<small>Take the 2-minute workflow check</small></span></Button></DialogTrigger>
     <DialogContent className="wa-dialog" onOpenAutoFocus={event => { event.preventDefault(); heading.current?.focus(); }}>
       <div className="wa-scroll" ref={scrollArea}>
         <div className="wa-eyebrow"><Gauge size={18} aria-hidden="true"/> THE HANDY WORKFLOW CHECK</div>

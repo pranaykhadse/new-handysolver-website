@@ -1,0 +1,68 @@
+/* Readability: labels and captions no smaller than 11px, faint grey and orange text darkened to pass 4.5:1 (large headline words 3:1).
+   The mini product illustrations keep small text, but never below 9-10px. */
+
+/* Orange accent words in big headings, deepened slightly so they read on the light backgrounds */
+.handy-home .hp-hero h1 em,
+.handy-home .tw-hero h1 em,
+.handy-home .pc-hero h1 em,
+.handy-home .pc-roles h2 em,
+.handy-home .pc-top-roles-head h2 em,
+.handy-home .or-heading h1 em,
+.handy-home .lt-intro h1 em,
+.handy-home .gl-hero h1 em,
+.handy-home .ds-section h2 em { color: #db691c; }
+
+/* Small orange label on a lavender panel */
+.handy-home .hp-section-top .hp-overline { color: #a75016; }
+
+/* Home */
+.handy-home .hp-aside { font-size: 12px !important; color: #6d7066 !important; }
+.handy-home .hp-hero-bottom { font-size: 12px !important; }
+.wa-launch small { font-size: 11px !important; }
+.handy-home .vs-caption { font-size: 12px !important; color: #70685f !important; }
+.handy-home .vs-hub small { font-size: 10px !important; }
+.handy-home .vs-app-top small { font-size: 10px !important; color: #896b53 !important; }
+.handy-home .vs-module { font-size: 10px !important; }
+.handy-home .vs-auto-badge { font-size: 9px !important; }
+.handy-home .ds-hint { color: #756d65 !important; }
+.handy-home .ds-label { font-size: 11px !important; }
+.handy-home .tc-heading .hp-overline { font-size: 12px !important; color: #68655a !important; }
+.handy-home .tc-attribution p { font-size: 12px !important; color: #6b6458 !important; }
+.handy-home .tc-count { font-size: 11px !important; color: #73644f !important; }
+.handy-home .pj-step-text small { font-size: 11px !important; color: #7a6c5c !important; }
+.handy-home .pj-chapter { font-size: 11px !important; }
+.handy-home .pj-example-label { font-size: 10px !important; color: #736e67 !important; }
+.handy-home .pj-message span { font-size: 10px !important; }
+.handy-home .hp-footer-bottom,
+.handy-home .hp-footer-bottom span,
+.handy-home .hp-footer-bottom a { font-size: 11px !important; }
+
+/* Team */
+.handy-home .tw-hello > span { font-size: 11px !important; }
+.handy-home .tw-portrait figcaption span { font-size: 12px !important; }
+
+/* Careers */
+.handy-home .pc-photo-caption { color: #746e63 !important; }
+.handy-home .cv-chat-top span { font-size: 11px !important; }
+.handy-home .cv-bubble span { font-size: 10px !important; color: #716278 !important; }
+.handy-home .cv-reaction span { font-size: 10px !important; }
+.handy-home .pc-office-inner .hp-overline { font-size: 11px !important; }
+.handy-home .pc-office-inner address span { font-size: 11px !important; }
+
+/* Open roles */
+.handy-home .or-heading .hp-overline { font-size: 11px !important; }
+.handy-home .ce-nudge-top span { font-size: 11px !important; }
+.handy-home .or-board-top > span { font-size: 11px !important; color: #726d61 !important; }
+.handy-home .or-feed-note span { font-size: 11px !important; color: #736e63 !important; }
+.handy-home .or-discover { font-size: 11px !important; }
+
+/* Let's talk */
+.handy-home .lt-direct small { font-size: 11px !important; color: #6d6355 !important; }
+.handy-home .lt-form-top span { font-size: 11px !important; }
+.handy-home .lt-channel-options small { font-size: 11px !important; color: #6c6253 !important; }
+.handy-home .lt-topics button { font-size: 12px !important; }
+.handy-home .lt-fields small { font-size: 11px !important; color: #7b7060 !important; }
+.handy-home .lt-message-meta span { font-size: 11px !important; color: #7d6f5c !important; }
+.handy-home .lt-location .hp-overline,
+.handy-home .lt-career .hp-overline { font-size: 11px !important; }
+.handy-home .lt-career > p:not(.hp-overline) { color: #76604e !important; }

@@ -113,6 +113,20 @@ export default function Testimonials(){
     const timer=window.setTimeout(()=>api.scrollNext(),3000);
     return()=>window.clearTimeout(timer);
   },[api,playing,selected]);
+  useEffect(()=>{
+    if(!api)return;
+    const viewport=api.rootNode();
+    const track=api.containerNode();
+    const slides=api.slideNodes();
+    track.style.alignItems='flex-start';
+    viewport.style.transition='height .35s ease';
+    const fit=()=>{const slide=slides[api.selectedScrollSnap()];if(slide)viewport.style.height=`${slide.offsetHeight}px`;};
+    fit();
+    const observer=new ResizeObserver(fit);
+    slides.forEach(slide=>observer.observe(slide));
+    api.on('select',fit);api.on('reInit',fit);
+    return()=>{observer.disconnect();api.off('select',fit);api.off('reInit',fit);viewport.style.height='';viewport.style.transition='';track.style.alignItems='';};
+  },[api,testimonials.length]);
   function go(index:number){if(testimonials.length===0)return;setPaused(true);api?.scrollTo((index+testimonials.length)%testimonials.length,reduced);}
   if(testimonials.length===0){
     return <section id="testimonials" className="hp-proof tc-section">
@@ -122,7 +136,7 @@ export default function Testimonials(){
   return <section id="testimonials" className="hp-proof tc-section" ref={region} onFocusCapture={e=>{if(!(e.target as HTMLElement).closest('[data-rotation-control]'))setPaused(true);}}>
     <div className="hp-wrap tc-inner"><div className="tc-heading"><p className="hp-overline">The nicest part of our work? Hearing this.</p></div>
       <Carousel opts={{loop:true}} setApi={setApi} aria-label="What our clients say" onKeyDownCapture={e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();go(selected+(e.key==='ArrowLeft'?-1:1));}}}>
-        <CarouselContent aria-live={playing?'off':'polite'}>{testimonials.map((item,index)=><CarouselItem key={item.id} aria-label={`${index+1} of ${testimonials.length}`} aria-hidden={index!==selected}><div className="tc-slide"><span className="tc-quote-mark" aria-hidden="true">&ldquo;</span><blockquote>{item.quote}</blockquote>{item.videoUrl&&<VideoPlayer url={item.videoUrl} onHoverChange={setHovered}/>}<div className="tc-attribution">{item.avatarUrl?<img className="tc-avatar" src={item.avatarUrl} alt={`Photo of ${item.name}`} loading="lazy"/>:<span className="hp-initials">{item.initials}</span>}<div><strong>{item.name}</strong>{item.label&&<p>{item.label}</p>}</div></div></div></CarouselItem>)}</CarouselContent>
+        <CarouselContent aria-live={playing?'off':'polite'}>{testimonials.map((item,index)=><CarouselItem key={item.id} aria-label={`${index+1} of ${testimonials.length}`} aria-hidden={index!==selected}><div className="tc-slide"><span className="tc-quote-mark" aria-hidden="true">&ldquo;</span><blockquote>{item.quote}</blockquote>{item.videoUrl&&<VideoPlayer url={item.videoUrl} onHoverChange={setHovered}/>}<div className="tc-attribution">{item.avatarUrl?<img className="tc-avatar" width={46} height={46} src={item.avatarUrl} alt={`Photo of ${item.name}`} loading="lazy"/>:<span className="hp-initials">{item.initials}</span>}<div><strong>{item.name}</strong>{item.label&&<p>{item.label}</p>}</div></div></div></CarouselItem>)}</CarouselContent>
         <div className="tc-controls"><div className="tc-dots" aria-label="Choose a testimonial">{testimonials.map((item,index)=><Button key={item.id} variant="ghost" aria-label={`Show testimonial from ${item.name}`} aria-pressed={selected===index} onClick={()=>go(index)} disabled={!api}><span/></Button>)}</div><span className="tc-count">{String(selected+1).padStart(2,'0')} / {String(testimonials.length).padStart(2,'0')}</span><div className="tc-buttons"><Button variant="outline" size="icon" onClick={()=>go(selected-1)} disabled={!api} aria-label="Previous testimonial"><ArrowLeft size={17}/></Button><Button variant="outline" size="icon" onClick={()=>go(selected+1)} disabled={!api} aria-label="Next testimonial"><ArrowRight size={17}/></Button></div></div>
       </Carousel>
     </div>

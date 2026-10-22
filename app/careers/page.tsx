@@ -1,4 +1,5 @@
 ﻿import type { Metadata } from 'next';
+import { OG_DEFAULTS } from '@/lib/seo';
 import { ArrowUpRight, Asterisk, MapPin } from 'lucide-react';
 import CareerPhoto from './photo';
 import BreadcrumbsJsonLd from '../breadcrumbs-jsonld';
@@ -12,7 +13,7 @@ import './top-roles.css';
 import './career-refresh.css';
 import './floating-roles.css';
 
-export const metadata: Metadata = { title: 'Careers at HandySolver | Bring your curious side', description: 'Good people. Useful work. Explore life at HandySolver in Gurugram and find your next opportunity.', alternates: { canonical: '/careers' }, openGraph: { title: 'Careers at HandySolver | Bring your curious side', description: 'Good people. Useful work. Explore life at HandySolver in Gurugram and find your next opportunity.', url: '/careers' } };
+export const metadata: Metadata = { title: 'Careers at HandySolver | Bring your curious side', description: 'Good people. Useful work. Explore life at HandySolver in Gurugram and find your next opportunity.', alternates: { canonical: '/careers' }, openGraph: { ...OG_DEFAULTS, title: 'Careers at HandySolver | Bring your curious side', description: 'Good people. Useful work. Explore life at HandySolver in Gurugram and find your next opportunity.', url: '/careers' } };
 const jobs = '/careers/open-roles';
 
 export default function Careers() {

@@ -66,7 +66,7 @@ export default function GalleryContent() {
                   <div className="gl-grid">
                     {group.photos.map((photo, idx) => (
                       <figure key={photo.id} className="gl-photo" style={{ transform: `rotate(${ROTATIONS[idx % ROTATIONS.length]}deg)` }}>
-                        <img src={photo.src} alt={photo.caption} loading={idx < 4 ? 'eager' : 'lazy'} decoding="async" />
+                        <img src={photo.src} alt={photo.caption} width={360} height={240} loading={idx < 4 ? 'eager' : 'lazy'} decoding="async" />
                         <figcaption>{photo.caption}</figcaption>
                       </figure>
                     ))}

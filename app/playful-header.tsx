@@ -13,6 +13,7 @@ import './mobile-polish.css';
 import HomeDepth from './home-depth';
 import './page-depth.css';
 import './page-backgrounds.css';
+import './readability.css';
 
 const links = [
   { label: 'What we do', href: '/#solutions', number: '01' },
@@ -34,9 +35,11 @@ export default function PlayfulHeader() {
       if (pathname !== '/') { setActiveSection(''); return; }
       const marker = Math.max(120, window.innerHeight * .3);
       let active = '';
-      for (const id of ['solutions', 'approach', 'about']) {
+      // Page order. Sections with no menu entry (testimonials, the ambition band, the closing contact block) clear the highlight.
+      const navFor: Record<string, string> = { solutions: 'solutions', testimonials: '', approach: 'approach', ambition: '', about: 'about', 'contact-band': '' };
+      for (const id of Object.keys(navFor)) {
         const section = document.getElementById(id);
-        if (section && section.getBoundingClientRect().top <= marker) active = id;
+        if (section && section.getBoundingClientRect().top <= marker) active = navFor[id];
       }
       setActiveSection(active);
     };

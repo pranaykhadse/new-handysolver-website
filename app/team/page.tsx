@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { OG_DEFAULTS } from '@/lib/seo';
 import { ArrowUpRight, ArrowLeft, Asterisk } from 'lucide-react';
 import PlayfulHeader from '../playful-header';
 import BreadcrumbsJsonLd from '../breadcrumbs-jsonld';
@@ -7,7 +8,7 @@ import CareerPhoto from '../careers/photo';
 import '../playful-home.css';
 import './team.css';
 
-export const metadata:Metadata={title:'Meet the team | HandySolver',description:'Meet the humans behind the handy. A look at the people and everyday moments at HandySolver.',alternates:{canonical:'/team'},openGraph:{title:'Meet the team | HandySolver',description:'Meet the humans behind the handy. A look at the people and everyday moments at HandySolver.',url:'/team'}};
+export const metadata:Metadata={title:'Meet the team | HandySolver',description:'Meet the humans behind the handy. A look at the people and everyday moments at HandySolver.',alternates:{canonical:'/team'},openGraph:{ ...OG_DEFAULTS,title:'Meet the team | HandySolver',description:'Meet the humans behind the handy. A look at the people and everyday moments at HandySolver.',url:'/team'}};
 
 export default function TeamPage(){return <div className="handy-home team-page"><BreadcrumbsJsonLd items={[{ name: 'Home', path: '/' }, { name: 'Team', path: '/team' }]} />
   <a className="hp-skip" href="#main">Skip to the team</a><PlayfulHeader/>

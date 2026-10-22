@@ -1,5 +1,6 @@
 import { ArrowUpRight, ArrowRight, Asterisk, MoveUpRight } from 'lucide-react';
 import type { Metadata } from 'next';
+import { OG_DEFAULTS } from '@/lib/seo';
 import { HomeMotion } from './playful-interactions';
 import ProcessJourney from './process-journey';
 import PlayfulHeader from './playful-header';
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
   title: 'HandySolver | Ideas into impact',
   description: 'Hands-on business transformation, custom software, and practical AI. Bring people, processes, and technology together with HandySolver.',
   alternates: { canonical: '/' },
-  openGraph: {
+  openGraph: { ...OG_DEFAULTS,
     title: 'HandySolver | Ideas into impact',
     description: 'Hands-on business transformation, custom software, and practical AI. Bring people, processes, and technology together with HandySolver.',
     url: '/',
@@ -72,9 +73,9 @@ export default function Home() {
 
       <MissionBand />
 
-      <section className="hr-people hp-wrap hp-reveal" id="about"><div className="hr-team-photo"><img src="https://handysolver.com/assets/images/rock-n-roll/foosball-short.jpg" alt="HandySolver team sharing a relaxed moment in the office"/><span>Real people.<br/><em>Useful work.</em></span></div><div className="hr-people-copy"><p className="hp-overline">Meet the humans behind the handy.</p><h2>Good people.<br/>Sleeves rolled up.</h2><p>Hands-on thinkers who care about the people using what we build.</p><div className="hp-people-links"><a className="hp-text-link" href="/team">Meet the team <ArrowUpRight size={17}/></a><a className="hp-text-link" href="/careers">Come build with us <ArrowUpRight size={17}/></a></div></div></section>
+      <section className="hr-people hp-wrap hp-reveal" id="about"><div className="hr-team-photo"><img src="https://handysolver.com/assets/images/rock-n-roll/foosball-short.jpg" alt="HandySolver team sharing a relaxed moment in the office" width="261" height="195"/><span>Real people.<br/><em>Useful work.</em></span></div><div className="hr-people-copy"><p className="hp-overline">Meet the humans behind the handy.</p><h2>Good people.<br/>Sleeves rolled up.</h2><p>Hands-on thinkers who care about the people using what we build.</p><div className="hp-people-links"><a className="hp-text-link" href="/team">Meet the team <ArrowUpRight size={17}/></a><a className="hp-text-link" href="/careers">Come build with us <ArrowUpRight size={17}/></a></div></div></section>
 
-      <section className="hp-contact"><div className="hp-wrap"><p className="hp-overline">Over to you.</p><a className="hp-big-contact" href={contact}><span>What’s your<br/><em>“there must be<br/>a better way”?</em></span><span className="hp-contact-arrow"><MoveUpRight size={70} strokeWidth={1.2}/></span></a><div className="hp-contact-bottom"><p>Let’s find it. Together.</p><a href={contact}>Start a conversation <ArrowUpRight size={18}/></a></div></div></section>
+      <section className="hp-contact" id="contact-band"><div className="hp-wrap"><p className="hp-overline">Over to you.</p><a className="hp-big-contact" href={contact}><span>What’s your<br/><em>“there must be<br/>a better way”?</em></span><span className="hp-contact-arrow"><MoveUpRight size={70} strokeWidth={1.2}/></span></a><div className="hp-contact-bottom"><p>Let’s find it. Together.</p><a href={contact}>Start a conversation <ArrowUpRight size={18}/></a></div></div></section>
     </main>
     <footer className="hp-footer hp-wrap"><div className="hp-footer-top"><div><a href="/careers">Careers</a><a href="https://in.linkedin.com/company/handysolver">LinkedIn</a><a href={contact}>Contact</a></div></div><div className="hp-footer-bottom"><span>© {new Date().getFullYear()} HandySolver</span><span>Gurugram, India. Good ideas travel.</span><a href="#main">Back to the top ↑</a></div></footer>
   </div>;

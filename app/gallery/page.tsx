@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
+import { OG_DEFAULTS } from '@/lib/seo';
 import GalleryContent from './gallery-content';
 
 export const metadata: Metadata = {
   title: 'Photo Gallery | HandySolver',
   description: 'A peek at life at HandySolver - birthdays, celebrations, team moments, and the bits between the work.',
   alternates: { canonical: '/gallery' },
-  openGraph: {
+  openGraph: { ...OG_DEFAULTS,
     title: 'Photo Gallery | HandySolver',
     description: 'A peek at life at HandySolver - birthdays, celebrations, team moments, and the bits between the work.',
     url: '/gallery',

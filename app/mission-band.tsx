@@ -19,7 +19,7 @@ export default function MissionBand() {
 
   return (
     <div ref={host}>
-      <section ref={band} className="hr-mission" aria-label="Our ambition">
+      <section ref={band} id="ambition" className="hr-mission" aria-label="Our ambition">
         <div className="hp-wrap">
           <span>OUR AMBITION</span>
           <p>Help <strong>100 companies</strong> reach <em>2&times; growth.</em></p>
