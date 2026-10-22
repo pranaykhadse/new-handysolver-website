@@ -66,3 +66,7 @@
 .handy-home .lt-location .hp-overline,
 .handy-home .lt-career .hp-overline { font-size: 11px !important; }
 .handy-home .lt-career > p:not(.hp-overline) { color: #76604e !important; }
+
+/* Follow-up: two captions that were just under 4.5:1 */
+.handy-home .tw-portrait figcaption span { color: #5f5040 !important; }
+.handy-home .cv-bubble span { color: #5a4a63 !important; }
