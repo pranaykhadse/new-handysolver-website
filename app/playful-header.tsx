@@ -23,10 +23,21 @@ const links = [
 ];
 const contact = '/lets-talk';
 
+// The slide-out menu locks page scrolling while it is open; scrolling to a section has to wait until that lock is released.
+function afterMenuClosed(run: () => void) {
+  const started = Date.now();
+  const check = () => {
+    const locked = document.body.hasAttribute('data-scroll-locked') || document.body.style.overflow === 'hidden';
+    if (!locked || Date.now() - started > 1500) run(); else window.setTimeout(check, 50);
+  };
+  window.setTimeout(check, 60);
+}
+
 export default function PlayfulHeader() {
   const pathname = usePathname();
   const [activeSection, setActiveSection] = useState('');
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
     let frame = 0;
     const update = () => {
@@ -97,12 +108,20 @@ export default function PlayfulHeader() {
     </nav>
     <a className="hn-contact" href={contact}><span>Let’s talk</span><span className="hn-contact-icon"><ArrowUpRight size={19}/></span></a>
     <a className="hn-mobile-contact" href={contact} aria-label="Let’s talk"><ArrowUpRight size={21}/></a>
-    <Sheet>
+    <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
       <SheetTrigger className="hn-menu-trigger" aria-label="Open navigation"><span>Explore</span><Menu size={20}/></SheetTrigger>
       <SheetContent className="hn-sheet" side="right" showCloseButton={false}>
         <SheetHeader className="hn-sheet-head"><SheetTitle><BrandMark/></SheetTitle><SheetDescription>A little less complicated. A little more human.</SheetDescription></SheetHeader>
         <SheetClose className="hn-sheet-close" aria-label="Close navigation"><X size={20}/></SheetClose>
-        <nav className="hn-mobile-nav" aria-label="Mobile navigation">{links.map(link => <SheetClose asChild key={link.href}><a href={link.href} aria-current={current(link.href)}><small>{link.number}</small><span>{link.label}</span><ArrowUpRight size={22}/></a></SheetClose>)}</nav>
+        <nav className="hn-mobile-nav" aria-label="Mobile navigation">{links.map(link => <SheetClose asChild key={link.href}><a href={link.href} aria-current={current(link.href)} onClick={(e) => {
+          if (!link.href.startsWith('/#') || pathname !== '/') return;
+          e.preventDefault();
+          setMenuOpen(false);
+          afterMenuClosed(() => {
+            scrollToSection(link.href.slice(2));
+            window.history.replaceState({}, '', link.href);
+          });
+        }}><small>{link.number}</small><span>{link.label}</span><ArrowUpRight size={22}/></a></SheetClose>)}</nav>
         <div className="hn-sheet-foot"><p>Got a good<br/><em>“what if”?</em></p><a href={contact}>Let’s work it out <ArrowRight size={21}/></a></div>
       </SheetContent>
     </Sheet>

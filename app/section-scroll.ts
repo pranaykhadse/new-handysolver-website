@@ -3,7 +3,12 @@
 // header as fallback), so this math must live here — never duplicated.
 
 // Per-section fine-tuning, measured in px (positive = scroll further down).
-export const SECTION_SCROLL_EXTRA: Record<string, number> = { solutions: 108, approach: 89, life: 820 };
+export const SECTION_SCROLL_EXTRA: Record<string, number> = { life: 820 };
+
+// These sections land by their own content: the first line of content sits just below the sticky navbar,
+// whatever the screen size (section padding and navbar height both change between phone, tablet and desktop).
+const CONTENT_ALIGNED = new Set(['solutions', 'approach']);
+const CONTENT_GAP = 14;
 
 export function getNavbarHeight(): number {
   const nav = document.querySelector('.hn-shell');
@@ -15,10 +20,11 @@ export function scrollToSection(id: string, extra = 0): void {
   const el = document.getElementById(id);
   if (!el) return;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  window.scrollTo({
-    top: el.getBoundingClientRect().top + window.scrollY - getNavbarHeight() - 26 + (SECTION_SCROLL_EXTRA[id] ?? 0) + extra,
-    behavior: reduce ? 'auto' : 'smooth',
-  });
+  const sectionTop = el.getBoundingClientRect().top + window.scrollY;
+  const top = CONTENT_ALIGNED.has(id)
+    ? sectionTop + (parseFloat(getComputedStyle(el).paddingTop) || 0) - getNavbarHeight() - CONTENT_GAP + extra
+    : sectionTop - getNavbarHeight() - 26 + (SECTION_SCROLL_EXTRA[id] ?? 0) + extra;
+  window.scrollTo({ top, behavior: reduce ? 'auto' : 'smooth' });
 }
 
 // Entry-point adjustment: the hero "A better way starts here" link lands 0.5px
