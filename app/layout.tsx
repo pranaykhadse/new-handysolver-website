@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/site';
+import { CONTACT_EMAIL } from '@/lib/contact';
 import './globals.css';
 
 const DESCRIPTION = 'Hands-on business transformation, custom software, and practical AI. Bring people, processes, and technology together with HandySolver.';
@@ -26,7 +27,7 @@ const ORG_JSON_LD = {
   url: SITE_URL,
   logo: `${SITE_URL}/hs-logo.png`,
   description: DESCRIPTION,
-  email: 'connect@handysolver.com',
+  email: CONTACT_EMAIL,
   address: { '@type': 'PostalAddress', addressLocality: 'Gurugram', addressCountry: 'IN' },
 };
 

@@ -1,6 +1,7 @@
 'use client';
 import { useState, type FormEvent } from 'react';
 import { ArrowUpRight, Copy, Check, Send } from 'lucide-react';
+import { CONTACT_EMAIL } from '@/lib/contact';
 
 function WhatsAppIcon() {
   return (
@@ -51,15 +52,15 @@ export default function MessageBuilder(){
         setStatus(`Thank you, ${name.trim()}. Your message has been sent and we will reply to ${email.trim()}.`);
         setName('');setEmail('');setCompany('');setMessage('');
       }else{
-        setStatus(data.error||'Something went wrong. Please try WhatsApp or write to connect@handysolver.com.');
+        setStatus(data.error||`Something went wrong. Please try WhatsApp or write to ${CONTACT_EMAIL}.`);
       }
     }catch{
-      setStatus('We could not reach the server. Please try WhatsApp or write to connect@handysolver.com.');
+      setStatus(`We could not reach the server. Please try WhatsApp or write to ${CONTACT_EMAIL}.`);
     }finally{
       setSending(false);
     }
   }
-  async function copy(){try{await navigator.clipboard.writeText(body());setStatus(channel==='whatsapp'?'Message copied. Paste it into WhatsApp to +91 99718 15001.':'Message copied. You can paste it into an email to connect@handysolver.com.');}catch{setStatus('Copy isn’t available here. Select your message to copy it manually.');}}
+  async function copy(){try{await navigator.clipboard.writeText(body());setStatus(channel==='whatsapp'?'Message copied. Paste it into WhatsApp to +91 99718 15001.':`Message copied. You can paste it into an email to ${CONTACT_EMAIL}.`);}catch{setStatus('Copy isn’t available here. Select your message to copy it manually.');}}
   return <form className="lt-form" onSubmit={submit}>
     <div className="lt-form-top"><span>A GOOD CONVERSATION STARTS HERE</span><Send size={22} aria-hidden="true"/></div>
     <h2>{'What’s on '}<em>{'your mind?'}</em></h2>
@@ -70,7 +71,7 @@ export default function MessageBuilder(){
     <label className="lt-message">The short version <span>*</span><Textarea value={message} onChange={e=>setMessage(e.target.value)} required maxLength={1800} rows={5} placeholder="What’s taking too much time? What would you love to make easier? A few lines are plenty."/></label>
     <div className="lt-message-meta"><span>No perfect brief needed.</span><span>{message.length}/1800</span></div>
     <div className="lt-form-actions"><Button className="lt-send" type="submit" disabled={sending}>{channel==='whatsapp'?<><WhatsAppIcon/>Continue on WhatsApp</>:(sending?'Sending...':'Send message')} <ArrowUpRight size={18}/></Button><Button type="button" variant="ghost" onClick={copy} disabled={!message.trim()}><Copy size={15}/>Copy message</Button></div>
-    <p className="lt-form-note">{channel==='whatsapp'?<>Opens WhatsApp with your message for +91 99718 15001. You review and send it there.<br/>This page does not submit or store your details.</>:<>Sends your message to connect@handysolver.com.<br/>We use your name and email only to reply to you.</>}</p>
+    <p className="lt-form-note">{channel==='whatsapp'?<>Opens WhatsApp with your message for +91 99718 15001. You review and send it there.<br/>This page does not submit or store your details.</>:<>Sends your message to {CONTACT_EMAIL}.<br/>We use your name and email only to reply to you.</>}</p>
     <p className="lt-status" role="status">{status}</p>
   </form>;
 }

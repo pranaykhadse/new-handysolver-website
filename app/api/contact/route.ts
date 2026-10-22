@@ -1,8 +1,9 @@
 import nodemailer from "nodemailer";
+import { CONTACT_EMAIL } from "@/lib/contact";
 
 const SMTP_USER = process.env.SMTP_USER ?? "";
 const SMTP_PASS = process.env.SMTP_PASS ?? "";
-const CONTACT_TO = process.env.CONTACT_TO ?? "connect@handysolver.com";
+const CONTACT_TO = process.env.CONTACT_TO ?? CONTACT_EMAIL;
 
 const TOPICS = ["Connect our systems", "Build something custom", "Automate the busywork", "Still figuring it out"];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
   if (tooMany(ip)) return fail("You have sent a few messages already. Please try again later or use WhatsApp.", 429);
 
   if (!SMTP_USER || !SMTP_PASS) {
-    return fail("Sending from this page is not available right now. Please use WhatsApp or write to connect@handysolver.com.", 503);
+    return fail(`Sending from this page is not available right now. Please use WhatsApp or write to ${CONTACT_EMAIL}.`, 503);
   }
 
   try {
@@ -79,6 +80,6 @@ export async function POST(request: Request) {
     return Response.json({ ok: true });
   } catch (error) {
     console.error("Contact email failed:", error instanceof Error ? error.message : error);
-    return fail("We could not send that just now. Please try WhatsApp or write to connect@handysolver.com.", 502);
+    return fail(`We could not send that just now. Please try WhatsApp or write to ${CONTACT_EMAIL}.`, 502);
   }
 }
