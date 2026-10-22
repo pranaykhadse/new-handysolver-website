@@ -149,3 +149,35 @@
  .handy-home.handy-home .vs-card:hover,.handy-home.handy-home .tw-portrait:hover{transform:none;box-shadow:none}
  .handy-home.handy-home .hp-button:active,.handy-home.handy-home .hn-mobile-contact:active,.handy-home.handy-home .tw-you:active{scale:.97}
 }
+
+/* Readable text on phones: labels and captions no smaller than 11px, mini-illustration text no smaller than 9-10px */
+@media (max-width: 760px) {
+  .handy-home.handy-home .vs-caption,
+  .handy-home.handy-home .ds-label,
+  .handy-home.handy-home .pj-flow-controls span,
+  .handy-home.handy-home .pj-step-text small,
+  .handy-home.handy-home .pj-chapter,
+  .handy-home.handy-home .pj-example-label,
+  .handy-home.handy-home .cv-picker button span,
+  .handy-home.handy-home .cv-chat-top span,
+  .handy-home.handy-home address span,
+  .handy-home.handy-home .ce-nudge-top span,
+  .handy-home.handy-home .lt-direct small,
+  .handy-home.handy-home .lt-form-top span,
+  .handy-home.handy-home .lt-channel-options small,
+  .handy-home.handy-home .lt-fields small,
+  .handy-home.handy-home .tw-portrait figcaption span { font-size: 11px !important; }
+
+  .handy-home.handy-home .vs-app-top small,
+  .handy-home.handy-home .vs-hub small,
+  .handy-home.handy-home .cv-bubble span,
+  .handy-home.handy-home .cv-reaction span,
+  .handy-home.handy-home .pj-message span { font-size: 10px !important; }
+  .handy-home.handy-home .vs-auto-badge { font-size: 9px !important; }
+}
+
+/* The floating workflow check keeps its title on phones and drops the subtitle so it covers less of the page */
+@media (max-width: 600px) {
+  .wa-launch small { display: none; }
+  .wa-launch.wa-launch { padding: 9px 14px 9px 9px; }
+}

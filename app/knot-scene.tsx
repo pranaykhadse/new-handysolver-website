@@ -34,7 +34,7 @@ export default function KnotScene() {
   };
   return <div ref={scene} className="hp-knot-scene hp-knot-alive" data-moving={moving} onPointerMove={tilt} onPointerLeave={reset} onPointerCancel={reset}>
     <div className="hp-knot-depth">
-      <div className="hp-knot-picture"><img src="/untangled-cord.png" alt="A loose knot of orange cotton cord on lavender paper" width="1024" height="1024" fetchPriority="high"/></div>
+      <div className="hp-knot-picture"><img src="/untangled-cord.webp" alt="A loose knot of orange cotton cord on lavender paper" width="1024" height="1024" fetchPriority="high"/></div>
       <span className="hp-knot-note">a little tangled?<br/><em>we get it.</em></span>
       <a className="hp-knot-link" href="#solutions">Let’s work it out <ArrowDown size={19}/></a>
     </div>

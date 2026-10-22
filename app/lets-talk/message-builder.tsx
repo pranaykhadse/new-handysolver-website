@@ -30,32 +30,47 @@ export default function MessageBuilder(){
   const [name,setName]=useState('');
   const [company,setCompany]=useState('');
   const [message,setMessage]=useState('');
+  const [email,setEmail]=useState('');
+  const [trap,setTrap]=useState('');
+  const [sending,setSending]=useState(false);
   const [status,setStatus]=useState('');
-  const body=()=>`Hi HandySolver,\n\nI'd like to talk about: ${topic}.\n\n${message.trim()}\n\n${name.trim()}${company.trim()?`\n${company.trim()}`:''}`;
-  function draft(event:FormEvent<HTMLFormElement>){
+  const body=()=>`Hi HandySolver,\n\nI’d like to talk about: ${topic}.\n\n${message.trim()}\n\n${name.trim()}${company.trim()?`\n${company.trim()}`:''}`;
+  async function submit(event:FormEvent<HTMLFormElement>){
     event.preventDefault();
     if(channel==='whatsapp'){
       window.location.href=`https://wa.me/919971815001?text=${encodeURIComponent(body())}`;
       setStatus('Continue in WhatsApp to review and send your message to +91 99718 15001. This page has not sent it.');
-    }else{
-      const subject = encodeURIComponent("Let's talk: " + topic);
-      const bodyText = encodeURIComponent(body());
-      const gmailUrl = 'https://mail.google.com/mail/?view=cm&to=connect%40handysolver.com&su=' + subject + '&body=' + bodyText;
-      window.open(gmailUrl, '_blank', 'noopener,noreferrer');
-      setStatus('Gmail should open in a new tab with your draft. Review it and press Send there. Nothing has been sent by this page.');
+      return;
+    }
+    setSending(true);
+    setStatus('');
+    try{
+      const res=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,company,topic,message,website:trap})});
+      const data=await res.json().catch(()=>({}));
+      if(res.ok){
+        setStatus(`Thank you, ${name.trim()}. Your message has been sent and we will reply to ${email.trim()}.`);
+        setName('');setEmail('');setCompany('');setMessage('');
+      }else{
+        setStatus(data.error||'Something went wrong. Please try WhatsApp or write to connect@handysolver.com.');
+      }
+    }catch{
+      setStatus('We could not reach the server. Please try WhatsApp or write to connect@handysolver.com.');
+    }finally{
+      setSending(false);
     }
   }
-  async function copy(){try{await navigator.clipboard.writeText(body());setStatus(channel==='whatsapp'?'Message copied. Paste it into WhatsApp to +91 99718 15001.':'Message copied. Paste it into Gmail to connect@handysolver.com.');}catch{setStatus("Copy isn't available here. Select your message to copy it manually.");}}
-  return <form className="lt-form" onSubmit={draft}>
+  async function copy(){try{await navigator.clipboard.writeText(body());setStatus(channel==='whatsapp'?'Message copied. Paste it into WhatsApp to +91 99718 15001.':'Message copied. You can paste it into an email to connect@handysolver.com.');}catch{setStatus('Copy isn’t available here. Select your message to copy it manually.');}}
+  return <form className="lt-form" onSubmit={submit}>
     <div className="lt-form-top"><span>A GOOD CONVERSATION STARTS HERE</span><Send size={22} aria-hidden="true"/></div>
-    <h2>{"What's on "}<em>{"your mind?"}</em></h2>
-    <fieldset className="lt-channel"><legend>{"Let's connect on"}</legend><RadioGroup value={channel} onValueChange={value=>{setChannel(value);setStatus('');}} className="lt-channel-options" aria-label="Contact method"><label data-active={channel==='whatsapp'}><RadioGroupItem value="whatsapp"/><WhatsAppIcon/><span>WhatsApp<small>Quick and easy</small></span></label><label data-active={channel==='email'}><RadioGroupItem value="email"/><EmailIcon/><span>Email<small>Prefer your inbox?</small></span></label></RadioGroup></fieldset>
-    <fieldset className="lt-topics"><legend>{"I'd like to…"}</legend>{topics.map(item=><Button key={item} type="button" variant="outline" aria-pressed={topic===item} onClick={()=>setTopic(item)}>{topic===item&&<Check size={13}/>} {item}</Button>)}</fieldset>
-    <div className="lt-fields"><label>Your name <span>*</span><Input autoComplete="name" value={name} onChange={e=>setName(e.target.value)} required maxLength={100} placeholder="What should we call you?"/></label><label>Company <small>(optional)</small><Input autoComplete="organization" value={company} onChange={e=>setCompany(e.target.value)} maxLength={150} placeholder="Where you make things happen"/></label></div>
-    <label className="lt-message">The short version <span>*</span><Textarea value={message} onChange={e=>setMessage(e.target.value)} required maxLength={1800} rows={5} placeholder="What's taking too much time? What would you love to make easier? A few lines are plenty."/></label>
+    <h2>{'What’s on '}<em>{'your mind?'}</em></h2>
+    <fieldset className="lt-channel"><legend>{'Let’s connect on'}</legend><RadioGroup value={channel} onValueChange={value=>{setChannel(value);setStatus('');}} className="lt-channel-options" aria-label="Contact method"><label data-active={channel==='whatsapp'}><RadioGroupItem value="whatsapp"/><WhatsAppIcon/><span>WhatsApp<small>Quick and easy</small></span></label><label data-active={channel==='email'}><RadioGroupItem value="email"/><EmailIcon/><span>Email<small>Sent from this page</small></span></label></RadioGroup></fieldset>
+    <fieldset className="lt-topics"><legend>{'I’d like to…'}</legend>{topics.map(item=><Button key={item} type="button" variant="outline" aria-pressed={topic===item} onClick={()=>setTopic(item)}>{topic===item&&<Check size={13}/>} {item}</Button>)}</fieldset>
+    <div className="lt-fields"><label>Your name <span>*</span><Input autoComplete="name" value={name} onChange={e=>setName(e.target.value)} required maxLength={100} placeholder="What should we call you?"/></label><label>Company <small>(optional)</small><Input autoComplete="organization" value={company} onChange={e=>setCompany(e.target.value)} maxLength={150} placeholder="Where you make things happen"/></label>{channel==='email'&&<label className="lt-email">Your email <span>*</span><Input type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} required maxLength={200} placeholder="Where should we reply?"/></label>}</div>
+    <div className="lt-hp" aria-hidden="true"><label>Leave this field empty<input type="text" name="website" tabIndex={-1} autoComplete="off" value={trap} onChange={e=>setTrap(e.target.value)}/></label></div>
+    <label className="lt-message">The short version <span>*</span><Textarea value={message} onChange={e=>setMessage(e.target.value)} required maxLength={1800} rows={5} placeholder="What’s taking too much time? What would you love to make easier? A few lines are plenty."/></label>
     <div className="lt-message-meta"><span>No perfect brief needed.</span><span>{message.length}/1800</span></div>
-    <div className="lt-form-actions"><Button className="lt-send" type="submit">{channel==='whatsapp'?<><WhatsAppIcon/>Continue on WhatsApp</>:'Open email draft'} <ArrowUpRight size={18}/></Button><Button type="button" variant="ghost" onClick={copy} disabled={!message.trim()}><Copy size={15}/>Copy message</Button></div>
-    <p className="lt-form-note">{channel==='whatsapp'?'Opens WhatsApp with your message for +91 99718 15001.':'Opens Gmail in a new tab with a draft to connect@handysolver.com.'} You review and send it there.<br/>This page does not submit or store your details.</p>
+    <div className="lt-form-actions"><Button className="lt-send" type="submit" disabled={sending}>{channel==='whatsapp'?<><WhatsAppIcon/>Continue on WhatsApp</>:(sending?'Sending...':'Send message')} <ArrowUpRight size={18}/></Button><Button type="button" variant="ghost" onClick={copy} disabled={!message.trim()}><Copy size={15}/>Copy message</Button></div>
+    <p className="lt-form-note">{channel==='whatsapp'?<>Opens WhatsApp with your message for +91 99718 15001. You review and send it there.<br/>This page does not submit or store your details.</>:<>Sends your message to connect@handysolver.com.<br/>We use your name and email only to reply to you.</>}</p>
     <p className="lt-status" role="status">{status}</p>
   </form>;
 }

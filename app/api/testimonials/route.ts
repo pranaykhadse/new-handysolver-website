@@ -1,5 +1,6 @@
 import { getSupabase, isSupabaseConfigured, type DbTestimonial } from "@/lib/supabase";
 import seed from "@/db/seed/testimonials.json";
+import { curlyApostrophes, tidyLabel, tidyName } from "@/lib/tidy-text";
 
 type TestimonialPayload = {
   id: string; name: string; initials: string; label: string; quote: string;
@@ -8,8 +9,8 @@ type TestimonialPayload = {
 
 function shape(row: DbTestimonial): TestimonialPayload {
   return {
-    id: row.id, name: row.name, initials: row.initials, label: row.label ?? "",
-    quote: row.quote, avatarUrl: row.avatar_url ?? null, videoUrl: row.video_url ?? null,
+    id: row.id, name: tidyName(row.name), initials: row.initials, label: tidyLabel(row.label ?? ""),
+    quote: curlyApostrophes(row.quote), avatarUrl: row.avatar_url ?? null, videoUrl: row.video_url ?? null,
     source: row.source ?? "", sourceLabel: row.source_label ?? "",
   };
 }
