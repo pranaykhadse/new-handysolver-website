@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { ArrowUpRight, ArrowRight, Menu, X } from 'lucide-react';
 import BrandMark from './brand-mark';
@@ -38,6 +38,7 @@ export default function PlayfulHeader() {
   const [activeSection, setActiveSection] = useState('');
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const goingToSection = useRef(false);
   useEffect(() => {
     let frame = 0;
     const update = () => {
@@ -110,15 +111,17 @@ export default function PlayfulHeader() {
     <a className="hn-mobile-contact" href={contact} aria-label="Let’s talk"><ArrowUpRight size={21}/></a>
     <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
       <SheetTrigger className="hn-menu-trigger" aria-label="Open navigation"><span>Explore</span><Menu size={20}/></SheetTrigger>
-      <SheetContent className="hn-sheet" side="right" showCloseButton={false}>
+      <SheetContent className="hn-sheet" side="right" showCloseButton={false} onCloseAutoFocus={(e) => { if (goingToSection.current) e.preventDefault(); }}>
         <SheetHeader className="hn-sheet-head"><SheetTitle><BrandMark/></SheetTitle><SheetDescription>A little less complicated. A little more human.</SheetDescription></SheetHeader>
         <SheetClose className="hn-sheet-close" aria-label="Close navigation"><X size={20}/></SheetClose>
         <nav className="hn-mobile-nav" aria-label="Mobile navigation">{links.map(link => <SheetClose asChild key={link.href}><a href={link.href} aria-current={current(link.href)} onClick={(e) => {
           if (!link.href.startsWith('/#') || pathname !== '/') return;
           e.preventDefault();
+          goingToSection.current = true;
           setMenuOpen(false);
           afterMenuClosed(() => {
             scrollToSection(link.href.slice(2));
+            window.setTimeout(() => { goingToSection.current = false; }, 1500);
             window.history.replaceState({}, '', link.href);
           });
         }}><small>{link.number}</small><span>{link.label}</span><ArrowUpRight size={22}/></a></SheetClose>)}</nav>
