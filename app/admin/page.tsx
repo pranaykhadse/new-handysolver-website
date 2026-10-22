@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react'
 import {
   Plus, Trash2, PencilLine, LogOut, Save, X, GripVertical, Check, AlertTriangle,
   BellRing, Boxes, ShoppingBag, Building2, HardHat, Factory, FolderOpen, FolderInput, FolderPlus, Download, Eye, EyeOff, ChevronRight, ChevronLeft, Maximize2, Upload,
-  HeartPulse, BriefcaseBusiness, Hotel, Users, Image as ImageIcon, ChevronDown, ChevronUp,
+  HeartPulse, BriefcaseBusiness, Hotel, Users, Image as ImageIcon, ChevronDown, ChevronUp, CodeXml, Search as SearchIcon,
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import { categoryOf, groupByCategory, labelOf, slugifyFolder, type FolderMeta } from '@/lib/gallery-category';
@@ -19,8 +19,10 @@ const ICON_MAP: Record<string, ComponentType<{ size?: number }>> = {
   'building-2': Building2, 'hard-hat': HardHat, 'factory': Factory,
   'heart-pulse': HeartPulse, 'briefcase-business': BriefcaseBusiness,
   'hotel': Hotel, 'users': Users,
+  'code': CodeXml, 'image': ImageIcon, 'search': SearchIcon,
 };
-const CASE_ICONS = Object.keys(ICON_MAP);
+const CASE_ICONS = ['bell-ring', 'boxes', 'shopping-bag', 'building-2', 'hard-hat', 'factory', 'heart-pulse', 'briefcase-business', 'hotel', 'users'];
+const JOB_ICONS = ['code', 'image', 'search', 'briefcase-business', 'users', ...CASE_ICONS.filter(i => i !== 'briefcase-business' && i !== 'users')];
 
 const JOB_TYPES = ['Full-time', 'Part-time', 'Internship', 'Contract', 'Freelance'];
 
@@ -71,7 +73,7 @@ function OptionPicker({ value, onChange, options, placeholder }: { value: string
   );
 }
 
-function IconPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function IconPicker({ value, onChange, icons = CASE_ICONS }: { value: string; onChange: (v: string) => void; icons?: string[] }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -92,7 +94,7 @@ function IconPicker({ value, onChange }: { value: string; onChange: (v: string) 
       </button>
       {open && (
         <div className="adm-icon-dropdown">
-          {CASE_ICONS.map(icon => {
+          {icons.map(icon => {
             const Icon = ICON_MAP[icon];
             const active = value === icon;
             return (
@@ -2039,7 +2041,7 @@ export default function AdminPage() {
                   </Field>
                 </Field2>
                 <Field label="Icon">
-                  <IconPicker value={String(draft.icon ?? '')} onChange={(v) => set('icon', v)} />
+                  <IconPicker value={String(draft.icon ?? '')} onChange={(v) => set('icon', v)} icons={JOB_ICONS} />
                 </Field>
                 <FieldToggle label="Introduction" flagKey="show_intro" flags={flags} onToggle={setFlag}>
                   <textarea className="adm-textarea" rows={3} value={String(draft.intro ?? '')} onChange={(e) => set('intro', e.target.value)} placeholder="An Ideal Candidate Is Someone..." />
