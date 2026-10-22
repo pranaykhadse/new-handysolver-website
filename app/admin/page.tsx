@@ -968,6 +968,9 @@ export default function AdminPage() {
   const [applications, setApplications] = useState<Row[]>([]);
   const [appsLoading, setAppsLoading] = useState(false);
   const [expandedApp, setExpandedApp] = useState<string | null>(null);
+  const [appDraft, setAppDraft] = useState<Row | null>(null);
+  const [appSaveBusy, setAppSaveBusy] = useState(false);
+  const [appConfirmId, setAppConfirmId] = useState<string | null>(null);
   const [galDraft, setGalDraft] = useState<Partial<Photo> | null>(null);
   const [galIsNew, setGalIsNew] = useState(false);
   const [galSaveBusy, setGalSaveBusy] = useState(false);
@@ -1030,6 +1033,26 @@ export default function AdminPage() {
       || (rows.length > 0 && (!('category' in rows[0]) || !('is_active' in rows[0])))
       || (frows.length > 0 && !('sort_order' in frows[0]))
     );
+  }
+
+  async function appSave() {
+    if (!appDraft) return;
+    setAppSaveBusy(true);
+    const res = await api('/api/admin/applications', { method: 'PUT', body: JSON.stringify(appDraft) });
+    setAppSaveBusy(false);
+    if (!res.ok) { toast.error(res.json?.error ?? 'Could not save the changes'); return; }
+    setApplications(list => list.map(a => (String(a.id) === String(appDraft.id) ? { ...a, ...appDraft } : a)));
+    setAppDraft(null);
+    toast.success('Application updated');
+  }
+
+  async function appDelete(id: string) {
+    const res = await api(`/api/admin/applications?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+    setAppConfirmId(null);
+    if (!res.ok) { toast.error(res.json?.error ?? 'Could not delete the application'); return; }
+    setApplications(list => list.filter(a => String(a.id) !== id));
+    if (expandedApp === id) setExpandedApp(null);
+    toast.success(res.json?.cvRemoved === false ? 'Application deleted. The resume file could not be removed, so delete it from Supabase Storage.' : 'Application deleted');
   }
 
   async function loadApplications() {
@@ -1769,6 +1792,10 @@ export default function AdminPage() {
                             </div>
                           )}
                         </div>
+                        <div className="adm-row-actions" onClick={(e) => e.stopPropagation()}>
+                          <button className="adm-icon-btn" aria-label={`Edit ${name}`} title="Edit application" onClick={() => setAppDraft({ ...a })}><PencilLine size={14} /></button>
+                          <button className="adm-icon-btn delete" aria-label={`Delete ${name}`} title="Delete application" onClick={() => setAppConfirmId(id)}><Trash2 size={14} /></button>
+                        </div>
                         <span className="adm-app-expand">{open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}</span>
                       </div>
                     );
@@ -1850,6 +1877,37 @@ export default function AdminPage() {
               placeholder="e.g. Team outing 2025" />
           </div>
         </Modal>
+      )}
+
+      {appDraft && (
+        <Modal title="Edit application" onClose={() => setAppDraft(null)} onSave={appSave} saveBusy={appSaveBusy}>
+          {([
+            [['fname', 'First name'], ['lname', 'Last name']],
+            [['email', 'Email'], ['phone', 'Phone']],
+            [['type', 'Applied for'], ['location', 'Location']],
+            [['exp', 'Experience (months)'], ['salary', 'Expected salary']],
+            [['current_ctc', 'Current CTC'], ['hear', 'Heard via']],
+            [['dob', 'Date of birth'], ['gender', 'Gender']],
+          ] as [string, string][][]).map((pair, i) => (
+            <Field2 key={i}>
+              {pair.map(([key, label]) => (
+                <Field key={key} label={label}>
+                  <input className="adm-input" value={String(appDraft[key] ?? '')} onChange={(e) => setAppDraft(d => (d ? { ...d, [key]: e.target.value } : d))} maxLength={200} />
+                </Field>
+              ))}
+            </Field2>
+          ))}
+          <p className="ga-upload-hint">The resume file and the submission time can&apos;t be edited.</p>
+        </Modal>
+      )}
+
+      {appConfirmId && (
+        <ConfirmDialog
+          title="Delete this application?"
+          body="The application and its stored resume will be permanently deleted. This cannot be undone."
+          onConfirm={() => appDelete(appConfirmId)}
+          onCancel={() => setAppConfirmId(null)}
+        />
       )}
 
       {galConfirmId && (

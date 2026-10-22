@@ -1247,3 +1247,6 @@ body:has(.adm-root[data-theme="dark"]) {
   .adm-tab { font-size: 11px; padding: 8px 10px; min-width: 80px; }
   .adm-card-head, .adm-card-body { padding-inline: 16px; }
 }
+
+/* Keep edit/delete at the top of an expanded application row */
+.adm-app-row .adm-row-actions{align-self:flex-start}
