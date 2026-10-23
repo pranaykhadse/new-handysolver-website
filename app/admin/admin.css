@@ -1281,3 +1281,13 @@ body:has(.adm-root[data-theme="dark"]) {
 .fb-add:hover{border-color:#ff7a21;color:#c2510a}
 .fb-empty,.fb-hint{margin:0;font-size:12.5px;color:var(--adm-muted,#6b6054)}
 @media(max-width:560px){.fb-section-head{flex-wrap:wrap}.fb-field-row{gap:6px}}
+.fb{color:var(--adm-ink)}
+.fb-field{background:var(--adm-bg);border-color:var(--adm-line)}
+.fb-section{border-color:var(--adm-line)}
+.fb-field-main,.fb-check,.fb-eye,.fb-add{color:var(--adm-ink)}
+.fb-field-main strong{color:var(--adm-ink)}
+.fb-field-main span,.fb-summary,.fb-hint,.fb-empty{color:var(--adm-muted)}
+.fb-eye,.fb-add,.fb-edit{border-color:var(--adm-line)}
+.fb-eye[data-on=true]{background:var(--adm-orange-dim);border-color:var(--adm-orange-border);color:var(--adm-orange)}
+.fb-add:hover{border-color:var(--adm-orange);color:var(--adm-orange)}
+.fb-notice{color:#4a3a14}
