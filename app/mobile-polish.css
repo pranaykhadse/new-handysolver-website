@@ -26,7 +26,7 @@
  .handy-home.handy-home .hp-overline{font-size:11px;line-height:1.6;margin-bottom:16px}
  .handy-home.handy-home .hp-hero{padding-top:28px;gap:30px}
  .handy-home.handy-home .hp-hero-copy h1{font-size:clamp(48px,13.5vw,79px);letter-spacing:-.055em}
- .handy-home.handy-home .hp-lede,.handy-home.handy-home .pc-lede,.handy-home.handy-home .lt-lede{font-size:16px;line-height:1.75;max-width:100%}
+ .handy-home.handy-home .hp-lede,.handy-home.handy-home .pc-lede,.handy-home.handy-home .lt-lede{font-size:15px;line-height:1.7;max-width:100%}
  .handy-home.handy-home .hp-aside{font-size:11px;line-height:1.6}
  .handy-home.handy-home .hp-knot-scene{width:90%;max-width:420px;padding-bottom:62px}
  .handy-home.handy-home .hp-knot-link{min-height:48px;font-size:12px;right:-5px}
@@ -204,7 +204,7 @@
   .handy-home.handy-home .hp-hero-copy { display: contents; }
   .handy-home.handy-home .hp-hero-copy > :first-child { order: 1; }
   .handy-home.handy-home .hp-hero > .hp-knot-scene { order: 2; margin: 4px auto 0; }
-  .handy-home.handy-home .hp-hero-copy > .hp-lede { order: 3; font-size: 18px; line-height: 1.7; margin: 0; }
+  .handy-home.handy-home .hp-hero-copy > .hp-lede { order: 3; font-size: 15px; line-height: 1.7; margin: 0; }
   .handy-home.handy-home .hp-hero-copy > .hp-offer-cues { order: 4; margin: 4px 0 0; }
   .handy-home.handy-home .hp-hero-copy > .hp-button { order: 5; justify-self: start; margin-top: 6px; }
   .handy-home.handy-home .hp-hero-copy > .hp-aside { order: 6; }
