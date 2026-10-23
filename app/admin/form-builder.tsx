@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, GripVertical, Lock, PencilLine, Plus, RotateCcw, Save, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, ChevronUp, ChevronsDownUp, ChevronsUpDown, GripVertical, Lock, PencilLine, Plus, RotateCcw, Save, Trash2 } from 'lucide-react';
 import { CUSTOM_TYPES, DEFAULT_FORM_CONFIG, LOCKED_FIELDS, type FormConfig, type FormField, type FormSection } from '@/lib/application-form';
 
 type Api = (route: string, init?: RequestInit) => Promise<{ ok: boolean; status: number; json: any }>;
@@ -29,6 +29,8 @@ export default function FormBuilder({ api }: { api: Api }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [drag, setDrag] = useState<{ kind: 'field' | 'section'; id: string } | null>(null);
   const [over, setOver] = useState<string | null>(null);
+  const [collapsed, setCollapsed] = useState<string[]>([]);
+  const toggleSection = (id: string) => setCollapsed(c => (c.includes(id) ? c.filter(x => x !== id) : [...c, id]));
 
   useEffect(() => {
     let live = true;
@@ -62,8 +64,11 @@ export default function FormBuilder({ api }: { api: Api }) {
         next.splice(to, 0, moved);
         return { ...c, sections: next };
       }
-      const moved = c.fields.find(f => f.id === drag.id), target = c.fields.find(f => f.id === targetId);
-      if (!moved || !target) return c;
+      const moved = c.fields.find(f => f.id === drag.id);
+      if (!moved) return c;
+      if (c.sections.some(sec => sec.id === targetId)) return { ...c, fields: [...c.fields.filter(f => f.id !== drag.id), { ...moved, section: targetId }] };
+      const target = c.fields.find(f => f.id === targetId);
+      if (!target) return c;
       const rest = c.fields.filter(f => f.id !== drag.id);
       rest.splice(rest.findIndex(f => f.id === targetId), 0, { ...moved, section: target.section });
       return { ...c, fields: rest };
@@ -132,10 +137,10 @@ export default function FormBuilder({ api }: { api: Api }) {
   const dragProps = (kind: 'field' | 'section', id: string) => ({
     draggable: true,
     'data-dragging': drag?.id === id ? 'true' : 'false',
-    'data-drag-over': over === id && drag?.id !== id && drag?.kind === kind ? 'true' : 'false',
+    'data-drag-over': over === id && drag?.id !== id && (drag?.kind === kind || (kind === 'section' && drag?.kind === 'field')) ? 'true' : 'false',
     onDragStart: (e: React.DragEvent) => { e.stopPropagation(); setDrag({ kind, id }); },
-    onDragEnter: () => drag?.kind === kind && setOver(id),
-    onDragOver: (e: React.DragEvent) => { if (drag?.kind === kind) e.preventDefault(); },
+    onDragEnter: () => (drag?.kind === kind || (kind === 'section' && drag?.kind === 'field')) && setOver(id),
+    onDragOver: (e: React.DragEvent) => { if (drag?.kind === kind || (kind === 'section' && drag?.kind === 'field')) e.preventDefault(); },
     onDrop: (e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); dropOn(id); setDrag(null); setOver(null); },
     onDragEnd: () => { setDrag(null); setOver(null); },
   });
@@ -154,6 +159,7 @@ export default function FormBuilder({ api }: { api: Api }) {
       <div className="fb-toolbar">
         <p className="fb-summary">Drag to reorder questions on the Open roles apply form. {visibleCount} shown, {requiredCount} required{dirty ? ' · unsaved changes' : ''}.</p>
         <div className="fb-bar-actions">
+          <button className="adm-btn adm-btn-ghost" onClick={() => setCollapsed(collapsed.length === config.sections.length ? [] : config.sections.map(x => x.id))} title="Collapse or expand all sections">{collapsed.length === config.sections.length ? <><ChevronsUpDown size={13} /> Expand all</> : <><ChevronsDownUp size={13} /> Collapse all</>}</button>
           <button className="adm-add-btn" onClick={addSection}><Plus size={13} /> Add section</button>
           <button className="adm-btn adm-btn-ghost" onClick={reset} title="Restore the original layout"><RotateCcw size={13} /> Reset</button>
           <button className="adm-btn adm-btn-primary" onClick={save} disabled={!dirty || saving}><Save size={13} /> {saving ? 'Saving…' : 'Save'}</button>
@@ -162,12 +168,15 @@ export default function FormBuilder({ api }: { api: Api }) {
 
       {config.sections.map((section, si) => {
         const fields = config.fields.filter(f => f.section === section.id);
+        const isOpen = !collapsed.includes(section.id) && drag?.kind !== 'section';
         return (
           <div className="fb-group" key={section.id}>
             <div className="adm-row fb-section-row" {...dragProps('section', section.id)}>
               <span className="adm-drag-handle" title="Drag to reorder section"><GripVertical size={14} /></span>
+              <button className="adm-icon-btn" aria-label={isOpen ? 'Collapse section' : 'Expand section'} aria-expanded={isOpen} title={isOpen ? 'Collapse' : 'Expand'} onClick={() => toggleSection(section.id)}>{isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</button>
               <span className="adm-order-badge">{si + 1}</span>
               <input className="adm-input fb-section-input" value={section.title} maxLength={60} aria-label="Section heading" onChange={e => patchSection(section.id, { title: e.target.value })} onDragStart={e => e.preventDefault()} draggable={false} />
+              <span className="fb-count">{fields.length} {fields.length === 1 ? 'question' : 'questions'}</span>
               <div className="adm-row-actions">
                 <span className="fb-arrows">
                   <button className="adm-icon-btn" aria-label="Move section up" disabled={si === 0} onClick={() => nudgeSection(section.id, -1)}><ArrowUp size={14} /></button>
@@ -177,7 +186,7 @@ export default function FormBuilder({ api }: { api: Api }) {
               </div>
             </div>
 
-            <div className="fb-fields">
+            {isOpen && <div className="fb-fields">
               {fields.length === 0 && <p className="adm-empty">No questions in this section, so it won’t show on the form.</p>}
               {fields.map((field, fi) => {
                 const locked = LOCKED_FIELDS.includes(field.id);
@@ -250,7 +259,7 @@ export default function FormBuilder({ api }: { api: Api }) {
                 );
               })}
               <button className="adm-add-btn fb-add" onClick={() => addField(section.id)}><Plus size={13} /> Add question</button>
-            </div>
+            </div>}
           </div>
         );
       })}

@@ -1278,3 +1278,5 @@ body:has(.adm-root[data-theme="dark"]) {
   .fb-fields{padding-left:0}
   .fb-item .adm-row{flex-wrap:wrap}
 }
+.fb-count{font-size:11px;color:var(--adm-muted);white-space:nowrap}
+@media(max-width:560px){.fb-count{display:none}}
