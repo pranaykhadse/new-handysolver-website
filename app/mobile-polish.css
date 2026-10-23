@@ -213,3 +213,9 @@
 @media (max-width: 760px) {
   .handy-home.handy-home .hp-hero > .hp-knot-scene { padding-bottom: 50px; margin-bottom: 4px; }
 }
+/* Mobile menu: highlight the section you're currently on */
+.handy-home.handy-home .hn-mobile-nav a { position: relative; transition: background .2s, color .2s; }
+.handy-home.handy-home .hn-mobile-nav a[aria-current] { background: #ff7a2114; color: #b74300; font-weight: 600; }
+.handy-home.handy-home .hn-mobile-nav a[aria-current]::before { content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px; border-radius: 3px; background: #ff7a21; }
+.handy-home.handy-home .hn-mobile-nav a[aria-current] small,
+.handy-home.handy-home .hn-mobile-nav a[aria-current] svg { color: #ff7a21; }
