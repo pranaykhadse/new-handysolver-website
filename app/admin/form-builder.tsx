@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, Eye, EyeOff, Lock, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, Lock, Plus, RotateCcw, Trash2 } from 'lucide-react';
 import { CUSTOM_TYPES, DEFAULT_FORM_CONFIG, LOCKED_FIELDS, type FormConfig, type FormField, type FormSection } from '@/lib/application-form';
 
 type Api = (route: string, init?: RequestInit) => Promise<{ ok: boolean; status: number; json: any }>;
@@ -122,11 +122,16 @@ export default function FormBuilder({ api }: { api: Api }) {
         </div>
       )}
 
+      <div className="fb-intro">
+        <h3>Design the apply form</h3>
+        <p>This is the form people fill in when they apply for a role. Each row below is one question. Use the arrows to change the order, tick <b>Required</b> to make it compulsory, and switch a question to <b>Hidden</b> to take it off the form.</p>
+      </div>
+
       <div className="fb-bar">
-        <p className="fb-summary">{visibleCount} fields shown on the form, {requiredCount} required. Changes appear on the Open roles apply form after you save.</p>
+        <p className="fb-summary"><b>{visibleCount}</b> questions on the form · <b>{requiredCount}</b> required{dirty ? ' · you have unsaved changes' : ''}</p>
         <div className="fb-bar-actions">
-          <button className="adm-btn adm-btn-ghost" onClick={reset} title="Restore the original layout"><RotateCcw size={13} /> Reset</button>
-          <button className="adm-btn adm-btn-primary" onClick={save} disabled={!dirty || saving}>{saving ? 'Saving…' : dirty ? 'Save changes' : 'Saved'}</button>
+          <button className="adm-btn adm-btn-ghost" onClick={reset} title="Restore the original layout"><RotateCcw size={13} /> Reset to original</button>
+          <button className="adm-btn adm-btn-primary" onClick={save} disabled={!dirty || saving}>{saving ? 'Saving…' : dirty ? 'Save changes' : 'All saved'}</button>
         </div>
       </div>
 
@@ -135,13 +140,16 @@ export default function FormBuilder({ api }: { api: Api }) {
         return (
           <section className="fb-section" key={section.id}>
             <div className="fb-section-head">
-              <input className="adm-input fb-section-title" value={section.title} maxLength={60} aria-label="Section title" onChange={e => patchSection(section.id, { title: e.target.value })} />
-              <div className="fb-icons">
-                <button className="adm-icon-btn" aria-label="Move section up" disabled={si === 0} onClick={() => moveSection(section.id, -1)}><ArrowUp size={14} /></button>
-                <button className="adm-icon-btn" aria-label="Move section down" disabled={si === config.sections.length - 1} onClick={() => moveSection(section.id, 1)}><ArrowDown size={14} /></button>
-                <button className="adm-icon-btn delete" aria-label="Delete section" title={config.sections.length < 2 ? 'The form needs at least one section' : 'Delete section (its fields move to another section)'} disabled={config.sections.length < 2} onClick={() => removeSection(section.id)}><Trash2 size={14} /></button>
+              <span className="fb-step">{si + 1}</span>
+              <div className="fb-section-name"><label>Section heading</label>
+                <input className="adm-input fb-section-title" value={section.title} maxLength={60} aria-label="Section heading" onChange={e => patchSection(section.id, { title: e.target.value })} /></div>
+              <div className="fb-icons" aria-label="Section actions">
+                <button className="adm-icon-btn" aria-label="Move section up" title="Move section up" disabled={si === 0} onClick={() => moveSection(section.id, -1)}><ArrowUp size={14} /></button>
+                <button className="adm-icon-btn" aria-label="Move section down" title="Move section down" disabled={si === config.sections.length - 1} onClick={() => moveSection(section.id, 1)}><ArrowDown size={14} /></button>
+                <button className="adm-icon-btn delete" aria-label="Delete section" title={config.sections.length < 2 ? 'The form needs at least one section' : 'Delete section (its questions move to another section)'} disabled={config.sections.length < 2} onClick={() => removeSection(section.id)}><Trash2 size={14} /></button>
               </div>
             </div>
+            {fields.length > 0 && <div className="fb-cols" aria-hidden="true"><span>Order</span><span>Question</span><span>Required</span><span>On form</span><span /></div>}
 
             {fields.length === 0 && <p className="fb-empty">No fields in this section. It won’t show on the form.</p>}
             {fields.map((field, fi) => {
@@ -151,24 +159,24 @@ export default function FormBuilder({ api }: { api: Api }) {
                 <div className="fb-field" key={field.id} data-hidden={field.visible ? 'false' : 'true'}>
                   <div className="fb-field-row">
                     <div className="fb-icons">
-                      <button className="adm-icon-btn" aria-label={`Move ${field.label} up`} disabled={fi === 0} onClick={() => moveField(field.id, -1)}><ArrowUp size={14} /></button>
-                      <button className="adm-icon-btn" aria-label={`Move ${field.label} down`} disabled={fi === fields.length - 1} onClick={() => moveField(field.id, 1)}><ArrowDown size={14} /></button>
+                      <button className="adm-icon-btn" aria-label={`Move ${field.label} up`} title="Move up" disabled={fi === 0} onClick={() => moveField(field.id, -1)}><ArrowUp size={14} /></button>
+                      <button className="adm-icon-btn" aria-label={`Move ${field.label} down`} title="Move down" disabled={fi === fields.length - 1} onClick={() => moveField(field.id, 1)}><ArrowDown size={14} /></button>
                     </div>
-                    <button className="fb-field-main" onClick={() => setOpenId(open ? null : field.id)} aria-expanded={open}>
+                    <div className="fb-field-main">
                       <strong>{field.label}</strong>
-                      <span>{typeLabel(field)}{field.builtin ? '' : ' · custom'}{field.wide ? ' · full width' : ''}</span>
-                      {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                    </button>
+                      <span><i className="fb-badge">{typeLabel(field)}</i>{!field.builtin && <i className="fb-badge fb-badge-custom">Your question</i>}{field.wide && <i className="fb-badge">Full row</i>}</span>
+                    </div>
                     <label className="fb-check" title={locked ? 'Always required' : undefined}>
                       <input type="checkbox" checked={field.required} disabled={locked || !field.visible} onChange={e => patchField(field.id, { required: e.target.checked })} />
-                      Required
+                      <span className="fb-mobile-label">Required</span>
                     </label>
-                    <button className="fb-eye" data-on={field.visible ? 'true' : 'false'} disabled={locked} aria-pressed={field.visible}
-                      aria-label={field.visible ? `Hide ${field.label}` : `Show ${field.label}`}
-                      title={locked ? 'This field is always shown' : field.visible ? 'Shown on the form. Click to hide' : 'Hidden. Click to show'}
-                      onClick={() => patchField(field.id, { visible: !field.visible })}>
-                      {locked ? <Lock size={14} /> : field.visible ? <Eye size={14} /> : <EyeOff size={14} />}
-                    </button>
+                    {locked
+                      ? <span className="fb-switch" data-on="true" data-locked="true" title="This question is always shown"><Lock size={12} /> Always on</span>
+                      : <button className="fb-switch" data-on={field.visible ? 'true' : 'false'} role="switch" aria-checked={field.visible}
+                          aria-label={`Show ${field.label} on the form`} onClick={() => patchField(field.id, { visible: !field.visible })}>
+                          <i />{field.visible ? 'Shown' : 'Hidden'}
+                        </button>}
+                    <button className="fb-editbtn" onClick={() => setOpenId(open ? null : field.id)} aria-expanded={open}>{open ? 'Close' : 'Edit'} {open ? <ChevronUp size={13} /> : <ChevronDown size={13} />}</button>
                   </div>
 
                   {open && (
