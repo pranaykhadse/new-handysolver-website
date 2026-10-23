@@ -1,8 +1,9 @@
 ﻿'use client';
 import { useEffect, useState } from 'react';
 import { ArrowUpRight, BriefcaseBusiness, MapPin } from 'lucide-react';
+import { jobIconFor } from '@/lib/job-icons';
 
-type Job = { id: string; title: string; intro: string; type: string; location: string; experience: string };
+type Job = { id: string; title: string; icon: string | null; type: string; location: string; experience: string };
 
 export default function TopRoles() {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -32,21 +33,24 @@ export default function TopRoles() {
 
   return (
     <div className="tr-list">
-      {jobs.map((job, i) => (
-        <a key={job.id} className="tr-card" href="/careers/open-roles">
-          <span className="tr-num">{String(i + 1).padStart(2, '0')}</span>
-          <div className="tr-body">
-            <strong>{job.title}</strong>
-            {job.intro && <p>{job.intro}</p>}
-            <span className="tr-tags">
-              {job.type && <span><BriefcaseBusiness size={11}/>{job.type}</span>}
-              {job.location && <span><MapPin size={11}/>{job.location}</span>}
-              {job.experience && <span>{job.experience}</span>}
+      {jobs.map(job => {
+        const Icon = jobIconFor(job.icon, job.title);
+        return (
+          <a key={job.id} className="tr-card" href="/careers/open-roles">
+            {Icon && <span className="tr-icon"><Icon size={18}/></span>}
+            <span className="tr-main">
+              <strong>{job.title}</strong>
+              <span className="tr-tags">
+                {job.type && <span><BriefcaseBusiness size={12}/>{job.type}</span>}
+                {job.location && <span><MapPin size={12}/>{job.location}</span>}
+                {job.experience && <span>{job.experience}</span>}
+              </span>
             </span>
-          </div>
-          <ArrowUpRight size={18} className="tr-arrow"/>
-        </a>
-      ))}
+            <span className="tr-discover">Take a look</span>
+            <ArrowUpRight size={20} className="tr-arrow" aria-hidden="true"/>
+          </a>
+        );
+      })}
     </div>
   );
 }
