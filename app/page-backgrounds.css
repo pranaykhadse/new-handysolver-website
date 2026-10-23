@@ -20,12 +20,14 @@
 .handy-home.playful-careers .pc-moments::before{display:none}
 .handy-home.open-roles-page .or-bottom,
 .handy-home.team-page .tw-offscreen{
-  padding:46px 56px;
+  padding:48px 56px;
   border:1px solid #efd3bf;
   border-radius:8px;
   background:linear-gradient(125deg,#ffe4d0 0%,#ffd5ba 42%,#eadff4 100%);
   box-shadow:inset 0 1px 0 #ffffffb3,0 18px 32px -24px #5b3a2255;
 }
+.handy-home.open-roles-page .or-bottom{margin-block:64px 20px}
+.handy-home.open-roles-page .or-bottom .hp-overline{margin-bottom:16px}
 .handy-home.playful-careers .pc-moments{
   padding:46px 56px 90px;
   border:1px solid #e2d6ee;
@@ -35,7 +37,9 @@
 }
 @media(max-width:760px){
   .handy-home.open-roles-page .or-bottom,
-  .handy-home.team-page .tw-offscreen{padding:28px 24px}
+  .handy-home.team-page .tw-offscreen{padding:28px 24px 30px}
+  .handy-home.open-roles-page .or-bottom{margin-block:44px 12px}
+  .handy-home.open-roles-page .or-bottom .hp-overline{margin-bottom:14px}
   .handy-home.playful-careers .pc-moments{padding:28px 22px 40px}
 }
 .handy-home.playful-careers .pc-office{background-color:#f4ece1;background-image:var(--page-grain)}
