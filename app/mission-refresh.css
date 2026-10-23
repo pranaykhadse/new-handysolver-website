@@ -118,3 +118,10 @@
   .hr-mission p strong { display: block; margin-block: 0.04em; }
   .hr-mission p em { font-size: 1.04em; letter-spacing: -0.04em; }
 }
+
+@media (max-width: 760px) {
+  .hr-mission .hp-wrap { min-height: 0; padding-block: 52px 54px; gap: 28px; align-content: center; }
+  .hr-mission .hp-wrap > span:first-child { display: inline-flex; align-items: center; gap: 12px; letter-spacing: .16em; }
+  .hr-mission .hp-wrap > span:first-child::after { content: ""; width: 36px; height: 1px; background: currentColor; opacity: .55; }
+  .hr-mission p { padding-bottom: 0; text-wrap: balance; }
+}
