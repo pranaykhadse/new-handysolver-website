@@ -210,3 +210,6 @@
   .handy-home.handy-home .hp-hero-copy > .hp-aside { order: 6; }
   .handy-home.handy-home .hp-hero > .hp-hero-bottom { order: 7; }
 }
+@media (max-width: 760px) {
+  .handy-home.handy-home .hp-hero > .hp-knot-scene { padding-bottom: 50px; margin-bottom: 4px; }
+}
