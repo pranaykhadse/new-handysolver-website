@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import { categoryOf, groupByCategory, labelOf, slugifyFolder, type FolderMeta } from '@/lib/gallery-category';
+import FormBuilder from './form-builder';
 import { ALLOWED_IMAGE_LABEL, IMAGE_ACCEPT, checkImageFile } from '@/lib/upload-types';
 
 let _onAuthFailure: (() => void) | null = null;
@@ -112,7 +113,7 @@ function IconPicker({ value, onChange, icons = CASE_ICONS }: { value: string; on
   );
 }
 
-type Tab = 'case-studies' | 'testimonials' | 'team' | 'jobs' | 'applications' | 'gallery';
+type Tab = 'case-studies' | 'testimonials' | 'team' | 'jobs' | 'applications' | 'gallery' | 'apply-form';
 type Photo = { id: string; sort_order: number; src: string; caption: string; category?: string | null; is_active?: boolean };
 type Row = Record<string, unknown>;
 
@@ -1016,7 +1017,7 @@ export default function AdminPage() {
     const url = new URL(window.location.href);
     url.searchParams.set('tab', t);
     window.history.replaceState({}, '', url.toString());
-    if (t === 'gallery') { loadPhotos(); } else if (t === 'applications') { loadApplications(); } else { reload(t as Exclude<Tab, 'gallery' | 'applications'>); }
+    if (t === 'gallery') { loadPhotos(); } else if (t === 'applications') { loadApplications(); } else if (t !== 'apply-form') { reload(t as Exclude<Tab, 'gallery' | 'applications' | 'apply-form'>); }
   }
 
   async function loadPhotos() {
@@ -1271,7 +1272,7 @@ export default function AdminPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const storedTab = params.get('tab');
-    if (storedTab && (['case-studies', 'testimonials', 'team', 'jobs', 'applications', 'gallery'] as Tab[]).includes(storedTab as Tab)) {
+    if (storedTab && (['case-studies', 'testimonials', 'team', 'jobs', 'applications', 'apply-form', 'gallery'] as Tab[]).includes(storedTab as Tab)) {
       setTab(storedTab as Tab);
     }
     const magic = params.get('magic');
@@ -1318,7 +1319,7 @@ export default function AdminPage() {
     if (!key) return;
     if (tab === 'gallery') loadPhotos();
     else if (tab === 'applications') loadApplications();
-    else reload(tab);
+    else if (tab !== 'apply-form') reload(tab);
   }, [key]);
 
   async function reload(which: Exclude<Tab, 'gallery'>) {
@@ -1655,10 +1656,11 @@ export default function AdminPage() {
     team: 'Team members',
     jobs: 'Job posts',
     applications: 'Job applications',
+    'apply-form': 'Application form',
     gallery: 'Gallery photos',
   };
 
-  const currentRows = tab !== 'gallery' && tab !== 'applications' ? rows[tab] : [];
+  const currentRows = tab !== 'gallery' && tab !== 'applications' && tab !== 'apply-form' ? rows[tab] : [];
 
   return (
     <div className="adm-root" data-theme={theme}>
@@ -1687,7 +1689,7 @@ export default function AdminPage() {
         </div>
 
         <div className="adm-tabs">
-          {(['case-studies', 'testimonials', 'team', 'jobs', 'applications', 'gallery'] as Tab[]).map((t) => (
+          {(['case-studies', 'testimonials', 'team', 'jobs', 'applications', 'apply-form', 'gallery'] as Tab[]).map((t) => (
             <button
               key={t}
               className="adm-tab"
@@ -1703,16 +1705,18 @@ export default function AdminPage() {
           <div className="adm-card-head">
             <span className="adm-card-title">
               {TAB_LABELS[tab]}
-              <span className="adm-count-badge">{tab === 'gallery' ? photos.length : tab === 'applications' ? applications.length : currentRows.length}</span>
+              <span className="adm-count-badge">{tab === 'apply-form' ? null : tab === 'gallery' ? photos.length : tab === 'applications' ? applications.length : currentRows.length}</span>
             </span>
-            {tab === 'gallery' || tab === 'applications' ? null : (
+            {tab === 'gallery' || tab === 'applications' || tab === 'apply-form' ? null : (
               <button className="adm-add-btn" onClick={() => setDraft({ sort_order: currentRows.length + 1, is_active: true })}>
                 <Plus size={13} /> Add new
               </button>
             )}
           </div>
           <div className="adm-card-body">
-            {tab === 'gallery' ? (
+            {tab === 'apply-form' ? (
+              <FormBuilder api={api} />
+            ) : tab === 'gallery' ? (
               photosLoading ? <p className="adm-loading">Loading...</p>
               : (
                 <div className="adm-list">
@@ -1772,6 +1776,7 @@ export default function AdminPage() {
                       ['Gender', String(a.gender ?? '')],
                       ['CV file', String(a.cv_filename ?? '')],
                       ['Submitted', submitted],
+                      ...(Array.isArray(a.extra) ? (a.extra as { label?: string; value?: string }[]).map((item): [string, string] => [String(item.label ?? ''), String(item.value ?? '')]) : []),
                     ].filter((pair): pair is [string, string] => Boolean(pair[1]));
                     const cvUrl = String(a.cv_url ?? '');
                     return (

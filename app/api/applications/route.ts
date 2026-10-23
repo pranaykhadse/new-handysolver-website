@@ -20,7 +20,11 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    const { error } = await getSupabase().from("job_applications").insert({
+    // Answers to questions the admin added to the form: [{label, value}]
+    const extra = (Array.isArray(body?.extra) ? body.extra.slice(0, 40) : [])
+      .map((item: { label?: unknown; value?: unknown }) => ({ label: str(item?.label).slice(0, 200), value: str(item?.value) }))
+      .filter((item: { label: string }) => item.label);
+    const row: Record<string, unknown> = {
       type,
       fname: str(body?.fname),
       lname: str(body?.lname),
@@ -35,7 +39,11 @@ export async function POST(request: Request) {
       gender: str(body?.gender),
       cv_filename: str(body?.cv_filename),
       cv_path: str(body?.cv_path),
-    });
+    };
+    const supabase = getSupabase();
+    let { error } = await supabase.from("job_applications").insert(extra.length ? { ...row, extra } : row);
+    // The `extra` column is added by the form-builder setup SQL; if it isn't there yet, still save the core row.
+    if (error && extra.length) ({ error } = await supabase.from("job_applications").insert(row));
     if (error) throw error;
     return Response.json({ ok: true });
   } catch (e) {

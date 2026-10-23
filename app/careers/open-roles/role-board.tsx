@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
 
-import { ApplicationPrep, ApplyModal } from './candidate-extras';
+import { ApplicationPrep } from './candidate-extras';
+import { ApplyModal, prefetchApplicationForm } from './apply-modal';
 import { jobIconFor } from '@/lib/job-icons';
 import JobPostingJsonLd from './jobposting-jsonld';
 
@@ -18,6 +19,7 @@ export default function RoleBoard(){
   const [state,setState] = useState<'loading'|'ready'|'error'>('loading');
   const [attempt,setAttempt] = useState(0);
   const [applyJob,setApplyJob] = useState<string|null>(null);
+  useEffect(()=>{prefetchApplicationForm();},[]);
   useEffect(()=>{
     const controller = new AbortController();
     setState('loading');
