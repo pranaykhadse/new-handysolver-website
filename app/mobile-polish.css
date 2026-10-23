@@ -193,3 +193,8 @@
   }
   .handy-home.handy-home nav[aria-label="Breadcrumb"] a { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 6px; }
 }
+@media (max-width: 760px) {
+  .handy-home.handy-home.open-roles-page .or-bottom { display: flex; align-items: flex-end; justify-content: space-between; gap: 15px; }
+  .handy-home.handy-home.open-roles-page .or-bottom > a.or-bottom-arrow { width: 56px; height: 56px; margin: 0 0 5px; flex-shrink: 0; }
+  .handy-home.handy-home.open-roles-page .or-bottom > a.or-bottom-arrow svg { width: 32px; height: 32px; }
+}
