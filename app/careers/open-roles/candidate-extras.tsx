@@ -70,6 +70,13 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setServerMsg('');
+    const problem = firstProblem();
+    if (problem) {
+      setServerMsg(problem.message);
+      setStatus('error');
+      focusField(problem.field);
+      return;
+    }
     // The API reads $_FILES['attachment'] unconditionally and only accepts
     // pdf/doc/docx (case-sensitive), so guard both client-side.
     if (!cvFile) {
@@ -160,13 +167,50 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
     }
   };
 
+  const [dobParts, setDobParts] = useState(() => {
+    const [y = '', m = '', d = ''] = form.dob.split('-');
+    return { y, m, d };
+  });
+
+  const updateDob = (next: { y: string; m: string; d: string }) => {
+    const daysInMonth = next.y && next.m ? new Date(Number(next.y), Number(next.m), 0).getDate() : 31;
+    const day = next.d && Number(next.d) > daysInMonth ? '' : next.d;
+    const parts = { ...next, d: day };
+    setDobParts(parts);
+    setForm(f => ({ ...f, dob: parts.y && parts.m && parts.d ? `${parts.y}-${parts.m}-${parts.d}` : '' }));
+  };
+
+  const thisYear = new Date().getFullYear();
+  const birthYears = Array.from({ length: 55 }, (_, i) => String(thisYear - 16 - i));
+  const dayCount = dobParts.y && dobParts.m ? new Date(Number(dobParts.y), Number(dobParts.m), 0).getDate() : 31;
+
+  // Returns the first problem with the form, or null. Fields are checked in the order they appear.
+  const firstProblem = (): { field: string; message: string } | null => {
+    const digits = form.phone.replace(/\D/g, '');
+    const money = (value: string) => value.trim() !== '' && Number(value) >= 0;
+    if (!form.firstName.trim()) return { field: 'am-firstName', message: 'Please add your first name.' };
+    if (!form.lastName.trim()) return { field: 'am-lastName', message: 'Please add your last name.' };
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) return { field: 'am-email', message: 'That email address doesn’t look right.' };
+    if (digits.length < 10 || digits.length > 13) return { field: 'am-phone', message: 'Please enter a phone number with 10 digits.' };
+    if (!money(form.experience)) return { field: 'am-experience', message: 'Add your total experience in months. Use 0 if you’re a fresher.' };
+    if (!form.location.trim()) return { field: 'am-location', message: 'Please add the city you live in.' };
+    if (!money(form.currentSalary)) return { field: 'am-currentSalary', message: 'Add your current salary per month. Use 0 if you don’t have one.' };
+    if (!money(form.expectedSalary)) return { field: 'am-expectedSalary', message: 'Add the salary you expect per month.' };
+    if (!form.dob) return { field: 'am-dob-day', message: 'Please choose your full date of birth.' };
+    if (!form.gender) return { field: 'am-gender', message: 'Please choose an option for gender.' };
+    if (!form.hearAbout.trim()) return { field: 'am-hearAbout', message: 'Tell us where you heard about us.' };
+    return null;
+  };
+
+  const focusField = (id: string) => document.getElementById(id)?.focus();
+
   return createPortal(
     <div className="am-overlay" ref={overlayRef} onClick={e => e.target === overlayRef.current && onClose()} role="dialog" aria-modal="true" aria-labelledby="am-title">
       <div className="am-card">
         <div className="am-header">
           <div>
-            <p className="am-overline">APPLICATION</p>
-            <h2 id="am-title">Apply for <span className="am-job-title">{jobTitle}</span></h2>
+            <p className="am-overline">Applying for</p>
+            <h2 id="am-title">{jobTitle}</h2>
           </div>
           <button className="am-close" onClick={onClose} aria-label="Close"><X size={18}/></button>
         </div>
@@ -174,57 +218,66 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
         {status === 'done' ? (
           <div className="am-done">
             <span className="am-done-icon"><Check size={28}/></span>
-            <h3>Application sent!</h3>
-            <p>{serverMsg || <>We&apos;ve received your application for <strong>{jobTitle}</strong>. Our team will be in touch soon.</>}</p>
+            <h3>Thanks{form.firstName.trim() ? `, ${form.firstName.trim()}` : ''}. We’ve got it.</h3>
+            <p>{serverMsg || <>Your application for <strong>{jobTitle}</strong> is with the team. We’ll get back to you once we’ve had a look.</>}</p>
             <button className="am-submit" onClick={onClose}>Back to roles</button>
           </div>
         ) : (
           <form className="am-form" onSubmit={handleSubmit} noValidate>
             <div className="am-grid">
               <div className="am-field">
-                <label>First Name<span>*</span></label>
-                <input ref={firstRef} required value={form.firstName} onChange={set('firstName')} placeholder="Abhishek"/>
+                <label htmlFor="am-firstName">First name</label>
+                <input id="am-firstName" ref={firstRef} required autoComplete="given-name" value={form.firstName} onChange={set('firstName')}/>
               </div>
               <div className="am-field">
-                <label>Last Name<span>*</span></label>
-                <input required value={form.lastName} onChange={set('lastName')} placeholder="Sharma"/>
+                <label htmlFor="am-lastName">Last name</label>
+                <input id="am-lastName" required autoComplete="family-name" value={form.lastName} onChange={set('lastName')}/>
               </div>
               <div className="am-field">
-                <label>Email Address<span>*</span></label>
-                <input required type="email" value={form.email} onChange={set('email')} placeholder="you@example.com"/>
+                <label htmlFor="am-email">Email</label>
+                <input id="am-email" required type="email" autoComplete="email" value={form.email} onChange={set('email')}/>
               </div>
               <div className="am-field">
-                <label>Contact Number<span>*</span></label>
-                <input required type="tel" value={form.phone} onChange={set('phone')} placeholder="+91 98765 43210"/>
+                <label htmlFor="am-phone">Phone number</label>
+                <input id="am-phone" required type="tel" autoComplete="tel" value={form.phone} onChange={set('phone')}/>
               </div>
               <div className="am-field">
-                <label>Experience (in months)<span>*</span></label>
-                <input required type="number" min="0" value={form.experience} onChange={set('experience')} placeholder="12"/>
+                <label htmlFor="am-experience">Total experience (months)</label>
+                <input id="am-experience" required type="number" inputMode="numeric" min="0" placeholder="0 if you’re a fresher" value={form.experience} onChange={set('experience')}/>
               </div>
               <div className="am-field">
-                <label>Expected Salary (INR/month)<span>*</span></label>
-                <input required type="number" min="0" value={form.expectedSalary} onChange={set('expectedSalary')} placeholder="50000"/>
+                <label htmlFor="am-location">Current city</label>
+                <input id="am-location" required autoComplete="address-level2" value={form.location} onChange={set('location')}/>
               </div>
               <div className="am-field">
-                <label>Current Salary (INR/month)<span>*</span></label>
-                <input required type="number" min="0" value={form.currentSalary} onChange={set('currentSalary')} placeholder="40000"/>
+                <label htmlFor="am-currentSalary">Current salary (₹ per month)</label>
+                <input id="am-currentSalary" required type="number" inputMode="numeric" min="0" value={form.currentSalary} onChange={set('currentSalary')}/>
               </div>
               <div className="am-field">
-                <label>How did you hear about us?<span>*</span></label>
-                <input required value={form.hearAbout} onChange={set('hearAbout')} placeholder="LinkedIn, friend, etc."/>
+                <label htmlFor="am-expectedSalary">Expected salary (₹ per month)</label>
+                <input id="am-expectedSalary" required type="number" inputMode="numeric" min="0" value={form.expectedSalary} onChange={set('expectedSalary')}/>
               </div>
               <div className="am-field">
-                <label>Current Location<span>*</span></label>
-                <input required value={form.location} onChange={set('location')} placeholder="Gurugram, India"/>
+                <label htmlFor="am-dob-day">Date of birth</label>
+                <div className="am-dob">
+                  <select id="am-dob-day" aria-label="Day" autoComplete="bday-day" value={dobParts.d} onChange={e => updateDob({ ...dobParts, d: e.target.value })}>
+                    <option value="">Day</option>
+                    {Array.from({ length: dayCount }, (_, i) => String(i + 1).padStart(2, '0')).map(day => <option key={day} value={day}>{Number(day)}</option>)}
+                  </select>
+                  <select id="am-dob-month" aria-label="Month" autoComplete="bday-month" value={dobParts.m} onChange={e => updateDob({ ...dobParts, m: e.target.value })}>
+                    <option value="">Month</option>
+                    {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((name, i) => <option key={name} value={String(i + 1).padStart(2, '0')}>{name}</option>)}
+                  </select>
+                  <select id="am-dob-year" aria-label="Year" autoComplete="bday-year" value={dobParts.y} onChange={e => updateDob({ ...dobParts, y: e.target.value })}>
+                    <option value="">Year</option>
+                    {birthYears.map(year => <option key={year} value={year}>{year}</option>)}
+                  </select>
+                </div>
               </div>
               <div className="am-field">
-                <label>Date of Birth<span>*</span></label>
-                <input required type="date" value={form.dob} onChange={set('dob')}/>
-              </div>
-              <div className="am-field">
-                <label>Gender<span>*</span></label>
-                <select required value={form.gender} onChange={set('gender')}>
-                  <option value="">Select…</option>
+                <label htmlFor="am-gender">Gender</label>
+                <select id="am-gender" required value={form.gender} onChange={set('gender')}>
+                  <option value="">Choose one</option>
                   <option>Male</option>
                   <option>Female</option>
                   <option>Non-binary</option>
@@ -232,19 +285,23 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
                 </select>
               </div>
               <div className="am-field">
-                <label>Upload your CV<span>*</span></label>
-                <label className="am-file-label">
+                <label htmlFor="am-hearAbout">Where did you hear about us?</label>
+                <input id="am-hearAbout" required value={form.hearAbout} onChange={set('hearAbout')}/>
+              </div>
+              <div className="am-field">
+                <label htmlFor="am-cv">CV (PDF, DOC or DOCX)</label>
+                <label className="am-file-label" htmlFor="am-cv">
                   <Upload size={14}/>
-                  <span>{cvFile ? cvFile.name : 'Choose file…'}</span>
-                  <input required type="file" accept=".pdf,.doc,.docx" onChange={e => setCvFile(e.target.files?.[0] ?? null)}/>
+                  <span>{cvFile ? cvFile.name : 'Choose a file'}</span>
+                  <input id="am-cv" required type="file" accept=".pdf,.doc,.docx" onChange={e => setCvFile(e.target.files?.[0] ?? null)}/>
                 </label>
               </div>
             </div>
-            {status === 'error' && <p className="am-error">{serverMsg || 'Something went wrong. Please try again.'}</p>}
+            {status === 'error' && <p className="am-error" role="alert">{serverMsg || 'Something went wrong. Please try again.'}</p>}
             <div className="am-footer">
-              <span>Fields marked <span className="am-req">*</span> are required</span>
+              <span>Every field is needed to send your application.</span>
               <button type="submit" className="am-submit" disabled={status === 'submitting'}>
-                {status === 'submitting' ? 'Sending…' : <>Apply <ArrowUpRight size={16}/></>}
+                {status === 'submitting' ? 'Sending…' : 'Send application'}
               </button>
             </div>
           </form>
