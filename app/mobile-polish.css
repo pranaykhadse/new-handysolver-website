@@ -198,3 +198,15 @@
   .handy-home.handy-home.open-roles-page .or-bottom > a.or-bottom-arrow { width: 56px; height: 56px; margin: 0 0 5px; flex-shrink: 0; }
   .handy-home.handy-home.open-roles-page .or-bottom > a.or-bottom-arrow svg { width: 32px; height: 32px; }
 }
+/* Phone hero order: headline, then the knot picture, then the text and button */
+@media (max-width: 760px) {
+  .handy-home.handy-home .hp-hero { display: grid; gap: 14px; }
+  .handy-home.handy-home .hp-hero-copy { display: contents; }
+  .handy-home.handy-home .hp-hero-copy > :first-child { order: 1; }
+  .handy-home.handy-home .hp-hero > .hp-knot-scene { order: 2; margin: 4px auto 0; }
+  .handy-home.handy-home .hp-hero-copy > .hp-lede { order: 3; font-size: 18px; line-height: 1.7; margin: 0; }
+  .handy-home.handy-home .hp-hero-copy > .hp-offer-cues { order: 4; margin: 4px 0 0; }
+  .handy-home.handy-home .hp-hero-copy > .hp-button { order: 5; justify-self: start; margin-top: 6px; }
+  .handy-home.handy-home .hp-hero-copy > .hp-aside { order: 6; }
+  .handy-home.handy-home .hp-hero > .hp-hero-bottom { order: 7; }
+}
