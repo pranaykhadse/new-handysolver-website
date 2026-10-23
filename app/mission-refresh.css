@@ -103,3 +103,18 @@
     max-width: 560px;
   }
 }
+
+/* Phones: more air between lines and around the text */
+@media (max-width: 760px) {
+  .hr-mission::after { width: 170px; height: 170px; right: -70px; top: -95px; }
+  .hr-mission .hp-wrap { padding-block: 44px 46px; gap: 22px; }
+  .hr-mission .hp-wrap > span:first-child { font-size: 11px; opacity: .8; }
+  .hr-mission p {
+    font-size: clamp(34px, 9.6vw, 46px);
+    line-height: 1.18;
+    letter-spacing: -0.035em;
+    padding-bottom: 0.18em;
+  }
+  .hr-mission p strong { display: block; margin-block: 0.04em; }
+  .hr-mission p em { font-size: 1.04em; letter-spacing: -0.04em; }
+}
