@@ -214,6 +214,7 @@
   box-shadow: 5px 6px 0 #1a1208, 0 16px 40px #ff7a2170 !important;
 }
 
+.ds-handle-icon-v { display: none; width: 22px; height: 44px; color: #fff; flex-shrink: 0; }
 .ds-handle-icon {
   width: 44px;
   height: 20px;
@@ -242,12 +243,15 @@
     grid-template-columns: 1fr;
     min-height: 640px;
     cursor: ns-resize;
+    touch-action: pan-y;
   }
   .ds-before, .ds-after { padding: 24px; }
   .ds-before { clip-path: inset(0 0 calc(100% - var(--shift)) 0); }
   .ds-after  { clip-path: inset(var(--shift) 0 0 0); padding-left: 24px; }
   .ds-divider { inset: var(--shift) 0 auto 0; width: 100%; height: 2px; transform: translateY(-50%); }
-  .ds-handle { left: 50%; top: var(--shift); }
+  .ds-handle { left: 50%; top: var(--shift); pointer-events: auto; touch-action: none; cursor: ns-resize; }
+  .ds-handle-icon { display: none; }
+  .ds-handle-icon-v { display: block; }
 }
 
 /* ── Careers page reuse ─────────────────────────────────────────────── */

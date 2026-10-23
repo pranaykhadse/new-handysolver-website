@@ -37,13 +37,18 @@ export default function DayShift() {
 
   const clamp = (v: number) => Math.max(0, Math.min(100, v));
 
+  // On phones the two panels are stacked, so the slider moves up and down.
+  const isVertical = () => window.matchMedia('(max-width: 760px)').matches;
+
   const pctFromPointer = useCallback((e: React.PointerEvent) => {
     const r = stageRef.current?.getBoundingClientRect();
     if (!r) return pct;
-    return clamp(((e.clientX - r.left) / r.width) * 100);
+    return isVertical() ? clamp(((e.clientY - r.top) / r.height) * 100) : clamp(((e.clientX - r.left) / r.width) * 100);
   }, [pct]);
 
   const onDown = (e: React.PointerEvent) => {
+    // On phones only the handle drags, so the rest of the panel still scrolls the page.
+    if (isVertical() && !(e.target as HTMLElement).closest('.ds-handle')) return;
     cancelAnimationFrame(rafRef.current);
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     setDragging(true);
@@ -65,7 +70,7 @@ export default function DayShift() {
           <h2 id="ds-title">Same workday.<br /><em>Less chasing.</em></h2>
         </div>
         <span className={`ds-hint${dragging ? ' ds-hint--hide' : ''}`} aria-hidden="true">
-          Drag the handle →
+          Drag the handle ↔
         </span>
       </div>
 
@@ -116,6 +121,12 @@ export default function DayShift() {
 
         {/* Handle */}
         <div className={`ds-handle${dragging ? ' ds-handle--active' : ''}`} aria-hidden="true">
+          <svg className="ds-handle-icon-v" viewBox="0 0 20 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 13L10 4M10 4L6 8M10 4L14 8" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M10 31L10 40M10 40L6 36M10 40L14 36" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+            <line x1="2" y1="21" x2="18" y2="21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity=".4"/>
+            <line x1="2" y1="23" x2="18" y2="23" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity=".4"/>
+          </svg>
           <svg className="ds-handle-icon" viewBox="0 0 44 20" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M13 10L4 10M4 10L8 6M4 10L8 14" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M31 10L40 10M40 10L36 6M40 10L36 14" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
