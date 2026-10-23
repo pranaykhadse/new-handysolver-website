@@ -83,3 +83,26 @@ body:has(.am-overlay) main.hp-wrap{will-change:auto!important;transform:none!imp
 @keyframes ce-appear{from{opacity:.3;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:760px){.or-heading{display:grid;grid-template-columns:1fr;padding-bottom:26px;gap:28px}.ce-nudge{width:100%;max-width:none;transform:none;padding:20px;box-shadow:4px 4px 0 #e7e0d4}.ce-nudge-copy{min-height:0}.ce-nudge h2{font-size:25px;margin:14px 0 10px}.ce-nudge h2 br{display:none}.ce-nudge h2 em{margin-left:6px}.ce-nudge p{max-width:none;margin:0}.ce-nudge-top svg{width:25px;height:25px}.ce-nudge-bottom{margin-top:16px}.or-number{width:32px;height:32px;flex-basis:32px;font-size:14px}.or-job-trigger{padding:22px 14px!important}.or-job-content{padding-top:10px!important}}
 @media(prefers-reduced-motion:reduce){.ce-nudge,.ce-nudge-copy,.or-number,.ce-prep{animation:none!important;transition:none!important}}
+
+/* Apply form on phones and tablets */
+.am-legend{display:none;margin:12px 0 0;font-size:12px;color:#6d6255}
+.am-body{scroll-padding-block:24px}
+.am-dob select{padding:0 24px 0 10px;background-position:right 9px center}
+@media(max-width:1024px){.am-field input,.am-field select{font-size:16px}}
+@media(max-width:560px){
+  .am-overlay{padding:8px}
+  .am-header{padding:14px 16px;gap:12px}
+  .am-close{width:44px;height:44px}
+  .am-body{padding:0 16px 6px}
+  .am-legend{display:block}
+  .am-section{padding-top:16px}
+  .am-note{display:none}
+  .am-footer{padding:10px 16px}
+  .am-submit{min-height:48px}
+}
+@media(max-width:380px){
+  .am-role-icon{display:none}
+  .am-header h2{font-size:18px}
+  .am-dob{grid-template-columns:1fr 1fr}
+  .am-dob select:nth-child(2){grid-column:1/-1;order:-1}
+}

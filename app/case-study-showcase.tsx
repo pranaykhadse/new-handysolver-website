@@ -27,7 +27,7 @@ export default function CaseStudyShowcase(){
   const list=useRef<HTMLDivElement>(null);
   useEffect(()=>{
     const controller=new AbortController();
-    fetch('/api/case-studies',{signal:controller.signal,cache:'no-store'}).then(async r=>{
+    fetch('/api/case-studies',{signal:controller.signal}).then(async r=>{
       if(!r.ok)return;
       const payload=await r.json();
       if(Array.isArray(payload.studies))setStudies(payload.studies.map((study: Omit<Study,'number'>,index: number)=>({...study,number:String(index+1).padStart(2,'0')})));

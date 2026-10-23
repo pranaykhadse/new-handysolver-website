@@ -26,7 +26,7 @@ export async function GET() {
       if (Array.isArray(data) && data.length > 0) {
         return Response.json(
           { testimonials: (data as DbTestimonial[]).map(shape), source: "supabase" },
-          { headers: { "Cache-Control": "no-store" } }
+          { headers: { "Cache-Control": "public, s-maxage=20, stale-while-revalidate=120" } }
         );
       }
     } catch {
@@ -35,6 +35,6 @@ export async function GET() {
   }
   return Response.json(
     { testimonials: (seed as DbTestimonial[]).map(shape), source: "seed" },
-    { headers: { "Cache-Control": "no-store" } }
+    { headers: { "Cache-Control": "public, s-maxage=20, stale-while-revalidate=120" } }
   );
 }

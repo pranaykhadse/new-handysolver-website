@@ -15,7 +15,7 @@ export async function GET() {
       const res = await getSupabase().from("gallery_folders").select("*");
       if (!res.error && res.data) folders = res.data.map((f: { slug: string; label: string; sort_order?: number }) => ({ slug: f.slug, label: f.label, sort_order: f.sort_order }));
     } catch { /* folders table not created yet */ }
-    return Response.json({ photos, folders });
+    return Response.json({ photos, folders }, { headers: { "Cache-Control": "public, s-maxage=20, stale-while-revalidate=120" } });
   } catch (error) {
     return Response.json({ photos: [], folders: [] });
   }

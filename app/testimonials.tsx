@@ -83,7 +83,7 @@ export default function Testimonials(){
   const playing=!paused&&!hovered&&visible&&tabVisible&&!reduced;
   useEffect(()=>{
     const controller=new AbortController();
-    fetch('/api/testimonials',{signal:controller.signal,cache:'no-store'}).then(async r=>{
+    fetch('/api/testimonials',{signal:controller.signal}).then(async r=>{
       if(!r.ok)return;
       const payload=await r.json();
       if(Array.isArray(payload.testimonials))setTestimonials(payload.testimonials);

@@ -238,6 +238,7 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
         ) : (
           <form className="am-form" onSubmit={handleSubmit} noValidate>
             <div className="am-body">
+              <p className="am-legend"><span className="am-star" aria-hidden="true">*</span> marks a required field</p>
               <section className="am-section" aria-labelledby="am-s1">
                 <h3 id="am-s1" className="am-section-title">About you</h3>
                 <div className="am-grid">

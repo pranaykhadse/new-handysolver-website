@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { SITE_URL } from '@/lib/site';
 import { CONTACT_EMAIL } from '@/lib/contact';
 import './globals.css';
@@ -19,6 +19,9 @@ export const metadata: Metadata = {
   },
   twitter: { card: 'summary_large_image', images: ['/og-cover.png'] },
 };
+
+// Colours the browser bar on phones to match the site header
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#f6f2e9' };
 
 const ORG_JSON_LD = {
   '@context': 'https://schema.org',

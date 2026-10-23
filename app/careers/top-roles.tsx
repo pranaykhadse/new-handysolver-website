@@ -11,7 +11,7 @@ export default function TopRoles() {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch('/api/open-roles', { signal: controller.signal, cache: 'no-store' })
+    fetch('/api/open-roles', { signal: controller.signal })
       .then(async r => {
         if (!r.ok) throw new Error();
         const data = await r.json();

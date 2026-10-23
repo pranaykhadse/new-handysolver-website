@@ -25,7 +25,7 @@ export default function TeamWall(){
   const [mix,setMix] = useState(0);
   useEffect(()=>{
     const controller=new AbortController();
-    fetch('/api/team',{signal:controller.signal,cache:'no-store'}).then(async r=>{
+    fetch('/api/team',{signal:controller.signal}).then(async r=>{
       if(!r.ok)return;
       const payload=await r.json();
       if(Array.isArray(payload.members))setOrder(payload.members);

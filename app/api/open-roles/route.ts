@@ -46,7 +46,7 @@ export async function GET() {
           .order('sort_order', { ascending: true });
         if (!error) {
           const jobs = (Array.isArray(data) ? data as DbJobPost[] : []).map(shapeDbJob);
-          return Response.json({ jobs, source: 'supabase', checkedAt: new Date().toISOString() }, { headers: { 'Cache-Control': 'no-store' } });
+          return Response.json({ jobs, source: 'supabase', checkedAt: new Date().toISOString() }, { headers: { 'Cache-Control': 'public, s-maxage=20, stale-while-revalidate=120' } });
         }
       }
     } catch {}
@@ -75,7 +75,7 @@ export async function GET() {
           return on(j[flag]) && field && on(field.is_shown) && plain(j[key]) ? [{label: plain(field.label_rename) || label, text: plain(j[key])}] : [];
         }),
       }));
-    return Response.json({ jobs, source: 'external', checkedAt: new Date().toISOString() }, { headers: { 'Cache-Control': 'no-store' } });
+    return Response.json({ jobs, source: 'external', checkedAt: new Date().toISOString() }, { headers: { 'Cache-Control': 'public, s-maxage=20, stale-while-revalidate=120' } });
   } catch {
     return Response.json({ error: "We couldn't load the latest openings. Please try again or visit our recruitment portal." }, { status: 502, headers: { 'Cache-Control': 'no-store' } });
   }

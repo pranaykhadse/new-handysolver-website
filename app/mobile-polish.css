@@ -181,3 +181,15 @@
   .wa-launch small { display: none; }
   .wa-launch.wa-launch { padding: 9px 14px 9px 9px; }
 }
+
+/* Comfortable tap sizes on phones and tablets (the rules above stop at 760px) */
+@media (max-width: 1024px) {
+  .handy-home.handy-home button:not([role=checkbox]),
+  .handy-home.handy-home [role=tab] { min-height: 44px; }
+  .handy-home.handy-home :is(.hp-text-link, .pc-link, .pc-more-link, .or-back, .gl-back, .tw-back, .hp-contact-bottom a, .hp-footer a) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  .handy-home.handy-home nav[aria-label="Breadcrumb"] a { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 6px; }
+}

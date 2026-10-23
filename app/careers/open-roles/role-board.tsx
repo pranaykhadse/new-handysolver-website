@@ -21,7 +21,7 @@ export default function RoleBoard(){
   useEffect(()=>{
     const controller = new AbortController();
     setState('loading');
-    fetch('/api/open-roles',{signal:controller.signal,cache:'no-store'}).then(async r=>{
+    fetch('/api/open-roles',{signal:controller.signal}).then(async r=>{
       if(!r.ok) throw new Error('Unavailable');
       const data = await r.json();
       if(!Array.isArray(data.jobs)) throw new Error('Invalid data');
