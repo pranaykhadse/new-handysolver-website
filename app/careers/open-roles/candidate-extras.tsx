@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowUpRight, RotateCw, Smile, Check, Coffee, X, Upload } from 'lucide-react';
+import { ArrowUpRight, RotateCw, Smile, Check, Coffee, X, Upload, User, UserRound, Mail, Phone, MapPin, Briefcase, IndianRupee, Megaphone, FileText } from 'lucide-react';
+import { jobIconFor } from '@/lib/job-icons';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { getSupabase } from '@/lib/supabase';
@@ -65,7 +66,7 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
   }, []);
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement|HTMLSelectElement>) =>
-    setForm(f => ({ ...f, [k]: e.target.value }));
+    { setBadField(null); setForm(f => ({ ...f, [k]: e.target.value })); }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,6 +75,7 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
     if (problem) {
       setServerMsg(problem.message);
       setStatus('error');
+      setBadField(problem.field);
       focusField(problem.field);
       return;
     }
@@ -167,6 +169,7 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
     }
   };
 
+  const [badField, setBadField] = useState<string | null>(null);
   const [dobParts, setDobParts] = useState(() => {
     const [y = '', m = '', d = ''] = form.dob.split('-');
     return { y, m, d };
@@ -177,12 +180,17 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
     const day = next.d && Number(next.d) > daysInMonth ? '' : next.d;
     const parts = { ...next, d: day };
     setDobParts(parts);
+    setBadField(null);
     setForm(f => ({ ...f, dob: parts.y && parts.m && parts.d ? `${parts.y}-${parts.m}-${parts.d}` : '' }));
   };
 
   const thisYear = new Date().getFullYear();
   const birthYears = Array.from({ length: 55 }, (_, i) => String(thisYear - 16 - i));
   const dayCount = dobParts.y && dobParts.m ? new Date(Number(dobParts.y), Number(dobParts.m), 0).getDate() : 31;
+  const RoleIcon = jobIconFor(null, jobTitle);
+
+  const requiredValues = [form.firstName.trim(), form.lastName.trim(), form.email.trim(), form.phone.trim(), form.experience, form.location.trim(), form.currentSalary, form.expectedSalary, form.dob, form.gender, form.hearAbout.trim(), cvFile ? 'cv' : ''];
+  const filled = requiredValues.filter(Boolean).length;
 
   // Returns the first problem with the form, or null. Fields are checked in the order they appear.
   const firstProblem = (): { field: string; message: string } | null => {
@@ -192,27 +200,32 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
     if (!form.lastName.trim()) return { field: 'am-lastName', message: 'Please add your last name.' };
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) return { field: 'am-email', message: 'That email address doesn’t look right.' };
     if (digits.length < 10 || digits.length > 13) return { field: 'am-phone', message: 'Please enter a phone number with 10 digits.' };
-    if (!money(form.experience)) return { field: 'am-experience', message: 'Add your total experience in months. Use 0 if you’re a fresher.' };
     if (!form.location.trim()) return { field: 'am-location', message: 'Please add the city you live in.' };
-    if (!money(form.currentSalary)) return { field: 'am-currentSalary', message: 'Add your current salary per month. Use 0 if you don’t have one.' };
-    if (!money(form.expectedSalary)) return { field: 'am-expectedSalary', message: 'Add the salary you expect per month.' };
     if (!form.dob) return { field: 'am-dob-day', message: 'Please choose your full date of birth.' };
     if (!form.gender) return { field: 'am-gender', message: 'Please choose an option for gender.' };
+    if (!money(form.experience)) return { field: 'am-experience', message: 'Add your total experience in months. Use 0 if you’re a fresher.' };
+    if (!money(form.currentSalary)) return { field: 'am-currentSalary', message: 'Add your current salary per month. Use 0 if you don’t have one.' };
+    if (!money(form.expectedSalary)) return { field: 'am-expectedSalary', message: 'Add the salary you expect per month.' };
     if (!form.hearAbout.trim()) return { field: 'am-hearAbout', message: 'Tell us where you heard about us.' };
     return null;
   };
 
   const focusField = (id: string) => document.getElementById(id)?.focus();
+  const invalid = (id: string) => (badField === id || (id === 'am-dob' && badField === 'am-dob-day')) ? true : undefined;
 
   return createPortal(
     <div className="am-overlay" ref={overlayRef} onClick={e => e.target === overlayRef.current && onClose()} role="dialog" aria-modal="true" aria-labelledby="am-title">
       <div className="am-card">
         <div className="am-header">
-          <div>
+          {RoleIcon && <span className="am-role-icon" aria-hidden="true"><RoleIcon size={22}/></span>}
+          <div className="am-header-text">
             <p className="am-overline">Applying for</p>
             <h2 id="am-title">{jobTitle}</h2>
           </div>
           <button className="am-close" onClick={onClose} aria-label="Close"><X size={18}/></button>
+          <div className="am-progress" role="progressbar" aria-label="Form progress" aria-valuemin={0} aria-valuemax={requiredValues.length} aria-valuenow={filled}>
+            <span style={{ width: `${(filled / requiredValues.length) * 100}%` }}/>
+          </div>
         </div>
 
         {status === 'done' ? (
@@ -224,82 +237,106 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
           </div>
         ) : (
           <form className="am-form" onSubmit={handleSubmit} noValidate>
-            <div className="am-grid">
-              <div className="am-field">
-                <label htmlFor="am-firstName">First name</label>
-                <input id="am-firstName" ref={firstRef} required autoComplete="given-name" value={form.firstName} onChange={set('firstName')}/>
-              </div>
-              <div className="am-field">
-                <label htmlFor="am-lastName">Last name</label>
-                <input id="am-lastName" required autoComplete="family-name" value={form.lastName} onChange={set('lastName')}/>
-              </div>
-              <div className="am-field">
-                <label htmlFor="am-email">Email</label>
-                <input id="am-email" required type="email" autoComplete="email" value={form.email} onChange={set('email')}/>
-              </div>
-              <div className="am-field">
-                <label htmlFor="am-phone">Phone number</label>
-                <input id="am-phone" required type="tel" autoComplete="tel" value={form.phone} onChange={set('phone')}/>
-              </div>
-              <div className="am-field">
-                <label htmlFor="am-experience">Total experience (months)</label>
-                <input id="am-experience" required type="number" inputMode="numeric" min="0" placeholder="0 if you’re a fresher" value={form.experience} onChange={set('experience')}/>
-              </div>
-              <div className="am-field">
-                <label htmlFor="am-location">Current city</label>
-                <input id="am-location" required autoComplete="address-level2" value={form.location} onChange={set('location')}/>
-              </div>
-              <div className="am-field">
-                <label htmlFor="am-currentSalary">Current salary (₹ per month)</label>
-                <input id="am-currentSalary" required type="number" inputMode="numeric" min="0" value={form.currentSalary} onChange={set('currentSalary')}/>
-              </div>
-              <div className="am-field">
-                <label htmlFor="am-expectedSalary">Expected salary (₹ per month)</label>
-                <input id="am-expectedSalary" required type="number" inputMode="numeric" min="0" value={form.expectedSalary} onChange={set('expectedSalary')}/>
-              </div>
-              <div className="am-field">
-                <label htmlFor="am-dob-day">Date of birth</label>
-                <div className="am-dob">
-                  <select id="am-dob-day" aria-label="Day" autoComplete="bday-day" value={dobParts.d} onChange={e => updateDob({ ...dobParts, d: e.target.value })}>
-                    <option value="">Day</option>
-                    {Array.from({ length: dayCount }, (_, i) => String(i + 1).padStart(2, '0')).map(day => <option key={day} value={day}>{Number(day)}</option>)}
-                  </select>
-                  <select id="am-dob-month" aria-label="Month" autoComplete="bday-month" value={dobParts.m} onChange={e => updateDob({ ...dobParts, m: e.target.value })}>
-                    <option value="">Month</option>
-                    {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((name, i) => <option key={name} value={String(i + 1).padStart(2, '0')}>{name}</option>)}
-                  </select>
-                  <select id="am-dob-year" aria-label="Year" autoComplete="bday-year" value={dobParts.y} onChange={e => updateDob({ ...dobParts, y: e.target.value })}>
-                    <option value="">Year</option>
-                    {birthYears.map(year => <option key={year} value={year}>{year}</option>)}
-                  </select>
+            <div className="am-body">
+              <section className="am-section" aria-labelledby="am-s1">
+                <h3 id="am-s1" className="am-section-title">About you</h3>
+                <div className="am-grid">
+                  <div className="am-field">
+                    <label htmlFor="am-firstName">First name <span className="am-star" aria-hidden="true">*</span></label>
+                    <div className="am-control"><User size={16} className="am-icon" aria-hidden="true"/><input id="am-firstName" ref={firstRef} required aria-invalid={invalid('am-firstName')} autoComplete="given-name" placeholder="Your first name" value={form.firstName} onChange={set('firstName')}/></div>
+                  </div>
+                  <div className="am-field">
+                    <label htmlFor="am-lastName">Last name <span className="am-star" aria-hidden="true">*</span></label>
+                    <div className="am-control"><User size={16} className="am-icon" aria-hidden="true"/><input id="am-lastName" required aria-invalid={invalid('am-lastName')} autoComplete="family-name" placeholder="Your last name" value={form.lastName} onChange={set('lastName')}/></div>
+                  </div>
+                  <div className="am-field">
+                    <label htmlFor="am-email">Email <span className="am-star" aria-hidden="true">*</span></label>
+                    <div className="am-control"><Mail size={16} className="am-icon" aria-hidden="true"/><input id="am-email" required type="email" aria-invalid={invalid('am-email')} autoComplete="email" placeholder="name@email.com" value={form.email} onChange={set('email')}/></div>
+                  </div>
+                  <div className="am-field">
+                    <label htmlFor="am-phone">Phone number <span className="am-star" aria-hidden="true">*</span></label>
+                    <div className="am-control"><Phone size={16} className="am-icon" aria-hidden="true"/><input id="am-phone" required type="tel" aria-invalid={invalid('am-phone')} autoComplete="tel" placeholder="10-digit mobile number" value={form.phone} onChange={set('phone')}/></div>
+                  </div>
+                  <div className="am-field">
+                    <label htmlFor="am-location">Current city <span className="am-star" aria-hidden="true">*</span></label>
+                    <div className="am-control"><MapPin size={16} className="am-icon" aria-hidden="true"/><input id="am-location" required aria-invalid={invalid('am-location')} autoComplete="address-level2" placeholder="The city you live in" value={form.location} onChange={set('location')}/></div>
+                  </div>
+                  <div className="am-field">
+                    <label htmlFor="am-gender">Gender <span className="am-star" aria-hidden="true">*</span></label>
+                    <div className="am-control"><UserRound size={16} className="am-icon" aria-hidden="true"/>
+                      <select id="am-gender" required aria-invalid={invalid('am-gender')} value={form.gender} onChange={set('gender')}>
+                        <option value="">Choose one</option>
+                        <option>Male</option>
+                        <option>Female</option>
+                        <option>Non-binary</option>
+                        <option>Prefer not to say</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="am-field am-wide">
+                    <label htmlFor="am-dob-day">Date of birth <span className="am-star" aria-hidden="true">*</span></label>
+                    <div className="am-dob" role="group" aria-label="Date of birth">
+                      <select id="am-dob-day" aria-label="Day" aria-invalid={invalid('am-dob')} autoComplete="bday-day" value={dobParts.d} onChange={e => updateDob({ ...dobParts, d: e.target.value })}>
+                        <option value="">Day</option>
+                        {Array.from({ length: dayCount }, (_, i) => String(i + 1).padStart(2, '0')).map(day => <option key={day} value={day}>{Number(day)}</option>)}
+                      </select>
+                      <select id="am-dob-month" aria-label="Month" aria-invalid={invalid('am-dob')} autoComplete="bday-month" value={dobParts.m} onChange={e => updateDob({ ...dobParts, m: e.target.value })}>
+                        <option value="">Month</option>
+                        {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((name, i) => <option key={name} value={String(i + 1).padStart(2, '0')}>{name}</option>)}
+                      </select>
+                      <select id="am-dob-year" aria-label="Year" aria-invalid={invalid('am-dob')} autoComplete="bday-year" value={dobParts.y} onChange={e => updateDob({ ...dobParts, y: e.target.value })}>
+                        <option value="">Year</option>
+                        {birthYears.map(year => <option key={year} value={year}>{year}</option>)}
+                      </select>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="am-field">
-                <label htmlFor="am-gender">Gender</label>
-                <select id="am-gender" required value={form.gender} onChange={set('gender')}>
-                  <option value="">Choose one</option>
-                  <option>Male</option>
-                  <option>Female</option>
-                  <option>Non-binary</option>
-                  <option>Prefer not to say</option>
-                </select>
-              </div>
-              <div className="am-field">
-                <label htmlFor="am-hearAbout">Where did you hear about us?</label>
-                <input id="am-hearAbout" required value={form.hearAbout} onChange={set('hearAbout')}/>
-              </div>
-              <div className="am-field">
-                <label htmlFor="am-cv">CV (PDF, DOC or DOCX)</label>
-                <label className="am-file-label" htmlFor="am-cv">
-                  <Upload size={14}/>
-                  <span>{cvFile ? cvFile.name : 'Choose a file'}</span>
-                  <input id="am-cv" required type="file" accept=".pdf,.doc,.docx" onChange={e => setCvFile(e.target.files?.[0] ?? null)}/>
-                </label>
-              </div>
+              </section>
+
+              <section className="am-section" aria-labelledby="am-s2">
+                <h3 id="am-s2" className="am-section-title">Your experience</h3>
+                <div className="am-grid">
+                  <div className="am-field am-wide">
+                    <label htmlFor="am-experience">Total experience (months) <span className="am-star" aria-hidden="true">*</span></label>
+                    <div className="am-control"><Briefcase size={16} className="am-icon" aria-hidden="true"/><input id="am-experience" required type="number" inputMode="numeric" min="0" aria-invalid={invalid('am-experience')} placeholder="0 if you’re a fresher" value={form.experience} onChange={set('experience')}/></div>
+                  </div>
+                  <div className="am-field">
+                    <label htmlFor="am-currentSalary">Current salary (₹ per month) <span className="am-star" aria-hidden="true">*</span></label>
+                    <div className="am-control"><IndianRupee size={16} className="am-icon" aria-hidden="true"/><input id="am-currentSalary" required type="number" inputMode="numeric" min="0" aria-invalid={invalid('am-currentSalary')} placeholder="Amount per month" value={form.currentSalary} onChange={set('currentSalary')}/></div>
+                  </div>
+                  <div className="am-field">
+                    <label htmlFor="am-expectedSalary">Expected salary (₹ per month) <span className="am-star" aria-hidden="true">*</span></label>
+                    <div className="am-control"><IndianRupee size={16} className="am-icon" aria-hidden="true"/><input id="am-expectedSalary" required type="number" inputMode="numeric" min="0" aria-invalid={invalid('am-expectedSalary')} placeholder="Amount per month" value={form.expectedSalary} onChange={set('expectedSalary')}/></div>
+                  </div>
+                </div>
+              </section>
+
+              <section className="am-section" aria-labelledby="am-s3">
+                <h3 id="am-s3" className="am-section-title">Almost there</h3>
+                <div className="am-grid">
+                  <div className="am-field am-wide">
+                    <label htmlFor="am-hearAbout">Where did you hear about us? <span className="am-star" aria-hidden="true">*</span></label>
+                    <div className="am-control"><Megaphone size={16} className="am-icon" aria-hidden="true"/><input id="am-hearAbout" required aria-invalid={invalid('am-hearAbout')} placeholder="e.g. LinkedIn, a friend, our website" value={form.hearAbout} onChange={set('hearAbout')}/></div>
+                  </div>
+                  <div className="am-field am-wide">
+                    <label htmlFor="am-cv">CV <span className="am-star" aria-hidden="true">*</span></label>
+                    <label className="am-file-label" htmlFor="am-cv" data-filled={cvFile ? 'true' : 'false'}>
+                      {cvFile ? <FileText size={18}/> : <Upload size={18}/>}
+                      <span className="am-file-text">
+                        <strong>{cvFile ? cvFile.name : 'Choose your CV'}</strong>
+                        <small>{cvFile ? 'Click to choose a different file' : 'PDF, DOC or DOCX'}</small>
+                      </span>
+                      <input id="am-cv" required type="file" accept=".pdf,.doc,.docx" onChange={e => { setCvFile(e.target.files?.[0] ?? null); setBadField(null); }}/>
+                    </label>
+                  </div>
+                </div>
+              </section>
             </div>
-            {status === 'error' && <p className="am-error" role="alert">{serverMsg || 'Something went wrong. Please try again.'}</p>}
+
             <div className="am-footer">
-              <span>Every field is needed to send your application.</span>
+              {status === 'error'
+                ? <p className="am-error" role="alert">{serverMsg || 'Something went wrong. Please try again.'}</p>
+                : <p className="am-note"><span className="am-star" aria-hidden="true">*</span> Required &middot; {filled} of {requiredValues.length} done</p>}
               <button type="submit" className="am-submit" disabled={status === 'submitting'}>
                 {status === 'submitting' ? 'Sending…' : 'Send application'}
               </button>
