@@ -4,7 +4,7 @@ const LABELS: Record<string, string> = {
   sports: 'Sports',
   farewell: 'Farewells',
   starbucks: 'Celebrating success',
-  'rock-n-roll': 'Rock n roll',
+  'rock-n-roll': "Rock 'n' roll",
   other: 'More moments',
 };
 

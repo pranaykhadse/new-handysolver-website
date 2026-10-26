@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
     const { valid, email } = await verifyResetToken(resetToken);
     if (!valid || !email) {
-      return Response.json({ error: "Reset link has expired. Please request a new one." }, { status: 401 });
+      return Response.json({ error: "That reset link has expired. Please request a new one." }, { status: 401 });
     }
 
     const hash = await hashPassword(newPassword);
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error("[reset-password] supabase error:", error);
-      return Response.json({ error: "Failed to save password. Try again." }, { status: 500 });
+      return Response.json({ error: "Could not save the password. Please try again." }, { status: 500 });
     }
 
     return Response.json({ ok: true });

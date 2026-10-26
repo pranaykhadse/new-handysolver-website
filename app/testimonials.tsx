@@ -130,7 +130,7 @@ export default function Testimonials(){
   function go(index:number){if(testimonials.length===0)return;setPaused(true);api?.scrollTo((index+testimonials.length)%testimonials.length,reduced);}
   if(testimonials.length===0){
     return <section id="testimonials" className="hp-proof tc-section">
-      <div className="hp-wrap tc-inner"><div className="tc-heading"><p className="hp-overline">The nicest part of our work? Hearing this.</p></div><p>Gathering kind words...</p></div>
+      <div className="hp-wrap tc-inner"><div className="tc-heading"><p className="hp-overline">The nicest part of our work? Hearing this.</p></div><p>Gathering kind words…</p></div>
     </section>;
   }
   return <section id="testimonials" className="hp-proof tc-section" ref={region} onFocusCapture={e=>{if(!(e.target as HTMLElement).closest('[data-rotation-control]'))setPaused(true);}}>

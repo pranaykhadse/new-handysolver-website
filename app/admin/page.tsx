@@ -194,7 +194,7 @@ function FieldToggle({ label, flagKey, flags, onToggle, children }: {
     <div className="adm-field">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
         <label className="adm-label" style={{ marginBottom: 0 }}>{label}</label>
-        <label className="adm-toggle" title={visible ? 'Visible on careers page — click to hide' : 'Hidden from careers page — click to show'}>
+        <label className="adm-toggle" title={visible ? 'Visible on the careers page — click to hide' : 'Hidden from the careers page — click to show'}>
           <input type="checkbox" checked={visible} onChange={(e) => onToggle(flagKey, e.target.checked)} />
           <span className="adm-toggle-track"><span className="adm-toggle-thumb" /></span>
           <span className="adm-toggle-label" style={{ minWidth: 36, fontSize: 10 }}>{visible ? 'Show' : 'Hide'}</span>
@@ -658,7 +658,7 @@ function DraggablePhotoList({
               {photo.is_active === false && <span className="ga-tile-badge">Hidden</span>}
               <figcaption>{photo.caption || <em>No caption</em>}</figcaption>
               <div className="ga-tile-actions">
-                <button className="adm-icon-btn" aria-label={photo.is_active === false ? 'Show on website' : 'Hide from website'} title={photo.is_active === false ? 'Inactive: click to show on website' : 'Active: click to hide from website'} onClick={() => onSetActive([photo.id], photo.is_active === false)}>{photo.is_active === false ? <EyeOff size={14} /> : <Eye size={14} />}</button>
+                <button className="adm-icon-btn" aria-label={photo.is_active === false ? 'Show on website' : 'Hide from website'} title={photo.is_active === false ? 'Inactive: click to show on the website' : 'Active: click to hide from the website'} onClick={() => onSetActive([photo.id], photo.is_active === false)}>{photo.is_active === false ? <EyeOff size={14} /> : <Eye size={14} />}</button>
                 <button className="adm-icon-btn" aria-label="Move to another folder" title="Move to another folder" onClick={() => openMove([photo.id])}><FolderInput size={14} /></button>
                 <button className="adm-icon-btn" aria-label="Maximize" onClick={() => setLightIdx(i)}><Maximize2 size={14} /></button>
                 <button className="adm-icon-btn" aria-label="Edit" onClick={() => onEdit({ ...photo })}><PencilLine size={14} /></button>

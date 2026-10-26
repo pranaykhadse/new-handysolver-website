@@ -70,7 +70,7 @@ export default function MessageBuilder(){
     <div className="lt-hp" aria-hidden="true"><label>Leave this field empty<input type="text" name="website" tabIndex={-1} autoComplete="off" value={trap} onChange={e=>setTrap(e.target.value)}/></label></div>
     <label className="lt-message">The short version <span>*</span><Textarea value={message} onChange={e=>setMessage(e.target.value)} required maxLength={1800} rows={5} placeholder="What’s taking too much time? What would you love to make easier? A few lines are plenty."/></label>
     <div className="lt-message-meta"><span>No perfect brief needed.</span><span>{message.length}/1800</span></div>
-    <div className="lt-form-actions"><Button className="lt-send" type="submit" disabled={sending}>{channel==='whatsapp'?<><WhatsAppIcon/>Continue on WhatsApp</>:(sending?'Sending...':'Send message')} <ArrowUpRight size={18}/></Button><Button type="button" variant="ghost" onClick={copy} disabled={!message.trim()}><Copy size={15}/>Copy message</Button></div>
+    <div className="lt-form-actions"><Button className="lt-send" type="submit" disabled={sending}>{channel==='whatsapp'?<><WhatsAppIcon/>Continue on WhatsApp</>:(sending?'Sending…':'Send message')} <ArrowUpRight size={18}/></Button><Button type="button" variant="ghost" onClick={copy} disabled={!message.trim()}><Copy size={15}/>Copy message</Button></div>
     <p className="lt-form-note">{channel==='whatsapp'?<>Opens WhatsApp with your message for +91 99718 15001. You review and send it there.<br/>This page does not submit or store your details.</>:<>Sends your message to {CONTACT_EMAIL}.<br/>We use your name and email only to reply to you.</>}</p>
     <p className="lt-status" role="status">{status}</p>
   </form>;
