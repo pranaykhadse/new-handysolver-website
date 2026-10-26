@@ -124,3 +124,10 @@
   .hr-mission .hp-wrap > span:first-child { letter-spacing: .16em; }
   .hr-mission p { padding-bottom: 0; text-wrap: balance; }
 }
+
+/* Desktop and tablet: one compact row with the label centred beside the text.
+   Doubled class so the result is the same in dev and in the production CSS order. */
+@media (min-width: 761px) {
+  .hr-mission.hr-mission .hp-wrap { display: flex; align-items: center; gap: 32px; min-height: 130px; }
+  .hr-mission.hr-mission .hp-wrap > span:first-child { align-self: center; margin-top: 0; }
+}
