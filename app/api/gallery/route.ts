@@ -1,3 +1,4 @@
+import { legacyAsset } from "@/lib/legacy-assets";
 import { getSupabase } from "@/lib/supabase";
 
 export async function GET() {
@@ -8,7 +9,11 @@ export async function GET() {
       .order("sort_order", { ascending: true });
     if (error) throw error;
     // Hidden photos never reach the public site. Rows without the flag (older databases) count as visible.
-    const photos = (data ?? []).filter((p: { is_active?: boolean }) => p.is_active !== false);
+    // Pictures that lived on the old website and could not be recovered are left out rather than shown broken.
+    const photos = (data ?? [])
+      .filter((p: { is_active?: boolean }) => p.is_active !== false)
+      .map((p: { src: string }) => ({ ...p, src: legacyAsset(p.src) }))
+      .filter((p: { src: string }) => p.src);
 
     let folders: { slug: string; label: string; sort_order?: number }[] = [];
     try {

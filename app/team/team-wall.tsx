@@ -3,14 +3,15 @@
 import { useEffect, useState } from 'react';
 import { Shuffle, Smile, ArrowUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { legacyAsset } from '@/lib/legacy-assets';
 
-const PHOTO_BASE = 'https://handysolver.com/assets/images/employees/';
+const PHOTO_BASE = '/legacy/images/employees/';
 
 type Member = { id: string; name: string; surname: string; photoUrl: string };
 
 function photoSrc(member: Member) {
   if (!member.photoUrl) return '';
-  if (/^https?:\/\//i.test(member.photoUrl)) return member.photoUrl;
+  if (/^https?:\/\//i.test(member.photoUrl)) return legacyAsset(member.photoUrl);
   return `${PHOTO_BASE}${member.photoUrl}`;
 }
 
