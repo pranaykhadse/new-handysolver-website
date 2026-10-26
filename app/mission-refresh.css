@@ -131,3 +131,9 @@
   .hr-mission.hr-mission .hp-wrap { display: flex; align-items: center; gap: 32px; min-height: 130px; }
   .hr-mission.hr-mission .hp-wrap > span:first-child { align-self: center; margin-top: 0; }
 }
+
+/* Phones: tighter, evenly spaced card */
+@media (max-width: 760px) {
+  .hr-mission.hr-mission .hp-wrap { padding-block: 36px; gap: 14px; }
+  .hr-mission.hr-mission p { line-height: 1.16; }
+}
