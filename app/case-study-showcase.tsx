@@ -58,7 +58,7 @@ export default function CaseStudyShowcase(){
       <Tabs className="cs-tabs" value={current??studies[0].id} onValueChange={choose}>
         <div className="cs-browse-head"><div><small>Scroll to explore</small><button type="button" onClick={()=>list.current?.scrollBy({left:-330,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})} aria-label="Previous case studies"><ArrowLeft/></button><button type="button" onClick={()=>list.current?.scrollBy({left:330,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})} aria-label="More case studies"><ArrowRight/></button></div></div>
         <div className="cs-list-shell"><TabsList ref={list} className="cs-list" aria-label="Choose a case study">{studies.map(({id,number,label,metric,title,icon})=>{const Icon=ICONS[icon]??Boxes;return <TabsTrigger className="cs-card" value={id} key={id} onClick={()=>choose(id)}>
-          <span className="cs-card-top"><small>{number} / {label}</small><Icon size={21} strokeWidth={1.7}/></span><strong>{metric}</strong><span>{title}</span><i aria-hidden="true"><ArrowRight size={17}/></i>
+          <span className="cs-card-top"><small>{number} / {label}</small><Icon size={21} strokeWidth={1.7}/></span><strong>{metric}</strong><span>{title}</span>
         </TabsTrigger>})}</TabsList></div>
         {!opened&&<button className="cs-open-hint" type="button" onClick={()=>setOpened(true)}>Pick a story to unfold it <ArrowRight size={17}/></button>}
         {opened&&studies.map(study=><TabsContent className="cs-story" value={study.id} key={study.id}>

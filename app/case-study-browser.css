@@ -9,3 +9,8 @@
 .cs-section .cs-card[data-state=active]{background:#ff7a21!important;color:#090909!important;border-color:#ff7a21!important}
 .cs-open-hint{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:74px;margin-top:5px;border:1px dashed #ffffff55;border-radius:9px;background:#151515;color:#fffaf3;font-family:Georgia,serif;font-size:17px;font-style:italic;cursor:pointer;transition:background .2s,color .2s}.cs-open-hint:hover{background:#ff7a21;color:#090909}.cs-open-hint:focus-visible{outline:3px solid #ffb07b;outline-offset:4px}
 @media(max-width:600px){.cs-browse-head small{display:none}.cs-card{flex-basis:82vw}}
+
+/* Small and medium screens: each card is shown whole, with no peeking neighbour */
+@media(max-width:1024px){.cs-card{flex:0 0 calc(50% - 7px)}.cs-story-actions{gap:0;padding-top:4px}.cs-story-actions button,.cs-story-actions a{padding:0;min-height:40px}}
+@media(max-width:600px){.cs-card{flex:0 0 100%}}
+@media(max-width:1024px){.handy-home.handy-home .cs-story-actions :is(button,a){padding:0;min-height:40px}}
