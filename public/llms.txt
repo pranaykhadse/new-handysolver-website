@@ -1,0 +1,24 @@
+# Handysolver
+
+> Handysolver is a Gurugram, India company that helps businesses replace disconnected tools, manual processes and repetitive tasks with connected software and practical automation. It offers business transformation, custom software and automation with applied AI.
+
+Handysolver works hands-on with clients: listening to the problem first, agreeing a plan, building in the open and improving after launch. Contact is by WhatsApp, email or the contact form.
+
+## Main pages
+
+- [Home](https://handysolver.com/): what Handysolver does, case studies, client testimonials, how the work runs, and a two-minute workflow check
+- [Meet the team](https://handysolver.com/team): the people at Handysolver
+- [Careers](https://handysolver.com/careers): life at Handysolver and why people work here
+- [Open roles](https://handysolver.com/careers/open-roles): current vacancies with role details and an application form
+- [Photo gallery](https://handysolver.com/gallery): team moments, celebrations and outings
+- [Let's talk](https://handysolver.com/lets-talk): contact form, WhatsApp, email and office address
+
+## Contact
+
+- Email: connect@handysolver.com
+- WhatsApp: +91 99718 15001
+- Office: C 705, Pioneer Urban Square, Golf Course Extension Road, Sector 62, Gurugram, Haryana 122101, India
+
+## Optional
+
+- [Sitemap](https://handysolver.com/sitemap.xml)

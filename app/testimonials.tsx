@@ -70,8 +70,8 @@ function VideoPlayer({ url, onHoverChange }: { url: string; onHoverChange?: (h: 
   return <a className="tc-watch" href={embed.src} target="_blank" rel="noopener noreferrer">Watch the story <ArrowUpRight size={14} /></a>;
 }
 
-export default function Testimonials(){
-  const [testimonials,setTestimonials]=useState<Testimonial[]>([]);
+export default function Testimonials({initial=[]}:{initial?:Testimonial[]}){
+  const [testimonials,setTestimonials]=useState<Testimonial[]>(initial);
   const [api,setApi]=useState<CarouselApi>();
   const [selected,setSelected]=useState(0);
   const [paused,setPaused]=useState(false);
@@ -82,6 +82,7 @@ export default function Testimonials(){
   const region=useRef<HTMLElement>(null);
   const playing=!paused&&!hovered&&visible&&tabVisible&&!reduced;
   useEffect(()=>{
+    if(initial.length>0)return;
     const controller=new AbortController();
     fetch('/api/testimonials',{signal:controller.signal}).then(async r=>{
       if(!r.ok)return;

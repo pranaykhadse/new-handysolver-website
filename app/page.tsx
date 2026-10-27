@@ -1,6 +1,7 @@
 import { ArrowUpRight, ArrowRight, Asterisk, MoveUpRight } from 'lucide-react';
 import type { Metadata } from 'next';
 import { OG_DEFAULTS } from '@/lib/seo';
+import { getCaseStudies, getTestimonials } from '@/lib/content';
 import { HomeMotion } from './playful-interactions';
 import ProcessJourney from './process-journey';
 import PlayfulHeader from './playful-header';
@@ -33,7 +34,12 @@ export const metadata: Metadata = {
     url: '/',
   },
 };
-export default function Home() {
+// Re-generated at most once a minute, so admin edits to case studies and testimonials show up quickly
+// while visitors still get a ready-made page.
+export const revalidate = 60;
+
+export default async function Home() {
+  const [{ studies }, { testimonials }] = await Promise.all([getCaseStudies(), getTestimonials()]);
   return <div className="handy-home handy-depth">
     <HomeDepth />
     <HomeMotion />
@@ -53,7 +59,7 @@ export default function Home() {
         <div className="hp-hero-bottom"><span>People first. Technology second.</span></div>
       </section>
 
-      <CaseStudyShowcase />
+      <CaseStudyShowcase initial={studies} />
 
       <section className="hp-intro-strip" aria-label="Our approach"><div className="hp-wrap"><span>Less Manual Work.</span><Asterisk/><span>More Headspace.</span><Asterisk/><span>That’s Handy.</span><Asterisk/></div></section>
 
@@ -67,7 +73,7 @@ export default function Home() {
 
       <DayShift />
 
-      <Testimonials/>
+      <Testimonials initial={testimonials} />
 
       <ProcessJourney />
 

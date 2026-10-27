@@ -29,3 +29,5 @@
   .cs-section[data-loading] { min-height: 640px; }
   .tc-section[data-loading] { min-height: 590px; }
 }
+/* The selected story stays in the page (so the tab's aria-controls points at something real) but is hidden until opened. */
+.cs-story.cs-story[data-closed] { display: none !important; }

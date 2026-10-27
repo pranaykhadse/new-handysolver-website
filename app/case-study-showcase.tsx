@@ -20,12 +20,15 @@ const ICONS: Record<string, IconComponent> = {
   'briefcase-business': BriefcaseBusiness, 'hotel': Hotel, 'users': Users,
 };
 
-export default function CaseStudyShowcase(){
-  const [studies,setStudies]=useState<Study[]>([]);
+const numbered=(items: Omit<Study,'number'>[]): Study[]=>items.map((study,index)=>({...study,number:String(index+1).padStart(2,'0')}));
+
+export default function CaseStudyShowcase({initial=[]}:{initial?:Omit<Study,'number'>[]}){
+  const [studies,setStudies]=useState<Study[]>(()=>numbered(initial));
   const [active,setActive]=useState<string|null>(null);
   const [opened,setOpened]=useState(false);
   const list=useRef<HTMLDivElement>(null);
   useEffect(()=>{
+    if(initial.length>0)return;
     const controller=new AbortController();
     fetch('/api/case-studies',{signal:controller.signal}).then(async r=>{
       if(!r.ok)return;
@@ -60,7 +63,7 @@ export default function CaseStudyShowcase(){
           <span className="cs-card-top"><small>{number} / {label}</small><Icon size={21} strokeWidth={1.7}/></span><strong>{metric}</strong><span>{title}</span>
         </TabsTrigger>})}</TabsList></div>
         {!opened&&<button className="cs-open-hint" type="button" onClick={()=>setOpened(true)}>Pick a story to unfold it <ArrowRight size={17}/></button>}
-        {opened&&studies.map(study=><TabsContent className="cs-story" value={study.id} key={study.id}>
+        {studies.map(study=><TabsContent className="cs-story" data-closed={opened?undefined:'true'} value={study.id} key={study.id}>
           <div className="cs-story-lead"><span>CASE {study.number} OF {studies.length}</span><h3>{study.title}</h3><div>{study.tags.map(tag=><small key={tag}>{tag}</small>)}</div></div>
           <div className="cs-story-steps"><article><span>BEFORE</span><p>{study.before}</p></article><article><span>WHAT CHANGED</span><p>{study.changed}</p></article><article className="cs-result"><span><Check size={15}/> RESULT</span><p>{study.result}</p></article></div>
           <div className="cs-story-actions"><a href="/lets-talk">Bring us a process like this <ArrowUpRight size={17}/></a></div>
