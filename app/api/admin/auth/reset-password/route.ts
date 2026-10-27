@@ -1,5 +1,5 @@
 import { verifyResetToken, hashPassword } from "@/lib/auth";
-import { getSupabase } from "@/lib/supabase";
+import { getServerSupabase } from "@/lib/supabase-admin";
 
 export async function POST(request: Request) {
   try {
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 
     const hash = await hashPassword(newPassword);
 
-    const { error } = await getSupabase()
+    const { error } = await getServerSupabase()
       .from("admin_emails")
       .update({ password_hash: hash })
       .eq("email", email);

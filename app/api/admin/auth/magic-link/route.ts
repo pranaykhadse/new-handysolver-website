@@ -1,5 +1,5 @@
 import { signMagicToken, hashToken } from "@/lib/auth";
-import { getSupabase } from "@/lib/supabase";
+import { getServerSupabase } from "@/lib/supabase-admin";
 import nodemailer from "nodemailer";
 
 const SMTP_USER = process.env.SMTP_USER ?? "";
@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     const { email } = await request.json();
 
     // Check if email is registered as an admin
-    const { data: adminRecord } = await getSupabase()
+    const { data: adminRecord } = await getServerSupabase()
       .from("admin_emails")
       .select("email")
       .eq("email", email)
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
     // Store token hash in Supabase
-    await getSupabase()
+    await getServerSupabase()
       .from("admin_magic_tokens")
       .insert({ token_hash: tokenHash, expires_at: expiresAt, email });
 

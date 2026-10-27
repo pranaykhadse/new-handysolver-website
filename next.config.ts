@@ -22,7 +22,6 @@ const CSP = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
-  typescript: { ignoreBuildErrors: true },
   // Resize and convert pictures on demand (see lib/image.ts). Supabase holds the uploaded photos.
   images: {
     remotePatterns: [{ protocol: "https", hostname: "*.supabase.co", pathname: "/storage/v1/object/public/**" }],

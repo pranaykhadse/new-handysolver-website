@@ -1,10 +1,10 @@
-import { getSupabase } from "@/lib/supabase";
+import { getServerSupabase } from "@/lib/supabase-admin";
 import { isAdminRequest, isCsrfValid, unauthorized, forbidden, badRequest, serverError } from "@/lib/admin";
 
 export async function GET(request: Request) {
   if (!(await isAdminRequest(request))) return unauthorized();
   try {
-    const { data, error } = await getSupabase()
+    const { data, error } = await getServerSupabase()
       .from("job_posts")
       .select("*")
       .order("sort_order", { ascending: true });
@@ -22,7 +22,7 @@ export async function PUT(request: Request) {
     const body = await request.json();
     if (!body?.id) return badRequest("id is required");
     if (!body?.title) return badRequest("title is required");
-    const { error } = await getSupabase().from("job_posts").upsert(body, { onConflict: "id" });
+    const { error } = await getServerSupabase().from("job_posts").upsert(body, { onConflict: "id" });
     if (error) throw error;
     return Response.json({ ok: true });
   } catch (error) {
@@ -36,7 +36,7 @@ export async function DELETE(request: Request) {
   try {
     const id = new URL(request.url).searchParams.get("id");
     if (!id) return badRequest("id is required");
-    const { error } = await getSupabase().from("job_posts").delete().eq("id", id);
+    const { error } = await getServerSupabase().from("job_posts").delete().eq("id", id);
     if (error) throw error;
     return Response.json({ ok: true });
   } catch (error) {

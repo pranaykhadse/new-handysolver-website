@@ -1,10 +1,10 @@
-import { getSupabase } from "@/lib/supabase";
+import { getServerSupabase } from "@/lib/supabase-admin";
 import { isAdminRequest, isCsrfValid, unauthorized, forbidden, badRequest, serverError } from "@/lib/admin";
 
 export async function GET(request: Request) {
   if (!(await isAdminRequest(request))) return unauthorized();
   try {
-    const { data, error } = await getSupabase()
+    const { data, error } = await getServerSupabase()
       .from("team_members")
       .select("*")
       .order("sort_order", { ascending: true });
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     if (!body?.name && !body?.photo_url) return badRequest("name or photo_url is required");
-    const { error } = await getSupabase().from("team_members").insert(body);
+    const { error } = await getServerSupabase().from("team_members").insert(body);
     if (error) throw error;
     return Response.json({ ok: true });
   } catch (error) {
@@ -35,7 +35,7 @@ export async function PUT(request: Request) {
   try {
     const body = await request.json();
     if (!body?.id) return badRequest("id is required");
-    const { error } = await getSupabase().from("team_members").upsert(body, { onConflict: "id" });
+    const { error } = await getServerSupabase().from("team_members").upsert(body, { onConflict: "id" });
     if (error) throw error;
     return Response.json({ ok: true });
   } catch (error) {
@@ -49,7 +49,7 @@ export async function DELETE(request: Request) {
   try {
     const id = new URL(request.url).searchParams.get("id");
     if (!id) return badRequest("id is required");
-    const { error } = await getSupabase().from("team_members").delete().eq("id", id);
+    const { error } = await getServerSupabase().from("team_members").delete().eq("id", id);
     if (error) throw error;
     return Response.json({ ok: true });
   } catch (error) {

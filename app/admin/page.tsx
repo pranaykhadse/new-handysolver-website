@@ -957,7 +957,7 @@ export default function AdminPage() {
   const [loginError, setLoginError] = useState('');
   const [loggingIn, setLoggingIn] = useState(false);
   const [tab, setTab] = useState<Tab>('case-studies');
-  const [rows, setRows] = useState<Record<Tab, Row[]>>({ 'case-studies': [], testimonials: [], team: [], jobs: [], applications: [] });
+  const [rows, setRows] = useState<Record<Tab, Row[]>>({ 'case-studies': [], testimonials: [], team: [], jobs: [], applications: [], gallery: [], 'apply-form': [] });
   const [loading, setLoading] = useState(false);
   const [draft, setDraft] = useState<Row | null>(null);
   const [saveBusy, setSaveBusy] = useState(false);
@@ -1267,6 +1267,9 @@ export default function AdminPage() {
     team: '/api/admin/team',
     jobs: '/api/admin/jobs',
     applications: '/api/admin/applications',
+    // These two tabs have their own screens and never go through the row list.
+    gallery: '',
+    'apply-form': '',
   }), []);
 
   useEffect(() => {
@@ -1322,8 +1325,8 @@ export default function AdminPage() {
     else if (tab !== 'apply-form') reload(tab);
   }, [key]);
 
-  async function reload(which: Exclude<Tab, 'gallery'>) {
-    if (!key) return;
+  async function reload(which: Tab) {
+    if (!key || !route[which]) return;
     setLoading(true);
     const res = await api(route[which]);
     setLoading(false);
@@ -1993,7 +1996,7 @@ export default function AdminPage() {
                   <TeamPhotoUpload bucket="testimonial-avatars" onUrl={(url) => set('avatar_url', url)} />
                 </div>
                 <p className="ga-upload-hint">Allowed image types: {ALLOWED_IMAGE_LABEL}. Other file types can&apos;t be selected.</p>
-                {draft.avatar_url && (
+                {Boolean(draft.avatar_url) && (
                   <PhotoPreview src={String(draft.avatar_url)} />
                 )}
               </Field>
@@ -2029,7 +2032,7 @@ export default function AdminPage() {
                   <TeamPhotoUpload onUrl={(url) => set('photo_url', url)} />
                 </div>
                 <p className="ga-upload-hint">Allowed image types: {ALLOWED_IMAGE_LABEL}. Other file types can&apos;t be selected.</p>
-                {draft.photo_url && (
+                {Boolean(draft.photo_url) && (
                   <PhotoPreview src={String(draft.photo_url)} />
                 )}
               </Field>

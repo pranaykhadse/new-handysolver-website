@@ -40,6 +40,8 @@ const JOB_TEXT_FIXES: [RegExp, string][] = [
   [/best practises/g, 'best practices'],
   [/PHP Frameworks/g, 'PHP frameworks'],
   [/Team Leads/g, 'team leads'],
+  [/\bfrontend\b/g, 'front-end'],
+  [/\bFrontend\b/g, 'Front-end'],
   [/mixing LLM brains with real engineering/g, 'that mix LLMs with real engineering'],
   [/(Bachelor.s\/Master.s in CS or) related\./g, '$1 a related field.'],
   [/Manage and ensure delivery is as per the proposed plan and mock-ups and that too before time\./g, 'Ensure delivery follows the proposed plan and mock-ups, ahead of schedule.'],

@@ -1,4 +1,4 @@
-import { getSupabase } from "@/lib/supabase";
+import { getServerSupabase } from "@/lib/supabase-admin";
 
 // Public endpoint: mirrors a website job application into Supabase.
 // The myhandydash API is the primary store; this is only a silent copy,
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       cv_filename: str(body?.cv_filename),
       cv_path: str(body?.cv_path),
     };
-    const supabase = getSupabase();
+    const supabase = getServerSupabase();
     let { error } = await supabase.from("job_applications").insert(extra.length ? { ...row, extra } : row);
     // The `extra` column is added by the form-builder setup SQL; if it isn't there yet, still save the core row.
     if (error && extra.length) ({ error } = await supabase.from("job_applications").insert(row));

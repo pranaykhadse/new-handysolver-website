@@ -1,5 +1,5 @@
 import { verifyMagicToken, hashToken, signResetToken } from "@/lib/auth";
-import { getSupabase } from "@/lib/supabase";
+import { getServerSupabase } from "@/lib/supabase-admin";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     if (!valid) return htmlRedirect(`${adminUrl}?magic=invalid`);
 
     const tokenHash = await hashToken(token);
-    const supabase = getSupabase();
+    const supabase = getServerSupabase();
 
     const { data } = await supabase
       .from("admin_magic_tokens")

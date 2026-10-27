@@ -1,5 +1,5 @@
 import { clearAuthCookies, parseCookies, hashToken } from "@/lib/auth";
-import { getSupabase } from "@/lib/supabase";
+import { getServerSupabase } from "@/lib/supabase-admin";
 
 export async function POST(request: Request) {
   try {
@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     if (refreshToken) {
       try {
         const tokenHash = await hashToken(refreshToken);
-        await getSupabase()
+        await getServerSupabase()
           .from("admin_sessions")
           .update({ revoked: true })
           .eq("token_hash", tokenHash);

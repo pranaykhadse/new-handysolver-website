@@ -1,5 +1,5 @@
 import { verifyRefreshToken, setAuthCookies, clearAuthCookies, parseCookies, hashToken } from "@/lib/auth";
-import { getSupabase } from "@/lib/supabase";
+import { getServerSupabase } from "@/lib/supabase-admin";
 
 export async function POST(request: Request) {
   try {
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     let sessionValid = true;
     try {
       const tokenHash = await hashToken(refreshToken);
-      const { data, error: dbError } = await getSupabase()
+      const { data, error: dbError } = await getServerSupabase()
         .from("admin_sessions")
         .select("id")
         .eq("token_hash", tokenHash)
@@ -49,10 +49,10 @@ export async function POST(request: Request) {
     // Best-effort: revoke old token, store new one
     try {
       const oldHash = await hashToken(refreshToken);
-      await getSupabase().from("admin_sessions").update({ revoked: true }).eq("token_hash", oldHash);
+      await getServerSupabase().from("admin_sessions").update({ revoked: true }).eq("token_hash", oldHash);
       const newHash = await hashToken(newRefreshToken);
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-      await getSupabase().from("admin_sessions").insert({ token_hash: newHash, admin_id: "admin", expires_at: expiresAt });
+      await getServerSupabase().from("admin_sessions").insert({ token_hash: newHash, admin_id: "admin", expires_at: expiresAt });
     } catch (e) {
       console.warn("admin_sessions rotation skipped:", (e as Error).message);
     }

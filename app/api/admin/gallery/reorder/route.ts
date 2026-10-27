@@ -1,4 +1,4 @@
-import { getSupabase } from "@/lib/supabase";
+import { getServerSupabase } from "@/lib/supabase-admin";
 import { isAdminRequest, isCsrfValid, unauthorized, forbidden, badRequest, serverError } from "@/lib/admin";
 
 export async function PUT(request: Request) {
@@ -10,7 +10,7 @@ export async function PUT(request: Request) {
     const items = body.items as { id: string; sort_order: number; src: string; caption: string }[];
     if (items.length === 0) return badRequest("items must not be empty");
 
-    const { error } = await getSupabase()
+    const { error } = await getServerSupabase()
       .from("gallery_photos")
       .upsert(
         items.map((item) => ({ id: item.id, sort_order: item.sort_order, src: item.src, caption: item.caption ?? "" })),

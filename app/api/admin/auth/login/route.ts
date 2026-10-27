@@ -1,10 +1,10 @@
 import { setAuthCookies, hashToken, verifyPassword } from "@/lib/auth";
-import { getSupabase } from "@/lib/supabase";
+import { getServerSupabase } from "@/lib/supabase-admin";
 
 const ADMIN_KEY = process.env.ADMIN_KEY ?? "HandySolver@2026";
 
 async function checkPassword(email: string, password: string): Promise<boolean> {
-  const { data } = await getSupabase()
+  const { data } = await getServerSupabase()
     .from("admin_emails")
     .select("password_hash")
     .eq("email", email)
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     try {
       const tokenHash = await hashToken(refreshToken);
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-      const { error } = await getSupabase()
+      const { error } = await getServerSupabase()
         .from("admin_sessions")
         .insert({ token_hash: tokenHash, admin_id: email, expires_at: expiresAt });
       if (error) console.warn("admin_sessions insert failed:", error.message);
