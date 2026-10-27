@@ -44,7 +44,6 @@ export default function CaseStudyShowcase(){
     const a=rail.getBoundingClientRect(), b=card.getBoundingClientRect();
     rail.scrollBy({left:b.left-a.left-(a.width-b.width)/2,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
   },[current,opened]);
-  const next=()=>{if(studies.length===0)return;setActive(studies[(index+1)%studies.length].id);setOpened(true)};
   if(studies.length===0){
     return <section className="cs-section" aria-labelledby="cs-title">
       <div className="hp-wrap">
@@ -64,7 +63,7 @@ export default function CaseStudyShowcase(){
         {opened&&studies.map(study=><TabsContent className="cs-story" value={study.id} key={study.id}>
           <div className="cs-story-lead"><span>CASE {study.number} OF {studies.length}</span><h3>{study.title}</h3><div>{study.tags.map(tag=><small key={tag}>{tag}</small>)}</div></div>
           <div className="cs-story-steps"><article><span>BEFORE</span><p>{study.before}</p></article><article><span>WHAT CHANGED</span><p>{study.changed}</p></article><article className="cs-result"><span><Check size={15}/> RESULT</span><p>{study.result}</p></article></div>
-          <div className="cs-story-actions"><button type="button" onClick={next}>Next story <ArrowRight size={17}/></button><a href="/lets-talk">Bring us a process like this <ArrowUpRight size={17}/></a></div>
+          <div className="cs-story-actions"><a href="/lets-talk">Bring us a process like this <ArrowUpRight size={17}/></a></div>
         </TabsContent>)}
       </Tabs>
       <p className="cs-source-note">Outcomes are drawn from project records. Approximate figures are shown with ~.</p>
