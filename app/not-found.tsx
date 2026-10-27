@@ -1,4 +1,7 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = { title: 'Page not found | Handysolver', robots: { index: false } };
 
 // Branded 404 (served with HTTP 404 status automatically). Keeps lost
 // visitors — and link equity — inside the site instead of bouncing.

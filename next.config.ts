@@ -3,6 +3,19 @@ import { REDIRECTS } from "./lib/redirects";
 
 const nextConfig: NextConfig = {
   typescript: { ignoreBuildErrors: true },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return [
       // Canonical host consolidation FIRST: www → apex, so every www hit
