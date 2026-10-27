@@ -129,7 +129,7 @@ export default function Testimonials(){
   },[api,testimonials.length]);
   function go(index:number){if(testimonials.length===0)return;setPaused(true);api?.scrollTo((index+testimonials.length)%testimonials.length,reduced);}
   if(testimonials.length===0){
-    return <section id="testimonials" className="hp-proof tc-section">
+    return <section id="testimonials" className="hp-proof tc-section" data-loading="true">
       <div className="hp-wrap tc-inner"><div className="tc-heading"><p className="hp-overline">The nicest part of our work? Hearing this.</p></div><p>Gathering kind words…</p></div>
     </section>;
   }

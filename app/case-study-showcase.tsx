@@ -45,7 +45,7 @@ export default function CaseStudyShowcase(){
     rail.scrollBy({left:b.left-a.left-(a.width-b.width)/2,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
   },[current,opened]);
   if(studies.length===0){
-    return <section className="cs-section" aria-labelledby="cs-title">
+    return <section className="cs-section" data-loading="true" aria-labelledby="cs-title">
       <div className="hp-wrap">
         <div className="cs-heading hp-reveal"><div><h2 id="cs-title">Real problems.<br/><em>Useful outcomes.</em></h2></div><p>Gathering our stories…</p></div>
       </div>

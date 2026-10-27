@@ -20,3 +20,12 @@
 @media (prefers-reduced-motion: reduce) {
   .handy-depth .cs-story[data-state=active] { animation: none; }
 }
+
+/* Case studies and testimonials load after the page. Reserve roughly their final height while waiting so the
+   content below does not jump when they arrive (this was the main source of layout shift for real visitors). */
+.cs-section[data-loading], .tc-section[data-loading] { min-height: 680px; }
+.tc-section[data-loading] { min-height: 540px; }
+@media (max-width: 760px) {
+  .cs-section[data-loading] { min-height: 640px; }
+  .tc-section[data-loading] { min-height: 590px; }
+}
