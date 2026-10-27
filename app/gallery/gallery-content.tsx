@@ -11,6 +11,11 @@ import './gallery.css';
 
 type Photo = { id: string; sort_order: number; src: string; caption: string; category?: string | null };
 
+// Photos imported from a phone or camera keep the file name as their caption ("IMG 9726", "20241225 181941").
+// That means nothing to a visitor, so only real, written captions are shown.
+const FILE_NAME_LIKE = /^(?:(?:img|dsc|dscn|pxl|mvimg|vid|image|photo|pic|screenshot|importedphoto|whatsapp[\w\s-]*)[\s_.-]*)?[\d\s_.-]*$|\.(?:jpe?g|png|webp|heic|gif)$/i;
+const readableCaption = (caption: string) => { const text = (caption ?? '').trim(); return text && !FILE_NAME_LIKE.test(text) ? text : ''; };
+
 const ROTATIONS = [-4, 3, -2, 5, -3, 2, -5, 4, -1, 3, -4, 2, 5, -3, 1, -2, 4, -5, 3, -1];
 
 export default function GalleryContent() {
@@ -67,8 +72,8 @@ export default function GalleryContent() {
                   <div className="gl-grid">
                     {group.photos.map((photo, idx) => (
                       <figure key={photo.id} className="gl-photo" style={{ transform: `rotate(${ROTATIONS[idx % ROTATIONS.length]}deg)` }}>
-                        <img {...responsiveImage(photo.src, '(max-width: 760px) 50vw, 360px')} alt={photo.caption} width={360} height={240} loading={idx < 4 ? 'eager' : 'lazy'} decoding="async" />
-                        <figcaption>{photo.caption}</figcaption>
+                        <img {...responsiveImage(photo.src, '(max-width: 760px) 50vw, 360px')} alt={readableCaption(photo.caption) || 'Handysolver team moment'} width={360} height={240} loading={idx < 4 ? 'eager' : 'lazy'} decoding="async" />
+                        {readableCaption(photo.caption) && <figcaption>{readableCaption(photo.caption)}</figcaption>}
                       </figure>
                     ))}
                   </div>
