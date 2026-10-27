@@ -1,6 +1,7 @@
-import { getSupabase, isSupabaseConfigured, type DbCaseStudy, type DbTestimonial } from "@/lib/supabase";
+import { getSupabase, isSupabaseConfigured, type DbCaseStudy, type DbTeamMember, type DbTestimonial } from "@/lib/supabase";
 import { legacyAsset } from "@/lib/legacy-assets";
 import caseStudySeed from "@/db/seed/case-studies.json";
+import teamSeed from "@/db/seed/team.json";
 import testimonialSeed from "@/db/seed/testimonials.json";
 import { curlyApostrophes, tidyLabel, tidyName } from "@/lib/tidy-text";
 
@@ -62,4 +63,23 @@ export async function getTestimonials(): Promise<{ testimonials: TestimonialPayl
     }
   }
   return { testimonials: (testimonialSeed as DbTestimonial[]).map(shapeTestimonial), source: "seed" };
+}
+
+export type TeamPayload = { id: string; name: string; surname: string; photoUrl: string };
+
+function shapeMember(row: DbTeamMember): TeamPayload {
+  return { id: row.id, name: row.name ?? "", surname: row.surname ?? "", photoUrl: row.photo_url ?? "" };
+}
+
+export async function getTeamMembers(): Promise<{ members: TeamPayload[]; source: "supabase" | "seed" }> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await getSupabase().from("team_members").select("*").order("sort_order", { ascending: true });
+      if (error) throw error;
+      if (Array.isArray(data) && data.length > 0) return { members: (data as DbTeamMember[]).map(shapeMember), source: "supabase" };
+    } catch {
+      // fall through to the bundled copy
+    }
+  }
+  return { members: (teamSeed as DbTeamMember[]).map(shapeMember), source: "seed" };
 }

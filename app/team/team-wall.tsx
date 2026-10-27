@@ -22,10 +22,11 @@ function Portrait({member}:{member:Member}) {
   return failed||!src?<div className="tw-photo-fallback"><Smile size={40}/><span>One of our humans.</span></div>:<img {...responsiveImage(src, '(max-width: 760px) 50vw, 300px', [384, 640])} alt={member.name||'Handysolver team member'} width={400} height={432} loading="lazy" onError={()=>setFailed(true)}/>;
 }
 
-export default function TeamWall(){
-  const [order,setOrder] = useState<Member[]>([]);
+export default function TeamWall({initial=[]}:{initial?:Member[]}){
+  const [order,setOrder] = useState<Member[]>(initial);
   const [mix,setMix] = useState(0);
   useEffect(()=>{
+    if(initial.length>0)return;
     const controller=new AbortController();
     fetch('/api/team',{signal:controller.signal}).then(async r=>{
       if(!r.ok)return;
