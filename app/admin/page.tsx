@@ -829,8 +829,8 @@ function PhotoPreview({ src }: { src: string }) {
   );
 }
 
-/* ── Team photo upload ── */
-function TeamPhotoUpload({ onUrl }: { onUrl: (url: string) => void }) {
+/* ── Photo upload (team photos, testimonial avatars) ── */
+function TeamPhotoUpload({ onUrl, bucket = 'team-photos' }: { onUrl: (url: string) => void; bucket?: string }) {
   const ref = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
 
@@ -845,7 +845,7 @@ function TeamPhotoUpload({ onUrl }: { onUrl: (url: string) => void }) {
     }
     setBusy(true);
     try {
-      onUrl(await uploadGalleryFile(file, '', 'team-photos'));
+      onUrl(await uploadGalleryFile(file, '', bucket));
       toast.success('Photo uploaded');
     } catch (err: unknown) {
       toast.error((err as Error).message);
@@ -1987,14 +1987,19 @@ export default function AdminPage() {
               <Field label="Quote">
                 <textarea className="adm-textarea" rows={3} value={String(draft.quote ?? '')} onChange={(e) => set('quote', e.target.value)} />
               </Field>
-              <Field2>
-                <Field label="Avatar URL">
-                  <input className="adm-input" value={String(draft.avatar_url ?? '')} onChange={(e) => set('avatar_url', e.target.value || null)} placeholder="https://..." />
-                </Field>
-                <Field label="Video URL">
-                  <input className="adm-input" value={String(draft.video_url ?? '')} onChange={(e) => set('video_url', e.target.value || null)} placeholder="YouTube, Vimeo or .mp4" />
-                </Field>
-              </Field2>
+              <Field label="Avatar photo">
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <input className="adm-input" style={{ flex: 1 }} value={String(draft.avatar_url ?? '')} onChange={(e) => set('avatar_url', e.target.value || null)} placeholder="https://..." />
+                  <TeamPhotoUpload bucket="testimonial-avatars" onUrl={(url) => set('avatar_url', url)} />
+                </div>
+                <p className="ga-upload-hint">Allowed image types: {ALLOWED_IMAGE_LABEL}. Other file types can&apos;t be selected.</p>
+                {draft.avatar_url && (
+                  <PhotoPreview src={String(draft.avatar_url)} />
+                )}
+              </Field>
+              <Field label="Video URL">
+                <input className="adm-input" value={String(draft.video_url ?? '')} onChange={(e) => set('video_url', e.target.value || null)} placeholder="YouTube, Vimeo or .mp4" />
+              </Field>
               <Field2>
                 <Field label="Source URL">
                   <input className="adm-input" value={String(draft.source ?? '')} onChange={(e) => set('source', e.target.value)} />
