@@ -224,7 +224,7 @@
 
 @keyframes ds-pulse {
   0%, 70%, 100% { transform: translate(-50%, -50%) scale(1); }
-  35% { transform: translate(-50%, -50%) scale(1.1); box-shadow: 3px 4px 0 #1a1208, 0 14px 36px #ff7a2165; }
+  35% { transform: translate(-50%, -50%) scale(1.1); }
 }
 
 /* ── Focus ring ─────────────────────────────────────────────────────── */

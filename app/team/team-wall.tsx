@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Shuffle, Smile, ArrowUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { legacyAsset } from '@/lib/legacy-assets';
+import { responsiveImage } from '@/lib/image';
 
 const PHOTO_BASE = '/legacy/images/employees/';
 
@@ -18,7 +19,7 @@ function photoSrc(member: Member) {
 function Portrait({member}:{member:Member}) {
   const [failed,setFailed] = useState(false);
   const src = photoSrc(member);
-  return failed||!src?<div className="tw-photo-fallback"><Smile size={40}/><span>One of our humans.</span></div>:<img src={src} alt={member.name||'Handysolver team member'} width={400} height={432} loading="lazy" onError={()=>setFailed(true)}/>;
+  return failed||!src?<div className="tw-photo-fallback"><Smile size={40}/><span>One of our humans.</span></div>:<img {...responsiveImage(src, '(max-width: 760px) 50vw, 300px', [384, 640])} alt={member.name||'Handysolver team member'} width={400} height={432} loading="lazy" onError={()=>setFailed(true)}/>;
 }
 
 export default function TeamWall(){

@@ -23,8 +23,26 @@ const CSP = [
 
 const nextConfig: NextConfig = {
   typescript: { ignoreBuildErrors: true },
+  // Resize and convert pictures on demand (see lib/image.ts). Supabase holds the uploaded photos.
+  images: {
+    remotePatterns: [{ protocol: "https", hostname: "*.supabase.co", pathname: "/storage/v1/object/public/**" }],
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+    qualities: [75],
+  },
+  // Put the stylesheet in the page itself so the first paint does not wait for separate CSS downloads.
+  experimental: { inlineCss: true },
   async headers() {
     return [
+      {
+        // Pictures that rarely change: let browsers and the CDN keep them for a month.
+        source: "/:file(.+\\.(?:webp|png|jpg|jpeg|svg|ico))",
+        headers: [{ key: "Cache-Control", value: "public, max-age=2592000, stale-while-revalidate=86400" }],
+      },
+      {
+        source: "/legacy/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=2592000, stale-while-revalidate=86400" }],
+      },
       {
         source: "/:path*",
         headers: [

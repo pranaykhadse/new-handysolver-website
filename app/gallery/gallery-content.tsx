@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { groupByCategory, labelOf, type FolderMeta } from '@/lib/gallery-category';
+import { responsiveImage } from '@/lib/image';
 import PlayfulHeader from '../playful-header';
 import { HomeMotion } from '../playful-interactions';
 import '../playful-home.css';
@@ -66,7 +67,7 @@ export default function GalleryContent() {
                   <div className="gl-grid">
                     {group.photos.map((photo, idx) => (
                       <figure key={photo.id} className="gl-photo" style={{ transform: `rotate(${ROTATIONS[idx % ROTATIONS.length]}deg)` }}>
-                        <img src={photo.src} alt={photo.caption} width={360} height={240} loading={idx < 4 ? 'eager' : 'lazy'} decoding="async" />
+                        <img {...responsiveImage(photo.src, '(max-width: 760px) 50vw, 360px')} alt={photo.caption} width={360} height={240} loading={idx < 4 ? 'eager' : 'lazy'} decoding="async" />
                         <figcaption>{photo.caption}</figcaption>
                       </figure>
                     ))}
