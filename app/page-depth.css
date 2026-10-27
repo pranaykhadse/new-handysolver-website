@@ -23,3 +23,18 @@
 }
 @media(hover:none),(pointer:coarse){.handy-home:not(.handy-depth) :is(.pc-polaroid,.pc-moment,.tw-portrait,.tw-snapshots figure,.lt-note,.tw-hello,.ce-nudge){rotate:none;translate:none}}
 @media(prefers-reduced-motion:reduce){.handy-home:not(.handy-depth) :is(.pc-polaroid,.pc-moment,.tw-portrait,.tw-snapshots figure,.lt-note,.tw-hello,.ce-nudge){rotate:none!important;translate:none!important}.handy-home:not(.handy-depth) :is(.hp-button,.lt-send,.hn-contact,.tw-wall-action button,.ce-nudge-bottom button,.cv-tab,.pc-role-cta,.tw-invite>a):active{transform:none!important}.handy-home:not(.handy-depth) .hn-brand:hover .hs-brand-image{transform:none!important}}
+
+/* One hover for every black button that carries the orange offset shadow: it lifts 2px and the shadow grows. */
+.handy-home.handy-home .hp-button.hp-button,
+.handy-home.handy-home .lt-send.lt-send,
+.handy-home.handy-home .or-button.or-button { box-shadow: 4px 5px 0 #ff7a21; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .handy-home.handy-home .hp-button.hp-button:hover,
+  .handy-home.handy-home .lt-send.lt-send:hover,
+  .handy-home.handy-home .or-button.or-button:hover { transform: translateY(-2px); box-shadow: 6px 7px 0 #ff7a21; }
+}
+/* Careers slogan band: larger text on phones */
+@media (max-width: 760px) {
+  .handy-home.handy-home .pc-strip.pc-strip .hp-wrap { font-size: clamp(19px, 5.6vw, 23px); font-weight: 500; line-height: 1.35; gap: 10px 14px; }
+  .handy-home.handy-home .pc-strip.pc-strip .hp-wrap svg { width: 22px; height: 22px; flex: 0 0 auto; }
+}

@@ -11,7 +11,7 @@ import '../playful-home.css';
 import './playful-careers.css';
 import './top-roles.css';
 import './career-refresh.css';
-import './floating-roles.css';
+import FloatingRoles from './floating-roles';
 
 export const metadata: Metadata = { title: 'Careers at Handysolver | Bring your curious side', description: 'Good people. Useful work. Explore life at Handysolver in Gurugram and find your next opportunity.', alternates: { canonical: '/careers' }, openGraph: { ...OG_DEFAULTS, title: 'Careers at Handysolver | Bring your curious side', description: 'Good people. Useful work. Explore life at Handysolver in Gurugram and find your next opportunity.', url: '/careers' } };
 const jobs = '/careers/open-roles';
@@ -26,6 +26,6 @@ export default function Careers() {
       <section className="pc-office cv-office-postcard"><div className="hp-wrap pc-office-inner hp-reveal"><div className="pc-office-photo"><CareerPhoto src="/legacy/images/dummy/urban_square_office_suites.jpg" alt="Pioneer Urban Square, home to Handysolver&rsquo;s Gurugram office"/><span><MapPin size={15}/> Our little corner of Gurugram</span></div><div><p className="hp-overline">OFFLINE, IN GOOD COMPANY.</p><h2>See you<br/><em>in Gurugram.</em></h2><address><span>OUR CORNER OF THE WORLD &#8601;</span>C 705, Pioneer Urban Square<br/>Sector 62, Golf Course Extension Road<br/>Gurugram, Haryana, India</address></div></div></section>
       <section id="roles" className="pc-top-roles hp-wrap hp-reveal"><div className="pc-top-roles-head"><h2>Your next<br/><em>chapter.</em></h2><a className="pc-more-link" href={jobs}>Explore more roles <ArrowUpRight size={15}/></a></div><TopRoles/></section>
     </main><footer className="hp-footer hp-wrap"><div className="hp-footer-top"><p>Good people. Good work. Room for your curious side.</p><div><a href="/">Home</a><a href="https://in.linkedin.com/company/handysolver" target="_blank" rel="noopener noreferrer">LinkedIn</a><a href="/lets-talk">Contact</a></div></div><div className="hp-footer-bottom"><span>&copy; {new Date().getFullYear()} Handysolver</span><span>Gurugram, India. Good ideas travel.</span><a href="#main">Back to the top &#8593;</a></div></footer>
-    <a className="pc-floating-roles" href={jobs}><span>See all roles</span><span className="pc-floating-arrow" aria-hidden="true"><ArrowUpRight size={22}/></span></a>
+    <FloatingRoles href={jobs}/>
   </div>;
 }
