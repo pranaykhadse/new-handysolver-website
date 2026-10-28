@@ -69,9 +69,6 @@ export default function DayShift() {
           <p className="hp-overline">Slide into a simpler day.</p>
           <h2 id="ds-title">Same workday.<br /><em>Less chasing.</em></h2>
         </div>
-        <span className={`ds-hint${dragging ? ' ds-hint--hide' : ''}`} aria-hidden="true">
-          Drag the handle ↔
-        </span>
       </div>
 
       <div
