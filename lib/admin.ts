@@ -3,7 +3,8 @@
 
 import { verifyAccessToken, verifyCsrfToken, parseCookies } from "./auth";
 
-const ADMIN_KEY = process.env.ADMIN_KEY ?? "HandySolver@2026";
+// No built-in default: when ADMIN_KEY is not set, the shared key simply does not work.
+const ADMIN_KEY = process.env.ADMIN_KEY ?? "";
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
 export async function isAdminRequest(request: Request): Promise<boolean> {
@@ -21,7 +22,7 @@ export async function isAdminRequest(request: Request): Promise<boolean> {
 
   // 3. Legacy fallback: x-admin-key header (plain password)
   const key = request.headers.get("x-admin-key");
-  return Boolean(key) && key === ADMIN_KEY;
+  return Boolean(key) && Boolean(ADMIN_KEY) && key === ADMIN_KEY;
 }
 
 export async function isCsrfValid(request: Request): Promise<boolean> {

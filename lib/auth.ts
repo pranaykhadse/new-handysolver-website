@@ -23,17 +23,17 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   }
 }
 
-const ACCESS_SECRET = new TextEncoder().encode(
-  process.env.JWT_ACCESS_SECRET ?? "hs-access-dev-secret-change-in-prod"
-);
-const REFRESH_SECRET = new TextEncoder().encode(
-  process.env.JWT_REFRESH_SECRET ?? "hs-refresh-dev-secret-change-in-prod"
-);
+// A missing secret never falls back to a value written in the source: without it tokens are signed with a
+// random key that only lives as long as the process, so nothing can be forged and sessions simply end on restart.
+function signingSecret(value: string | undefined): Uint8Array {
+  return value ? new TextEncoder().encode(value) : randomBytes(32);
+}
+
+const ACCESS_SECRET = signingSecret(process.env.JWT_ACCESS_SECRET);
+const REFRESH_SECRET = signingSecret(process.env.JWT_REFRESH_SECRET);
 
 const ADMIN_ID = "admin";
-const CSRF_SECRET = new TextEncoder().encode(
-  process.env.JWT_CSRF_SECRET ?? "hs-csrf-dev-secret-change-in-prod"
-);
+const CSRF_SECRET = signingSecret(process.env.JWT_CSRF_SECRET);
 
 // ── JWT signing / verification ─────────────────────────────────────────
 
@@ -88,9 +88,7 @@ export async function verifyCsrfToken(token: string): Promise<boolean> {
   }
 }
 
-const MAGIC_SECRET = new TextEncoder().encode(
-  process.env.JWT_MAGIC_SECRET ?? "hs-magic-dev-secret-change-in-prod"
-);
+const MAGIC_SECRET = signingSecret(process.env.JWT_MAGIC_SECRET);
 
 export async function signMagicToken(): Promise<string> {
   return new SignJWT({ sub: ADMIN_ID, typ: "magic" })
@@ -109,9 +107,7 @@ export async function verifyMagicToken(token: string): Promise<boolean> {
   }
 }
 
-const RESET_SECRET = new TextEncoder().encode(
-  process.env.JWT_RESET_SECRET ?? "hs-reset-dev-secret-change-in-prod"
-);
+const RESET_SECRET = signingSecret(process.env.JWT_RESET_SECRET);
 
 export async function signResetToken(email: string): Promise<string> {
   return new SignJWT({ sub: ADMIN_ID, typ: "reset", email })

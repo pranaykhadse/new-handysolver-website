@@ -1,7 +1,7 @@
 import { setAuthCookies, hashToken, verifyPassword } from "@/lib/auth";
 import { getServerSupabase } from "@/lib/supabase-admin";
 
-const ADMIN_KEY = process.env.ADMIN_KEY ?? "HandySolver@2026";
+const ADMIN_KEY = process.env.ADMIN_KEY ?? "";
 
 async function checkPassword(email: string, password: string): Promise<boolean> {
   const { data } = await getServerSupabase()
@@ -16,7 +16,7 @@ async function checkPassword(email: string, password: string): Promise<boolean> 
   if (data.password_hash) return verifyPassword(password, data.password_hash);
 
   // Fall back to shared ADMIN_KEY for admins who haven't set a password yet
-  return password === ADMIN_KEY;
+  return Boolean(ADMIN_KEY) && password === ADMIN_KEY;
 }
 
 export async function POST(request: Request) {
