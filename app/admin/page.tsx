@@ -1393,7 +1393,7 @@ export default function AdminPage() {
           window.history.replaceState({}, '', '/admin');
         }
       } else {
-        setLoginError('That password is not recognised.');
+        setLoginError(res.status === 401 ? 'That password is not recognised.' : (await res.json().catch(() => ({}))).error || 'Login failed. Please try again.');
       }
     } catch {
       setLoggingIn(false);
