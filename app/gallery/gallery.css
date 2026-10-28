@@ -58,7 +58,7 @@
 
 .gl-photo {
   background: #fff;
-  padding: 10px 10px 0;
+  padding: 10px;
   box-shadow: 0 8px 25px #0000000a;
   transition: transform .4s;
 }
@@ -80,7 +80,7 @@
 }
 
 .gl-photo figcaption {
-  padding: 18px 6px 12px;
+  padding: 18px 6px 4px;
   font-family: Georgia, serif;
   font-style: italic;
   font-size: 13px;
