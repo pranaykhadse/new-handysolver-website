@@ -3,13 +3,19 @@ import { getServerSupabase } from "@/lib/supabase-admin";
 
 const ADMIN_KEY = process.env.ADMIN_KEY ?? "";
 
+class LookupError extends Error {}
+
 async function checkPassword(email: string, password: string): Promise<boolean> {
-  const { data } = await getServerSupabase()
+  const { data, error } = await getServerSupabase()
     .from("admin_emails")
     .select("password_hash")
-    .eq("email", email)
-    .single();
+    .ilike("email", String(email ?? "").trim())
+    .maybeSingle();
 
+  if (error) {
+    console.error("admin login lookup failed:", error.message);
+    throw new LookupError(error.message);
+  }
   if (!data) return false;
 
   // If this admin has set their own password, verify it
@@ -46,6 +52,9 @@ export async function POST(request: Request) {
 
     return response;
   } catch (error) {
+    if (error instanceof LookupError) {
+      return Response.json({ error: "The admin database could not be read. Check SUPABASE_SERVICE_KEY in Vercel." }, { status: 503 });
+    }
     const raw = error as { message?: string };
     return Response.json({ error: raw?.message ?? "Login failed" }, { status: 500 });
   }
