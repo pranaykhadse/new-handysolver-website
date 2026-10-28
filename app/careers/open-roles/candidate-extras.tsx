@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, RotateCw, Smile, Check, Coffee } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -11,12 +11,30 @@ const nudges = [
   ['Take a breath.', 'Be yourself.', 'Read the role, get curious, and give yourself a moment to decide.'],
 ];
 
+const NUDGE_EVERY = 2000;
+
 export function CandidateNudge() {
   const [index, setIndex] = useState(0);
-  return <aside className="ce-nudge" aria-label="A little encouragement">
+  const [paused, setPaused] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [stopped, setStopped] = useState(false); // once someone asks for another nudge, stop switching for them
+  const root = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), { threshold: 0 });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  useEffect(() => {
+    if (paused || stopped || !visible || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const timer = window.setTimeout(() => setIndex(i => (i + 1) % nudges.length), NUDGE_EVERY);
+    return () => window.clearTimeout(timer);
+  }, [index, paused, stopped, visible]);
+  return <aside ref={root} className="ce-nudge" aria-label="A little encouragement" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}>
     <div className="ce-nudge-top"><span>A LITTLE NUDGE</span><Smile size={30} aria-hidden="true"/></div>
-    <div className="ce-nudge-copy" aria-live="polite" key={index}><h2>{nudges[index][0]}<br/><em>{nudges[index][1]}</em></h2><p>{nudges[index][2]}</p></div>
-    <div className="ce-nudge-bottom"><span aria-hidden="true">{nudges.map((_,i)=><i key={i} className={i===index?'is-current':''}/>)}</span><Button variant="ghost" onClick={()=>setIndex(i=>(i+1)%nudges.length)}>Another nudge <RotateCw size={14}/></Button></div>
+    <div className="ce-nudge-copy" aria-live={stopped ? 'polite' : 'off'} key={index}><h2>{nudges[index][0]}<br/><em>{nudges[index][1]}</em></h2><p>{nudges[index][2]}</p></div>
+    <div className="ce-nudge-bottom"><span aria-hidden="true">{nudges.map((_,i)=><i key={i} className={i===index?'is-current':''}/>)}</span><Button variant="ghost" onClick={()=>{setStopped(true);setIndex(i=>(i+1)%nudges.length);}}>Another nudge <RotateCw size={14}/></Button></div>
   </aside>;
 }
 
