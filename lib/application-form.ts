@@ -104,8 +104,8 @@ export function validateField(field: FormField, value: string): string | null {
     case 'email':
       return EMAIL.test(v) ? null : 'That email address doesn’t look right.';
     case 'tel': {
-      const digits = v.replace(/\D/g, '');
-      return digits.length >= 10 && digits.length <= 15 ? null : 'Please enter a phone number with 10 to 15 digits.';
+      if (!/^[0-9]+$/.test(v)) return 'Use numbers only — no +, spaces or dashes.';
+      return v.length >= 10 && v.length <= 15 ? null : 'Please enter a phone number with 10 to 15 digits.';
     }
     case 'number':
       return Number(v) >= 0 ? null : `“${field.label}” must be a number, 0 or more.`;

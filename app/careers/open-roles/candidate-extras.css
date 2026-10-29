@@ -112,6 +112,7 @@ body:has(.am-overlay) main.hp-wrap{will-change:auto!important;transform:none!imp
 .am-field textarea::placeholder{color:#7d7060}
 .am-field input[type=date]{min-height:46px}
 .am-help{font-size:12px;line-height:1.4;color:#6b6054}
+.am-field-error{color:#b73e1a;font-weight:600}
 .am-check{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:#3a332b;cursor:pointer;min-height:44px;padding:8px 0}
 .am-check input{width:20px;height:20px;margin-top:1px;flex:none;accent-color:#ff7a21;padding:0}
 .am-loading{margin:0;padding:48px 0;text-align:center;color:#6b6054;font-size:14px}

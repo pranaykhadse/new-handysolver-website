@@ -58,6 +58,7 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
   const [status, setStatus] = useState<'idle'|'submitting'|'done'|'error'>('idle');
   const [serverMsg, setServerMsg] = useState('');
   const [badField, setBadField] = useState<string | null>(null);
+  const [fieldMsg, setFieldMsg] = useState('');
   const [dobParts, setDobParts] = useState({ y: '', m: '', d: '' });
   const overlayRef = useRef<HTMLDivElement>(null);
   const focused = useRef(false);
@@ -110,7 +111,7 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
   const filled = requiredFields.filter(isFilled).length;
 
   const val = (id: string) => values[id] ?? '';
-  const setVal = (id: string, value: string) => { setBadField(null); setValues(v => ({ ...v, [id]: value })); };
+  const setVal = (id: string, value: string) => { setBadField(null); setFieldMsg(''); setValues(v => ({ ...v, [id]: value })); };
 
   const updateDob = (id: string, next: { y: string; m: string; d: string }) => {
     const daysInMonth = next.y && next.m ? new Date(Number(next.y), Number(next.m), 0).getDate() : 31;
@@ -163,6 +164,7 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
       setServerMsg(problem.message);
       setStatus('error');
       setBadField(problem.field);
+      setFieldMsg(problem.message);
       document.getElementById(problem.field)?.focus();
       return;
     }
@@ -171,24 +173,26 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
     if (!cvFile) {
       setServerMsg('Please attach your CV (PDF, DOC or DOCX).');
       setStatus('error');
+      setBadField('am-cv');
+      setFieldMsg('Please attach your CV (PDF, DOC or DOCX).');
       return;
     }
     const ext = cvFile.name.split('.').pop()?.toLowerCase() ?? '';
     if (!['pdf', 'doc', 'docx'].includes(ext)) {
       setServerMsg('CV must be a PDF, DOC or DOCX file.');
       setStatus('error');
+      setBadField('am-cv');
+      setFieldMsg('CV must be a PDF, DOC or DOCX file.');
       return;
     }
     setStatus('submitting');
     // Fields the admin hid are sent empty (numbers as 0, which the recruiting
     // system expects), so its fixed contract still holds.
     const NUMERIC_KEYS = new Set(['exp', 'salary', 'current_ctc']);
-    // The API accepts digits only for phone, so strip +, spaces and dashes.
-    const clean = (apiKey: string, value: string) => apiKey === 'phone' ? value.replace(/\D/g, '') : value;
     const core: Record<string, string> = {};
     for (const [id, apiKey] of Object.entries(BUILTIN_API_KEYS)) {
       const field = visible.find(item => item.id === id);
-      const value = field ? clean(apiKey, val(id).trim()) : '';
+      const value = field ? val(id).trim() : '';
       core[apiKey] = value === '' && NUMERIC_KEYS.has(apiKey) ? '0' : value;
     }
     const extra = visible
@@ -225,7 +229,7 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
             // Storage unavailable (bucket/policy missing) — row still saves.
           }
           const mirror: Record<string, string> = {};
-          for (const [id, apiKey] of Object.entries(BUILTIN_API_KEYS)) mirror[apiKey] = visible.some(item => item.id === id) ? clean(apiKey, val(id).trim()) : '';
+          for (const [id, apiKey] of Object.entries(BUILTIN_API_KEYS)) mirror[apiKey] = visible.some(item => item.id === id) ? val(id).trim() : '';
           await fetch('/api/applications', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -243,7 +247,10 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
             ? data.message
             : 'Something went wrong. Please try again.')
         );
-        if (detail?.field) setBadField(detail.field);
+        if (detail?.field) {
+          setBadField(detail.field);
+          setFieldMsg(detail.message);
+        }
         setStatus('error');
       }
     } catch {
@@ -288,7 +295,7 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
               <strong>{cvFile ? cvFile.name : 'Choose your CV'}</strong>
               <small>{cvFile ? 'Click to choose a different file' : (field.placeholder || 'PDF, DOC or DOCX')}</small>
             </span>
-            <input id={id} required type="file" accept=".pdf,.doc,.docx" onChange={e => { setCvFile(e.target.files?.[0] ?? null); setBadField(null); }}/>
+            <input id={id} required type="file" accept=".pdf,.doc,.docx" onChange={e => { setCvFile(e.target.files?.[0] ?? null); setBadField(null); setFieldMsg(''); }}/>
           </label>
         );
         break;
@@ -329,6 +336,9 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
       <div className={`am-field${field.wide ? ' am-wide' : ''}`} key={field.id}>
         <label htmlFor={field.type === 'dob' ? 'am-dob-day' : id}>{field.label}{star(field)}</label>
         {control}
+        {(badField === id || (field.type === 'dob' && badField === 'am-dob-day')) && fieldMsg && (
+          <small className="am-help am-field-error" role="alert">{fieldMsg}</small>
+        )}
         {field.help && <small className="am-help">{field.help}</small>}
       </div>
     );
@@ -371,7 +381,7 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
             </div>
 
             <div className="am-footer">
-              {status === 'error'
+              {status === 'error' && !badField
                 ? <p className="am-error" role="alert">{serverMsg || 'Something went wrong. Please try again.'}</p>
                 : <p className="am-note">{requiredFields.length > 0 ? <><span className="am-star" aria-hidden="true">*</span> Required &middot; {filled} of {requiredFields.length} done</> : 'Everything here is optional'}</p>}
               <button type="submit" className="am-submit" disabled={status === 'submitting'}>
