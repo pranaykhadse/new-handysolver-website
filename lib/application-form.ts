@@ -84,6 +84,9 @@ const BUILTIN_REQUIRED_MESSAGES: Record<string, string> = {
 };
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// The recruiting API accepts ASCII letters only (spaces allowed); apostrophes,
+// hyphens, dots, digits and accents are all rejected. Catch it before sending.
+const NAME = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
 
 // Returns the message to show for the first problem with a field, or null.
 export function validateField(field: FormField, value: string): string | null {
@@ -94,12 +97,15 @@ export function validateField(field: FormField, value: string): string | null {
     if (field.type === 'checkbox') return `Please tick “${field.label}”.`;
     return BUILTIN_REQUIRED_MESSAGES[field.id] ?? `Please ${field.type === 'select' ? 'choose' : 'fill in'} “${field.label}”.`;
   }
+  if ((field.id === 'firstName' || field.id === 'lastName') && !NAME.test(v)) {
+    return 'Use letters only — no digits or symbols.';
+  }
   switch (field.type) {
     case 'email':
       return EMAIL.test(v) ? null : 'That email address doesn’t look right.';
     case 'tel': {
       const digits = v.replace(/\D/g, '');
-      return digits.length >= 10 && digits.length <= 13 ? null : 'Please enter a phone number with 10 digits.';
+      return digits.length >= 10 && digits.length <= 15 ? null : 'Please enter a phone number with 10 to 15 digits.';
     }
     case 'number':
       return Number(v) >= 0 ? null : `“${field.label}” must be a number, 0 or more.`;

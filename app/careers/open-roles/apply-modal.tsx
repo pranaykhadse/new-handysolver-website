@@ -42,6 +42,15 @@ const TYPE_ICONS: Record<string, IconType> = {
 };
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
+// The recruiting API reports per-field errors under `details`, keyed by its own
+// column names. Map them back to the form fields so the real reason is shown.
+const SERVER_FIELD_IDS: Record<string, string> = {
+  name: 'firstName', first_name: 'firstName', last_name: 'lastName',
+  mobile: 'phone', phone: 'phone', email: 'email', location: 'location',
+  gender: 'gender', dob: 'dob', exp: 'experience',
+  salary: 'expectedSalary', current_ctc: 'currentSalary', hear: 'hearAbout',
+};
+
 export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: () => void }) {
   const [config, setConfig] = useState<FormConfig | null>(cachedConfig);
   const [values, setValues] = useState<Record<string, string>>({});
@@ -130,6 +139,22 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
     return null;
   };
 
+  // Turns the API's `details` errors into a message + the field to focus.
+  const serverProblem = (data: { details?: unknown } | null): { field: string; message: string } | null => {
+    const details = data?.details;
+    if (!details || typeof details !== 'object') return null;
+    for (const [key, value] of Object.entries(details as Record<string, unknown>)) {
+      const text = Array.isArray(value)
+        ? value.find((item): item is string => typeof item === 'string')
+        : typeof value === 'string' ? value : '';
+      if (!text) continue;
+      const field = visible.find(item => item.id === SERVER_FIELD_IDS[key]);
+      if (!field) return { field: '', message: text };
+      return { field: field.type === 'dob' ? 'am-dob-day' : `am-${field.id}`, message: `${field.label}: ${text}` };
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setServerMsg('');
@@ -158,10 +183,12 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
     // Fields the admin hid are sent empty (numbers as 0, which the recruiting
     // system expects), so its fixed contract still holds.
     const NUMERIC_KEYS = new Set(['exp', 'salary', 'current_ctc']);
+    // The API accepts digits only for phone, so strip +, spaces and dashes.
+    const clean = (apiKey: string, value: string) => apiKey === 'phone' ? value.replace(/\D/g, '') : value;
     const core: Record<string, string> = {};
     for (const [id, apiKey] of Object.entries(BUILTIN_API_KEYS)) {
       const field = visible.find(item => item.id === id);
-      const value = field ? val(id).trim() : '';
+      const value = field ? clean(apiKey, val(id).trim()) : '';
       core[apiKey] = value === '' && NUMERIC_KEYS.has(apiKey) ? '0' : value;
     }
     const extra = visible
@@ -198,7 +225,7 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
             // Storage unavailable (bucket/policy missing) — row still saves.
           }
           const mirror: Record<string, string> = {};
-          for (const [id, apiKey] of Object.entries(BUILTIN_API_KEYS)) mirror[apiKey] = visible.some(item => item.id === id) ? val(id).trim() : '';
+          for (const [id, apiKey] of Object.entries(BUILTIN_API_KEYS)) mirror[apiKey] = visible.some(item => item.id === id) ? clean(apiKey, val(id).trim()) : '';
           await fetch('/api/applications', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -209,11 +236,14 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
         }
         setStatus('done');
       } else {
+        const detail = serverProblem(data);
         setServerMsg(
-          data && typeof data.message === 'string' && data.message
+          detail?.message
+          || (data && typeof data.message === 'string' && data.message
             ? data.message
-            : 'Something went wrong. Please try again.'
+            : 'Something went wrong. Please try again.')
         );
+        if (detail?.field) setBadField(detail.field);
         setStatus('error');
       }
     } catch {
