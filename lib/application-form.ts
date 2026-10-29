@@ -87,6 +87,16 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // The recruiting API accepts ASCII letters only (spaces allowed); apostrophes,
 // hyphens, dots, digits and accents are all rejected. Catch it before sending.
 const NAME = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
+// Keeps single-line answers to the size the recruiting system can store cleanly.
+const MAX_LENGTH: Record<string, number> = {
+  firstName: 60, lastName: 60, email: 254, location: 80, hearAbout: 120,
+};
+
+// Longest answer we accept for a text field (textarea keeps its own 2000 cap).
+export const fieldMaxLength = (field: FormField): number => {
+  if (field.type === 'textarea') return 2000;
+  return MAX_LENGTH[field.id] ?? 200;
+};
 
 // Returns the message to show for the first problem with a field, or null.
 export function validateField(field: FormField, value: string): string | null {
@@ -97,6 +107,8 @@ export function validateField(field: FormField, value: string): string | null {
     if (field.type === 'checkbox') return `Please tick “${field.label}”.`;
     return BUILTIN_REQUIRED_MESSAGES[field.id] ?? `Please ${field.type === 'select' ? 'choose' : 'fill in'} “${field.label}”.`;
   }
+  const max = fieldMaxLength(field);
+  if (v.length > max) return `Please keep “${field.label}” under ${max} characters.`;
   if ((field.id === 'firstName' || field.id === 'lastName') && !NAME.test(v)) {
     return 'Use letters only — no digits or symbols.';
   }
@@ -108,7 +120,19 @@ export function validateField(field: FormField, value: string): string | null {
       return v.length >= 10 && v.length <= 15 ? null : 'Please enter a phone number with 10 to 15 digits.';
     }
     case 'number':
-      return Number(v) >= 0 ? null : `“${field.label}” must be a number, 0 or more.`;
+      if (!/^[0-9]+$/.test(v)) return `“${field.label}” should be a whole number, 0 or more.`;
+      return null;
+    case 'dob': {
+      const date = new Date(`${v}T00:00:00`);
+      if (Number.isNaN(date.getTime())) return 'Please choose a valid date of birth.';
+      const now = new Date();
+      let age = now.getFullYear() - date.getFullYear();
+      const monthDiff = now.getMonth() - date.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < date.getDate())) age -= 1;
+      if (age < 18) return 'You must be at least 18 years old to apply.';
+      if (age > 80) return 'Please check the year of birth.';
+      return null;
+    }
     case 'url':
       try { new URL(/^https?:\/\//i.test(v) ? v : `https://${v}`); return v.includes('.') ? null : `“${field.label}” doesn’t look like a link.`; }
       catch { return `“${field.label}” doesn’t look like a link.`; }

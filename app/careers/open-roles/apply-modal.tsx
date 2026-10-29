@@ -5,13 +5,14 @@ import { createPortal } from 'react-dom';
 import { Check, X, Upload, User, UserRound, Mail, Phone, MapPin, Briefcase, IndianRupee, Megaphone, FileText, Link2, Calendar, Type, Hash, AlignLeft } from 'lucide-react';
 import { jobIconFor } from '@/lib/job-icons';
 import { getSupabase } from '@/lib/supabase';
-import { BUILTIN_API_KEYS, DEFAULT_FORM_CONFIG, validateField, type FormConfig, type FormField } from '@/lib/application-form';
+import { BUILTIN_API_KEYS, DEFAULT_FORM_CONFIG, fieldMaxLength, validateField, type FormConfig, type FormField } from '@/lib/application-form';
 
 // Job applications are saved by the myhandydash backend (its own database),
 // not Supabase — same endpoint + field contract as the live applicant form.
 const APPLICANT_SUBMIT_URL =
   process.env.NEXT_PUBLIC_APPLICANT_SUBMIT_URL ??
   'https://handysolver.myhandydash.com/api/web/v1/handy-recruiters/applicant-form-submit';
+const MAX_CV_BYTES = 10 * 1024 * 1024;
 
 // The form layout comes from the admin. Fetched once per page load and shared,
 // so starting the fetch early (see prefetchApplicationForm) avoids any wait.
@@ -47,8 +48,8 @@ const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
 const SERVER_FIELD_IDS: Record<string, string> = {
   name: 'firstName', first_name: 'firstName', last_name: 'lastName',
   mobile: 'phone', phone: 'phone', email: 'email', location: 'location',
-  gender: 'gender', dob: 'dob', exp: 'experience',
-  salary: 'expectedSalary', current_ctc: 'currentSalary', hear: 'hearAbout',
+  gender: 'gender', dob: 'dob', exp: 'experience', experience: 'experience',
+  salary: 'expectedSalary', expected_ctc: 'expectedSalary', current_ctc: 'currentSalary', hear: 'hearAbout',
 };
 
 export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: () => void }) {
@@ -57,8 +58,8 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [status, setStatus] = useState<'idle'|'submitting'|'done'|'error'>('idle');
   const [serverMsg, setServerMsg] = useState('');
-  const [badField, setBadField] = useState<string | null>(null);
-  const [fieldMsg, setFieldMsg] = useState('');
+  // Keyed by DOM id (e.g. am-lastName, am-dob-day) so every field can show its own error.
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [dobParts, setDobParts] = useState({ y: '', m: '', d: '' });
   const overlayRef = useRef<HTMLDivElement>(null);
   const focused = useRef(false);
@@ -111,7 +112,17 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
   const filled = requiredFields.filter(isFilled).length;
 
   const val = (id: string) => values[id] ?? '';
-  const setVal = (id: string, value: string) => { setBadField(null); setFieldMsg(''); setValues(v => ({ ...v, [id]: value })); };
+  const clearError = (...ids: string[]) => setFieldErrors(errors => {
+    const next = { ...errors };
+    for (const id of ids) delete next[id];
+    return next;
+  });
+  const setVal = (id: string, value: string) => {
+    clearError(`am-${id}`, 'am-dob-day');
+    setServerMsg('');
+    if (status === 'error') setStatus('idle');
+    setValues(v => ({ ...v, [id]: value }));
+  };
 
   const updateDob = (id: string, next: { y: string; m: string; d: string }) => {
     const daysInMonth = next.y && next.m ? new Date(Number(next.y), Number(next.m), 0).getDate() : 31;
@@ -121,23 +132,28 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
   };
 
   const thisYear = new Date().getFullYear();
-  const birthYears = Array.from({ length: 55 }, (_, i) => String(thisYear - 16 - i));
+  const birthYears = Array.from({ length: 63 }, (_, i) => String(thisYear - 18 - i));
   const dayCount = dobParts.y && dobParts.m ? new Date(Number(dobParts.y), Number(dobParts.m), 0).getDate() : 31;
   const RoleIcon = jobIconFor(null, jobTitle);
 
-  // The first problem with the form, in the order fields appear on screen.
-  const firstProblem = (): { field: string; message: string } | null => {
+  // Every problem with the form, in the order fields appear on screen.
+  const collectProblems = (): { field: string; message: string }[] => {
+    const problems: { field: string; message: string }[] = [];
     for (const section of sections) {
       for (const field of section.fields) {
+        const id = field.type === 'dob' ? 'am-dob-day' : `am-${field.id}`;
         if (field.type === 'file') {
-          if (!cvFile) return { field: 'am-cv', message: 'Please attach your CV (PDF, DOC or DOCX).' };
+          if (!cvFile) { if (field.required) problems.push({ field: id, message: 'Please attach your CV (PDF, DOC or DOCX).' }); continue; }
+          const ext = cvFile.name.split('.').pop()?.toLowerCase() ?? '';
+          if (!['pdf', 'doc', 'docx'].includes(ext)) { problems.push({ field: id, message: 'CV must be a PDF, DOC or DOCX file.' }); continue; }
+          if (cvFile.size > MAX_CV_BYTES) { problems.push({ field: id, message: 'Your CV must be 10 MB or smaller.' }); continue; }
           continue;
         }
         const message = validateField(field, val(field.id));
-        if (message) return { field: field.type === 'dob' ? 'am-dob-day' : `am-${field.id}`, message };
+        if (message) problems.push({ field: id, message });
       }
     }
-    return null;
+    return problems;
   };
 
   // Turns the API's `details` errors into a message + the field to focus.
@@ -159,32 +175,17 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setServerMsg('');
-    const problem = firstProblem();
-    if (problem) {
-      setServerMsg(problem.message);
+    const problems = collectProblems();
+    if (problems.length) {
+      setFieldErrors(Object.fromEntries(problems.map(problem => [problem.field, problem.message])));
+      setServerMsg(problems[0].message);
       setStatus('error');
-      setBadField(problem.field);
-      setFieldMsg(problem.message);
-      document.getElementById(problem.field)?.focus();
+      document.getElementById(problems[0].field)?.focus();
       return;
     }
-    // The API reads $_FILES['attachment'] unconditionally and only accepts
-    // pdf/doc/docx (case-sensitive), so guard both client-side.
-    if (!cvFile) {
-      setServerMsg('Please attach your CV (PDF, DOC or DOCX).');
-      setStatus('error');
-      setBadField('am-cv');
-      setFieldMsg('Please attach your CV (PDF, DOC or DOCX).');
-      return;
-    }
+    // collectProblems covers this; kept as a type guard for the upload below.
+    if (!cvFile) return;
     const ext = cvFile.name.split('.').pop()?.toLowerCase() ?? '';
-    if (!['pdf', 'doc', 'docx'].includes(ext)) {
-      setServerMsg('CV must be a PDF, DOC or DOCX file.');
-      setStatus('error');
-      setBadField('am-cv');
-      setFieldMsg('CV must be a PDF, DOC or DOCX file.');
-      return;
-    }
     setStatus('submitting');
     // Fields the admin hid are sent empty (numbers as 0, which the recruiting
     // system expects), so its fixed contract still holds.
@@ -247,10 +248,7 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
             ? data.message
             : 'Something went wrong. Please try again.')
         );
-        if (detail?.field) {
-          setBadField(detail.field);
-          setFieldMsg(detail.message);
-        }
+        if (detail?.field) setFieldErrors({ [detail.field]: detail.message });
         setStatus('error');
       }
     } catch {
@@ -259,28 +257,28 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
     }
   };
 
-  const invalid = (id: string) => (badField === id || (id === 'am-dob' && badField === 'am-dob-day')) ? true : undefined;
+  const invalid = (id: string) => (fieldErrors[id] ? true : undefined);
   const star = (field: FormField) => field.required ? <> <span className="am-star" aria-hidden="true">*</span></> : null;
 
   const renderField = (field: FormField) => {
     const id = `am-${field.id}`;
     const Icon = BUILTIN_ICONS[field.id] ?? TYPE_ICONS[field.type];
-    const common = { id, 'aria-invalid': invalid(id), required: field.required, placeholder: field.placeholder || undefined };
+    const common = { id, 'aria-invalid': invalid(id), required: field.required, placeholder: field.placeholder || undefined, maxLength: fieldMaxLength(field) };
     let control: React.ReactNode;
 
     switch (field.type) {
       case 'dob':
         control = (
           <div className="am-dob" role="group" aria-label={field.label}>
-            <select id="am-dob-day" aria-label="Day" aria-invalid={invalid('am-dob')} autoComplete="bday-day" value={dobParts.d} onChange={e => updateDob(field.id, { ...dobParts, d: e.target.value })}>
+            <select id="am-dob-day" aria-label="Day" aria-invalid={invalid('am-dob-day')} autoComplete="bday-day" value={dobParts.d} onChange={e => updateDob(field.id, { ...dobParts, d: e.target.value })}>
               <option value="">Day</option>
               {Array.from({ length: dayCount }, (_, i) => String(i + 1).padStart(2, '0')).map(day => <option key={day} value={day}>{Number(day)}</option>)}
             </select>
-            <select id="am-dob-month" aria-label="Month" aria-invalid={invalid('am-dob')} autoComplete="bday-month" value={dobParts.m} onChange={e => updateDob(field.id, { ...dobParts, m: e.target.value })}>
+            <select id="am-dob-month" aria-label="Month" aria-invalid={invalid('am-dob-day')} autoComplete="bday-month" value={dobParts.m} onChange={e => updateDob(field.id, { ...dobParts, m: e.target.value })}>
               <option value="">Month</option>
               {MONTHS.map((name, i) => <option key={name} value={String(i + 1).padStart(2, '0')}>{name}</option>)}
             </select>
-            <select id="am-dob-year" aria-label="Year" aria-invalid={invalid('am-dob')} autoComplete="bday-year" value={dobParts.y} onChange={e => updateDob(field.id, { ...dobParts, y: e.target.value })}>
+            <select id="am-dob-year" aria-label="Year" aria-invalid={invalid('am-dob-day')} autoComplete="bday-year" value={dobParts.y} onChange={e => updateDob(field.id, { ...dobParts, y: e.target.value })}>
               <option value="">Year</option>
               {birthYears.map(year => <option key={year} value={year}>{year}</option>)}
             </select>
@@ -295,7 +293,7 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
               <strong>{cvFile ? cvFile.name : 'Choose your CV'}</strong>
               <small>{cvFile ? 'Click to choose a different file' : (field.placeholder || 'PDF, DOC or DOCX')}</small>
             </span>
-            <input id={id} required type="file" accept=".pdf,.doc,.docx" onChange={e => { setCvFile(e.target.files?.[0] ?? null); setBadField(null); setFieldMsg(''); }}/>
+            <input id={id} required type="file" accept=".pdf,.doc,.docx" onChange={e => { setCvFile(e.target.files?.[0] ?? null); clearError('am-cv'); setServerMsg(''); if (status === 'error') setStatus('idle'); }}/>
           </label>
         );
         break;
@@ -310,7 +308,7 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
         );
         break;
       case 'textarea':
-        control = <textarea {...common} rows={4} maxLength={2000} value={val(field.id)} onChange={e => setVal(field.id, e.target.value)}/>;
+        control = <textarea {...common} rows={4} value={val(field.id)} onChange={e => setVal(field.id, e.target.value)}/>;
         break;
       case 'checkbox':
         control = (
@@ -336,8 +334,8 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
       <div className={`am-field${field.wide ? ' am-wide' : ''}`} key={field.id}>
         <label htmlFor={field.type === 'dob' ? 'am-dob-day' : id}>{field.label}{star(field)}</label>
         {control}
-        {(badField === id || (field.type === 'dob' && badField === 'am-dob-day')) && fieldMsg && (
-          <small className="am-help am-field-error" role="alert">{fieldMsg}</small>
+        {(fieldErrors[field.type === 'dob' ? 'am-dob-day' : id]) && (
+          <small className="am-help am-field-error" role="alert">{fieldErrors[field.type === 'dob' ? 'am-dob-day' : id]}</small>
         )}
         {field.help && <small className="am-help">{field.help}</small>}
       </div>
@@ -381,8 +379,12 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
             </div>
 
             <div className="am-footer">
-              {status === 'error' && !badField
-                ? <p className="am-error" role="alert">{serverMsg || 'Something went wrong. Please try again.'}</p>
+              {status === 'error'
+                ? <p className="am-error" role="alert">{
+                    Object.keys(fieldErrors).length > 1
+                      ? 'Please fix the highlighted fields.'
+                      : (serverMsg || 'Something went wrong. Please try again.')
+                  }</p>
                 : <p className="am-note">{requiredFields.length > 0 ? <><span className="am-star" aria-hidden="true">*</span> Required &middot; {filled} of {requiredFields.length} done</> : 'Everything here is optional'}</p>}
               <button type="submit" className="am-submit" disabled={status === 'submitting'}>
                 {status === 'submitting' ? 'Sending…' : 'Send application'}
