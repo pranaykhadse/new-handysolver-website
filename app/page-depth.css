@@ -38,7 +38,3 @@
   .handy-home.handy-home .pc-strip.pc-strip .hp-wrap { font-size: clamp(19px, 5.6vw, 23px); font-weight: 500; line-height: 1.35; gap: 10px 14px; }
   .handy-home.handy-home .pc-strip.pc-strip .hp-wrap svg { width: 22px; height: 22px; flex: 0 0 auto; }
 }
-
-/* Header logo: flat, the same as the logo in the menu panel (no orange offset shadow, not even on hover). */
-.handy-home.handy-home .hn-brand.hn-brand .hs-brand-image.hs-brand-image,
-.handy-home.handy-home .hn-brand.hn-brand:hover .hs-brand-image.hs-brand-image { box-shadow: none; }
