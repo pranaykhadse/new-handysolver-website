@@ -1,6 +1,7 @@
 'use client';
 
 import './admin.css';
+import BrandMark from '../brand-mark';
 import './gallery/gallery-admin.css';
 import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
 import {
@@ -1473,12 +1474,9 @@ export default function AdminPage() {
         {/* Brand panel */}
         <div className="adm-login-brand">
           <div className="adm-login-brand-inner">
-            <div className="adm-login-wordmark">
-              <span className="adm-login-hs">hs</span>
-              <span>handy<strong>solver</strong></span>
-            </div>
+            <a className="adm-login-wordmark" href="/" aria-label="Handysolver website"><BrandMark /></a>
             <div className="adm-login-brand-copy">
-              <p className="adm-login-tagline">Content<br />Control<br />Centre</p>
+              <p className="adm-login-tagline">Content<br />Control<br /><em>Centre.</em></p>
               <p className="adm-login-brand-sub">Manage your case studies, testimonials, team and job posts in one place.</p>
             </div>
             <div className="adm-login-brand-items">
@@ -1493,6 +1491,7 @@ export default function AdminPage() {
         </div>
         {/* Form panel */}
         <div className="adm-login-form-panel">
+          <a className="adm-login-back" href="/">&larr; Back to website</a>
           <div className="adm-login-form-inner">
             {resetToken ? (
               /* ── Reset password form ── */

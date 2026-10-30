@@ -1280,3 +1280,74 @@ body:has(.adm-root[data-theme="dark"]) {
 }
 .fb-count{font-size:11px;color:var(--adm-muted);white-space:nowrap}
 @media(max-width:560px){.fb-count{display:none}}
+
+/* ── Login screen: refreshed look, in line with the main site ── */
+.adm-login .adm-login-brand { background: #1d1b18; }
+.adm-login .adm-login-brand::before {
+  background:
+    radial-gradient(ellipse at 15% 85%, #ff7a2124 0%, transparent 55%),
+    radial-gradient(ellipse at 90% 8%, #ff7a2114 0%, transparent 50%),
+    radial-gradient(circle at 1px 1px, #ffffff12 1px, transparent 0) 0 0 / 26px 26px;
+}
+.adm-login .adm-login-wordmark { color: #f6f1e8; text-decoration: none; width: fit-content; }
+.adm-login .adm-login-wordmark .hs-brand-name { font-size: 22px; letter-spacing: -.7px; }
+.adm-login .adm-login-wordmark .hs-brand-image { box-shadow: 1px 2px 0 #5d321c, 2px 4px 0 #d96519; border-radius: 8px 8px 8px 2px; }
+.adm-login .adm-login-wordmark:focus-visible { outline: 2px solid #ff9764; outline-offset: 6px; }
+.adm-login .adm-login-tagline { font-size: clamp(42px, 4.4vw, 64px); color: #f6f1e8; }
+.adm-login .adm-login-tagline em { font-family: Georgia, "Times New Roman", serif; font-style: italic; font-weight: 400; letter-spacing: -1.5px; color: #ff8a3d; }
+.adm-login .adm-login-brand-sub { font-size: 15px; color: #b9b3a8; max-width: 340px; }
+.adm-login .adm-login-brand-items { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+.adm-login .adm-login-brand-item { font-size: 12px; color: #cfc9be; padding: 7px 13px; border: 1px solid #ffffff1f; border-radius: 999px; background: #ffffff08; }
+.adm-login .adm-login-brand-dot { opacity: 1; }
+
+.adm-login .adm-login-form-panel { position: relative; background: #f5f0e8; }
+.adm-login .adm-login-back { position: absolute; top: 28px; right: 36px; font-size: 13px; color: #5c584f; text-decoration: none; padding: 6px 2px; border-bottom: 1px solid transparent; transition: color .15s, border-color .15s; }
+.adm-login .adm-login-back:hover { color: #b94700; border-bottom-color: currentColor; }
+.adm-login .adm-login-back:focus-visible { outline: 2px solid #b94700; outline-offset: 4px; }
+.adm-login .adm-login-form-inner { max-width: 420px; padding: 40px 38px 30px; background: #fffaf2; border: 1px solid #e6dccb; border-radius: 22px; box-shadow: 0 2px 0 #e6dccb, 0 24px 48px -28px #49351e55; }
+.adm-login .adm-login-eyebrow { font-size: 11px; letter-spacing: 1.6px; color: #b94700; }
+.adm-login .adm-login-title { font-size: 34px; letter-spacing: -1.3px; color: #1d1b18; }
+.adm-login .adm-login-sub { font-size: 14px; color: #5c584f; }
+.adm-login .adm-login-field label { font-size: 12px; font-weight: 600; letter-spacing: .5px; color: #4a463e; }
+.adm-login .adm-login-input-wrap > svg { color: #8a8174; }
+.adm-login .adm-login-pw-input { height: 48px; background: #fff; border: 1px solid #d9cfbd; border-radius: 12px; color: #1d1b18; transition: border-color .15s, box-shadow .15s; }
+.adm-login .adm-login-pw-input::placeholder { color: #8a8174; opacity: 1; }
+.adm-login .adm-login-pw-input:focus { outline: none; border-color: #ff7a21; box-shadow: 0 0 0 4px #ff7a2126; }
+.adm-login .adm-pw-toggle { color: #6f685d; }
+.adm-login .adm-login-forgot { color: #5c584f; text-decoration: underline; text-underline-offset: 3px; }
+.adm-login .adm-login-forgot:hover { color: #b94700; }
+.adm-login .adm-login-remember { font-size: 13px; }
+.adm-login .adm-login-submit.adm-login-submit { height: 50px; font-size: 15px; font-weight: 600; background: #090909; color: #fff; border: 1px solid #090909; border-radius: 12px; box-shadow: 4px 5px 0 #ff7a21; transition: transform .2s, box-shadow .2s; }
+.adm-login .adm-login-submit.adm-login-submit:disabled { opacity: .65; box-shadow: 2px 3px 0 #ff7a21; }
+.adm-login .adm-login-submit.adm-login-submit:focus-visible { outline: 3px solid #ff7a21; outline-offset: 4px; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .adm-login .adm-login-submit.adm-login-submit:not(:disabled):hover { transform: translateY(-2px); box-shadow: 6px 7px 0 #ff7a21; }
+}
+.adm-login .adm-login-footer { font-size: 12px; color: #6f685d; }
+
+@media (max-width: 768px) {
+  .adm-login .adm-login-brand { min-height: 0; }
+  .adm-login .adm-login-brand-inner { min-height: 0; padding: 26px 24px 28px; gap: 6px; }
+  .adm-login .adm-login-brand-copy { padding: 14px 0 0; }
+  .adm-login .adm-login-tagline { font-size: 34px; line-height: 1.08; margin: 0; }
+  .adm-login .adm-login-brand-sub, .adm-login .adm-login-brand-items { display: none; }
+  .adm-login .adm-login-form-panel { padding: 28px 16px 36px; align-items: flex-start; min-height: 0; }
+  .adm-login .adm-login-back { position: static; align-self: flex-start; margin: 0 0 14px; }
+  .adm-login .adm-login-form-panel { flex-direction: column; align-items: stretch; }
+  .adm-login .adm-login-form-inner { padding: 28px 22px 24px; }
+}
+
+/* The shared logo's own sizing lives in the public site's stylesheets, which the admin does not load. */
+.adm-login .hs-brand { display: inline-flex; align-items: center; gap: 12px; }
+.adm-login .hs-brand-image { position: relative; display: block; flex: 0 0 auto; width: 49px; height: 45px; overflow: hidden; background: #000; }
+.adm-login .hs-brand-image img { position: absolute; width: 59px; height: auto; max-width: none; left: -5px; top: -5px; }
+.adm-login .hs-brand-name { font-weight: 700; color: currentColor; }
+@media (max-width: 768px) {
+  .adm-login .hs-brand-image { width: 43px; height: 39px; }
+  .adm-login .hs-brand-image img { width: 52px; left: -4px; top: -5px; }
+}
+@media (max-width: 768px) {
+  .adm-login.adm-login { grid-template-rows: auto 1fr; }
+  .adm-login .adm-login-brand { grid-column: 1; grid-row: 1; }
+  .adm-login .adm-login-form-panel { grid-column: 1; grid-row: 2; }
+}
