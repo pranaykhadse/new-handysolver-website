@@ -369,7 +369,6 @@ export function ApplyModal({ jobTitle, onClose }: { jobTitle: string; onClose: (
         ) : (
           <form className="am-form" onSubmit={handleSubmit} noValidate>
             <div className="am-body">
-              {requiredFields.length > 0 && <p className="am-legend"><span className="am-star" aria-hidden="true">*</span> marks a required field</p>}
               {sections.map(section => (
                 <section className="am-section" key={section.id} aria-labelledby={`am-sec-${section.id}`}>
                   <h3 id={`am-sec-${section.id}`} className="am-section-title">{section.title}</h3>
